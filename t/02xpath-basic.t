@@ -27,8 +27,6 @@ is tags($root.find('Document/L/LI[1]/*')), ['Lbl', 'LBody'];
 my $li = $root.first('Document/L/LI[1]');
 is tags($li.find('*')), ['Lbl', 'LBody'], 'relative search';
 is tags($li.find('/*')), ['Document'], 'absolute search';
-
-skip("handling of object references, etc");
-##is tags($root.find('Document/L/LI[1]/LBody/Reference/Link/*')), [..];
+is tags($li.find('LBody/Reference/Link/*')), ['#ref', 'Link'];
 
 done-testing;

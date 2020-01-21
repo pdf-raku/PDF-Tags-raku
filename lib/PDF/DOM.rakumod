@@ -11,7 +11,7 @@ class PDF::DOM {
     has %.role-map;
     has NumberTree $.parent-tree;
     has %!deref{Any};
-    has Bool $.render;
+    has Bool $.render = True;
     has $.root is built;
 
     my class Cache {
@@ -35,7 +35,7 @@ class PDF::DOM {
         }
     }
 
-    method deref(StructNode $_) {
+    multi method deref(StructNode $_) {
         %!deref{$_} //= do with .struct-parent -> $i {
             with $.item.parent-tree {.[$i + 0]}
         } // $_;

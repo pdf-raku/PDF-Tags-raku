@@ -8,13 +8,17 @@
     "auth"        : "github:p6-pdf",
     "authors"     : [ "David Warring" ],
     "description" : "Minimal DOM like access to tagged PDF files",
-    "depends"     : [ "PDF::Content:ver<0.3.1+>", "PDF" ],
+    "depends"     : [ "PDF::Content:ver<0.3.2+>", "PDF", "PDF::Font::Loader" ],
     "source-url"  : "git://github.com/p6-pdf/PDF-DOM-raku.git",
     "provides"    : {
         "PDF::DOM" : "lib/PDF/DOM.rakumod",
-        "PDF::DOM::Elem" : "lib/PDF/DOM/Elem.rakumod",
-        "PDF::DOM::Node" : "lib/PDF/DOM/Node.rakumod",
-        "PDF::DOM::Root" : "lib/PDF/DOM/Root.rakumod",
+        "PDF::DOM::Elem"  : "lib/PDF/DOM/Elem.rakumod",
+        "PDF::DOM::Item"  : "lib/PDF/DOM/Item.rakumod",
+        "PDF::DOM::Link"  : "lib/PDF/DOM/Link.rakumod",
+        "PDF::DOM::Node"  : "lib/PDF/DOM/Node.rakumod",
+        "PDF::DOM::Root"  : "lib/PDF/DOM/Root.rakumod",
+        "PDF::DOM::Tag"   : "lib/PDF/DOM/Tag.rakumod",
+        "PDF::DOM::Text"   : "lib/PDF/DOM/Text.rakumod",
         "PDF::DOM::XPath" : "lib/PDF/DOM/XPath.rakumod"
      }
 }

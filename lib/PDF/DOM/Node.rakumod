@@ -1,27 +1,22 @@
-class PDF::DOM::Node {
-    use PDF::DOM;
-    use PDF::StructTreeRoot;
-    use PDF::StructElem;
+use PDF::DOM::Item :&item-class;
 
-    has PDF::DOM $.dom handles<root> is required;
-    has $.item is required;
-    has PDF::DOM::Node @.kids;
+class PDF::DOM::Node
+    is PDF::DOM::Item {
+
+    has PDF::DOM::Item @.kids;
     has Bool $!loaded;
     has UInt $.elems is built;
-    has PDF::Page $.Pg is rw; # current page scope
     submethod TWEAK {
-        $!elems = do with $!item.K {
+        $!elems = do with self.item<K> {
             when Hash { 1 }
             default { .elems }
         } // 0;
     }
-    multi sub node-class(PDF::StructTreeRoot) { require ::('PDF::DOM::Root') }
-    multi sub node-class(PDF::StructElem)     { require ::('PDF::DOM::Elem') }
 
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $!elems: $i" unless 0 <= $i < $!elems;
-        my Any:D $item = $!item<K>[$i];
-        @!kids[$i] //= node-class($item).new: :parent(self), :$item, :$!Pg, :$!dom;
+        my Any:D $item = $.item<K>[$i];
+        @!kids[$i] //= item-class($item).new: :parent(self), :$item, :$.Pg, :$.dom;
     }
     method Array {
         $!loaded ||= do {
