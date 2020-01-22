@@ -10,6 +10,11 @@ use PDF::Page;
 use PDF::StructTreeRoot;
 use PDF::StructElem :StructElemChild;
 use PDF::DOM :StructNode;
+
+use PDF::DOM::Elem;
+use PDF::DOM::ObjRef;
+use PDF::DOM::Root;
+use PDF::DOM::Tag;
 use PDF::DOM::XPath;
 
 use PDF::Content;
@@ -18,9 +23,6 @@ use PDF::IO;
 
 constant StandardTag = PDF::StructTreeRoot::StandardStructureType;
 subset Number of Int where { !.defined || $_ > 0 };
-
-
-my PDF::DOM $*dom;
 
 sub html-escape(Str $_) {
     .trans:
@@ -33,8 +35,6 @@ sub MAIN(Str $infile,              #= input PDF
 	 Str :$password = '',      #= password for the input PDF, if encrypted
          Number :$*max-depth = 16, #= depth to ascend/descend struct tree
          Str    :$path,            #= XPath expression of nodes to dump 
-         UInt   :$obj-num,         #= Direct select by object number
-         UInt   :$gen-num = 0,     #= Direct select by generation number
          Bool   :$*render = True,  #= include rendered content
          Bool   :$*atts = True,    #= include attributes in tags
          Bool   :$*debug,          #= write extra debugging information
@@ -51,87 +51,53 @@ sub MAIN(Str $infile,              #= input PDF
     my PDF::StructTreeRoot:D $root =  $pdf.catalog.StructTreeRoot
         // die "document does not contain marked content: $infile";
 
-    my PDF::DOM $*dom .= new: :$root, :$*render;
-
-    my $start = $obj-num
-    ?? PDF::COS.coerce( $pdf.reader.ind-obj($obj-num, $gen-num).object,
-                        PDF::StructElem)
-    !! $root;
+    my PDF::DOM $dom .= new: :$root, :$*render;
 
     my @nodes = do with $path {
-        PDF::DOM::XPath.find($root, $_);
+        $dom.find($_);
     }
     else {
-        $start;
+        $dom.root;
     }
-    warn :@nodes.perl;
 
-    dump-struct($_) for @nodes;
+    dump-node($_) for @nodes;
 }
 
 sub pad(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s }
 
-multi sub dump-struct(PDF::StructTreeRoot $root, :$depth = 0) {
-    with $root.K -> $k {
-        my $elems = $k ~~ List ?? $k.elems !! 1;
-        for 0 ..^ $elems {
-            my StructElemChild $c = $k[$_];
-            dump-struct($c, :$depth);
-        }
-    }
+multi sub dump-node(PDF::DOM::Root $_, :$depth = 0) {
+    dump-node($_, :$depth) for .kids;
 }
 
 sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{.value}\"" }).join;
 }
 
-sub attributes($item) {
-                    my %attributes;
-
-                    for $item.attribute-dicts -> $atts {
-                        %attributes{$_} = $atts{$_}
-                            for $atts.keys
-                    }
-
-                    unless %attributes {
-                        for $item.class-map-keys {
-                            with $*dom.class-map{$_} -> $class {
-                                %attributes{$_} = $class{$_}
-                                    for $class.keys
-                            }
-                        }
-                    }
-                    %attributes;
-}
-
-multi sub dump-struct(PDF::StructElem $elem, :$tags is copy = %(), :$depth is copy = 0) {
-    say pad($depth, "<!-- struct elem {$elem.obj-num} {$elem.gen-num} R ({$elem.WHAT.^name})) -->")
-        if $*debug;
-    $tags = $*dom.graphics-tags($_) with $elem.Pg;
-    my $tag = $elem.tag;
+multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
+    if $*debug {
+        say pad($depth, "<!-- struct elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
+            given $node.item;
+    }
+    my $tag = $node.tag;
     my $att = do if $*atts {
-        my %attributes = attributes($elem);
-        with $*dom.role-map{$tag} {
-            %attributes<class> //= $tag;
-            $tag = $_;
-        }
+        my %attributes = $node.attributes;
         %attributes<O>:delete;
         atts-str(%attributes);
     }
     else {
         $tag = $_
-            with $*dom.role-map{$tag};
+            with $node.dom.role-map{$tag};
         ''
     }
     $depth++;
 
     if $depth >= $*max-depth {
-        say pad($depth, "<$tag$att/> <!-- depth exceeded, see {$elem.obj-num} {$elem.gen-num} R -->");
+        say pad($depth, "<$tag$att/> <!-- depth exceeded, see {.item.obj-num} {.item.gen-num} R -->");
     }
     else {
-        with $elem.ActualText {
+        with $node.item.ActualText {
             say pad($depth, '<!-- actual text -->')
-            if $*debug;
+                if $*debug;
             given trim($_) {
                 if $_ eq '' {
                     say pad($depth, "<$tag$att/>")
@@ -143,14 +109,12 @@ multi sub dump-struct(PDF::StructElem $elem, :$tags is copy = %(), :$depth is co
             }
         }
         else {
-            with $elem.K -> $k {
-                my $elems = $k ~~ List ?? $k.elems !! 1;
+            with $node.elems -> $elems {
                 say pad($depth, "<$tag$att>")
                     unless $tag eq 'Span';
         
                 for 0 ..^ $elems {
-                    my StructElemChild $c = $k[$_];
-                    dump-struct($c, :$tags, :$depth);
+                    dump-node($node.kids[$_], :$depth);
                 }
 
                 say pad($depth, "</$tag>")
@@ -164,66 +128,28 @@ multi sub dump-struct(PDF::StructElem $elem, :$tags is copy = %(), :$depth is co
     }
 }
 
-multi sub dump-struct(PDF::OBJR $_, :$tags is copy, :$depth!) {
-    say pad($depth, "<!-- OBJR {.Obj.obj-num} {.Obj.gen-num} R -->")
+multi sub dump-node(PDF::DOM::ObjRef $_, :$depth!) {
+    say pad($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->")
         if $*debug;
-    $tags = $*dom.graphics-tags($_) with .Pg;
-    dump-struct($_, :$tags, :$depth) with .Obj;
+    dump-object(.object, :$depth);
 }
 
-multi sub dump-struct(UInt $mcid, :$tags is copy, :$depth!) {
-    say pad($depth, "<!-- mcid $mcid -->")
-        if $*debug;
+multi sub dump-node(PDF::DOM::Tag $node, :$depth!) {
     return unless $*render;
-    with $tags{$mcid} -> $tag {
-        dump-tag($tag, :$depth);
-    }
-    else {
-        warn "unable to resolve marked content $mcid";
-    }
-}
-
-multi sub dump-struct(PDF::MCR $_, :$tags is copy, :$depth!) {
-    return unless $*render;
-    say pad($depth, "<!-- MCR {.MCID} -->")
-        if $*debug;
-    $tags = $*dom.graphics-tags($_) with .Pg;
-    my UInt $mcid := .MCID;
-    with .Stm {
+    with $node.item.?Stm {
         warn "can't handle marked content streams yet";
     }
     else {
-        with $tags{$mcid} -> $tag {
-            dump-tag($tag, :$depth);
+        with $node.item {
+            dump-tag($node.item, :$depth);
         }
         else {
-            warn "unable to resolve marked content $mcid";
+            warn "unable to resolve marked content {$node.item.mcid}";
         }
     }
 }
 
-multi sub dump-struct(StructNode $_, |c) {
-    dump-struct( $*dom.deref($_), |c);
-}
-
-multi sub dump-struct(PDF::Field $_, :$tags is copy, :$depth!) {
-    warn "todo: dump field obj" if $*debug;
-}
-
-multi sub dump-struct(PDF::Annot $_, :$tags is copy, :$depth!) {
-    warn "todo: dump annot obj: " ~ .perl if $*debug;;
-}
-
-multi sub dump-struct(List $a, :$depth!, |c) {
-    say pad($depth, "<!-- struct list {$a.obj-num} {$a.gen-num} R -->")
-        if $*debug;
-    for $a.keys {
-        dump-struct($_, :$depth, |c)
-            with $a[$_];
-    }
-}
-
-multi sub dump-struct($_, :$tags, :$depth) is default {
+multi sub dump-node($_, :$tags, :$depth) is default {
     die "unknown struct elem of type {.WHAT.^name}";
     say pad($depth, .perl);
 }
@@ -247,17 +173,24 @@ sub dump-tag(PDF::Content::Tag $tag, :$depth!) is default {
     say pad($depth, tag-text($tag, :$depth));
 }
 
+multi sub dump-object(PDF::Field $_, :$tags is copy, :$depth!) {
+    warn "todo: dump field obj" if $*debug;
+}
+
+multi sub dump-object(PDF::Annot $_, :$tags is copy, :$depth!) {
+    warn "todo: dump annot obj: " ~ .perl if $*debug;;
+}
+
 =begin pod
 
 =head1 SYNOPSIS
 
-pdf-struct-dump.p6 [options] file.pdf
+pdf-dom-dump.raku [options] file.pdf
 
 Options:
    --password          password for an encrypted PDF
    --max-depth=n       maximum tag-depth to descend
-   --page=p            dump page number p  
-   --search-tag=name   tag to select
+   --path=XPath        dump selected node(s)
    --/render           omit rendering (avoid finding content-level tags)
    --/atts             ommit attributes in tags
 
@@ -284,6 +217,6 @@ Raku module to be installed on your system.
 
 =head1 TODO
 
-=item processing of annotations and links
+=item processing of links and fields
 
 =end pod

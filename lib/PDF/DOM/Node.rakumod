@@ -1,4 +1,4 @@
-use PDF::DOM::Item :&item-class;
+use PDF::DOM::Item :&item-class, :&build-item;
 
 class PDF::DOM::Node
     is PDF::DOM::Item {
@@ -16,7 +16,7 @@ class PDF::DOM::Node
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $!elems: $i" unless 0 <= $i < $!elems;
         my Any:D $item = $.item<K>[$i];
-        @!kids[$i] //= item-class($item).new: :parent(self), :$item, :$.Pg, :$.dom;
+        @!kids[$i] //= build-item($item, :parent(self), :$.Pg, :$.dom);
     }
     method Array {
         $!loaded ||= do {

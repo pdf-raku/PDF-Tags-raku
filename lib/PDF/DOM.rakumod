@@ -12,7 +12,7 @@ class PDF::DOM {
     has NumberTree $.parent-tree;
     has %!deref{Any};
     has Bool $.render = True;
-    has $.root is built;
+    has $.root is built handles<find>;
 
     my class Cache {
         has %.font{Any};
