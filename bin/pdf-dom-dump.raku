@@ -151,12 +151,12 @@ multi sub dump-node($_, :$tags, :$depth) is default {
     say pad($depth, .perl);
 }
 
-sub tag-text(PDF::DOM::Tag $node, :$depth!) is default {
+sub tag-content(PDF::DOM::Tag $node, :$depth!) is default {
     # join text strings. discard this, and child marked content tags for now
     my PDF::Content::Tag $item = $node.item;
     my @text = $item.kids.map: {
         when PDF::DOM::Tag {
-            my $text = trim(tag-text($_, :$depth));
+            my $text = trim(tag-content($_, :$depth));
         }
         when PDF::DOM::Text|Str { html-escape(.Str) }
         default { '???' }
@@ -173,7 +173,7 @@ sub tag-text(PDF::DOM::Tag $node, :$depth!) is default {
 }
 
 sub dump-tag(PDF::DOM::Tag $tag, :$depth!) is default {
-    say pad($depth, tag-text($tag, :$depth));
+    say pad($depth, tag-content($tag, :$depth));
 }
 
 multi sub dump-object(PDF::Field $_, :$depth!) {

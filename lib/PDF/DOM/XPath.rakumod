@@ -11,7 +11,7 @@ class PDF::DOM::XPath {
     our grammar Expression {
         rule TOP {
             [$<abs>='/']?
-            [<expr=.name>[ '[' ~ ']' <expr=.filter> ]?]+ % <expr=.path>
+            [<expr=.kids><expr=.name>[ '[' ~ ']' <expr=.filter> ]?]+ % '/'
         }
         proto rule name {*}
         rule name:sym<tag>  { <tag=.ident> }
@@ -21,13 +21,13 @@ class PDF::DOM::XPath {
         token int { < + - >? \d+ }
         rule filter:sym<position> { <int> }
 
-        rule path {'/'}
+        token kids {<?>}
 
         our class Actions {
             method TOP($/) {
                 make -> PDF::DOM::Node $ref is copy {
                     $ref .= root() if $<abs>;
-                    my @set = $ref.kids;
+                    my @set = ($ref,);
                     for @<expr> {
                         my &query = .ast;
                         @set = &query(@set);
@@ -35,7 +35,7 @@ class PDF::DOM::XPath {
                     @set;
                 }
             }
-            method path($/){
+            method kids($/){
                 make -> @nodes {
                     my @kids;
                     @kids.append(.kids)
