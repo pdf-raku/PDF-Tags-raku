@@ -2,58 +2,65 @@ class PDF::DOM::XPath {
     # tiny neophytic XPath like expression evaluator
     # currently handles: /<tag>[pos]?/ ...
 
-    use PDF::DOM::Elem;
-    use PDF::DOM::Node;
+    use PDF::DOM::Item;
 
     has Str $.xpath is required;
     has &!compiled;
 
     our grammar Expression {
-        rule TOP {
-            [$<abs>='/']?
-            [<expr=.kids><expr=.name>[ '[' ~ ']' <expr=.filter> ]?]+ % '/'
-        }
-        proto rule name {*}
-        rule name:sym<tag>  { <tag=.ident> }
-        rule name:sym<all>  { '*' }
+        rule TOP { [$<abs>='/']? <step>+ % '/' }
 
-        proto rule filter {*}
+        rule step { [ <axis> '::']? [ <node-test> [ '[' ~ ']' <predicate> ]?] }
+
+        proto rule node-test {*}
+        rule node-test:sym<tag> { <tag=.ident> }
+        rule node-test:sym<any> { '*' }
+
+        proto rule predicate {*}
         token int { < + - >? \d+ }
-        rule filter:sym<position> { <int> }
+        rule predicate:sym<position> { <int> | 'position(' ~ ')'  <int> }
 
-        token kids {<?>}
+        proto rule axis {*}
+        rule axis:sym<child>   { <sym> }
 
         our class Actions {
             method TOP($/) {
-                make -> PDF::DOM::Node $ref is copy {
+                make -> PDF::DOM::Item $ref is copy {
                     $ref .= root() if $<abs>;
                     my @set = ($ref,);
-                    for @<expr> {
-                        my &query = .ast;
-                        @set = &query(@set);
-                    }
+                    @set = (.ast)(@set)
+                        for @<step>;
                     @set;
                 }
             }
-            method kids($/){
-                make -> @nodes {
-                    my @kids;
-                    @kids.append(.kids)
-                        for @nodes;
-                    @kids;
-                }
-            }
-            method name:sym<tag>($/) {
-                my $tag := ~$<tag>;
-                make -> @nodes {
-                    @nodes.grep(PDF::DOM::Elem).grep({.tag eq $tag; });
-                }
-            }
-            method name:sym<all>($/) { make -> @elems { @elems } }
+            method step($/) {
+                my &axis := do with $<axis> { .ast } else { &child-axis };
+                my &node-test := $<node-test>.ast;
+                my &predicate = .ast with $<predicate>;
 
-            method filter:sym<position>($/) {
+                make -> @set {
+                    @set = gather {
+                        for @set {
+                            take $_ if &node-test($_)
+                                for &axis($_);
+                        }
+                    };
+                    &predicate.defined ?? &predicate(@set) !! @set;
+                }
+            }
+
+            method node-test:sym<tag>($/) {
+                my $tag := ~$<tag>;
+                make -> PDF::DOM::Item $_ { .tag eq $tag; }
+            }
+            method node-test:sym<any>($/) { make -> $_ { $_ } }
+
+            sub child-axis(PDF::DOM::Item $_) { .?kids // [] }
+            method axis:sym<child>($/)    { make &child-axis }
+
+            method predicate:sym<position>($/) {
                 my $index := $<int>.Int;
-                make -> @elems {
+                make -> @elems --> PDF::DOM::Item {
                     @elems[$index-1];
                 }
             }
@@ -67,11 +74,11 @@ class PDF::DOM::XPath {
         &!compiled := $/.ast;
     }
 
-    multi method find(PDF::DOM::Node :$ref!, Str:D :$xpath!) {
+    multi method find(PDF::DOM::Item :$ref!, Str:D :$xpath!) {
         self.new(:$xpath).find(:$ref);
     }
 
-    multi method find(PDF::DOM::Node :$ref!) {
+    multi method find(PDF::DOM::Item :$ref!) {
         &!compiled($ref);
     }
 
