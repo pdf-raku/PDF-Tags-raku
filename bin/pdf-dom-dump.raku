@@ -4,21 +4,18 @@ use v6;
 use PDF::Class;
 use PDF::Annot;
 use PDF::Catalog;
-use PDF::MCR;
-use PDF::OBJR;
-use PDF::Page;
 use PDF::StructTreeRoot;
-use PDF::StructElem :StructElemChild;
-use PDF::DOM :StructNode;
 
+use PDF::DOM :StructNode;
 use PDF::DOM::Elem;
+use PDF::DOM::Item;
 use PDF::DOM::ObjRef;
 use PDF::DOM::Root;
 use PDF::DOM::Tag;
+use PDF::DOM::Text;
 use PDF::DOM::XPath;
 
-use PDF::Content;
-use PDF::Content::Graphics;
+use PDF::Content::Tag;
 use PDF::IO;
 
 constant StandardTag = PDF::StructTreeRoot::StandardStructureType;
@@ -74,8 +71,9 @@ sub atts-str(%atts) {
 }
 
 multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
+    $depth++;
     if $*debug {
-        say pad($depth, "<!-- struct elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
+        say pad($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
             given $node.item;
     }
     my $tag = $node.tag;
@@ -89,13 +87,12 @@ multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
             with $node.dom.role-map{$tag};
         ''
     }
-    $depth++;
 
     if $depth >= $*max-depth {
-        say pad($depth, "<$tag$att/> <!-- depth exceeded, see {.item.obj-num} {.item.gen-num} R -->");
+        say pad($depth, "<$tag$att/> <!-- depth exceeded, see {$node.item.obj-num} {$node..item.gen-num} R -->");
     }
     else {
-        with $node.item.ActualText {
+        with $node.item.?ActualText {
             say pad($depth, '<!-- actual text -->')
                 if $*debug;
             given trim($_) {
@@ -109,7 +106,8 @@ multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
             }
         }
         else {
-            with $node.elems -> $elems {
+            my $elems = $node.elems;
+            if $elems {
                 say pad($depth, "<$tag$att>")
                     unless $tag eq 'Span';
         
@@ -135,17 +133,16 @@ multi sub dump-node(PDF::DOM::ObjRef $_, :$depth!) {
 }
 
 multi sub dump-node(PDF::DOM::Tag $node, :$depth!) {
+    if $*debug {
+        say pad($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
+            given $node.item;
+    }
     return unless $*render;
     with $node.item.?Stm {
         warn "can't handle marked content streams yet";
     }
     else {
-        with $node.item {
-            dump-tag($node.item, :$depth);
-        }
-        else {
-            warn "unable to resolve marked content {$node.item.mcid}";
-        }
+        dump-tag($node, :$depth);
     }
 }
 
@@ -154,30 +151,36 @@ multi sub dump-node($_, :$tags, :$depth) is default {
     say pad($depth, .perl);
 }
 
-sub tag-text(PDF::Content::Tag $tag, :$depth!) is default {
+sub tag-text(PDF::DOM::Tag $node, :$depth!) is default {
     # join text strings. discard this, and child marked content tags for now
-    my @text = $tag.children.map: {
-        when PDF::Content::Tag {
+    my PDF::Content::Tag $item = $node.item;
+    my @text = $item.kids.map: {
+        when PDF::DOM::Tag {
             my $text = trim(tag-text($_, :$depth));
-            .name eq 'Document'
-            ?? $text
-            !! ($text ?? "<{.name}>" ~ $text ~ "</{.name}>" !! "</{.name}>");
         }
-        when Str { html-escape($_) }
+        when PDF::DOM::Text|Str { html-escape(.Str) }
         default { '???' }
     }
-    @text.join;
+    my $text = @text.join;
+    my $tag = $node.tag;
+    my $atts = atts-str($node.attributes);
+    my $skip-tag = $node.tag eq 'Document'
+       || $item ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag
+       || ! $text;
+    $skip-tag
+    ?? $text
+    !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
 }
 
-sub dump-tag(PDF::Content::Tag $tag, :$depth!) is default {
+sub dump-tag(PDF::DOM::Tag $tag, :$depth!) is default {
     say pad($depth, tag-text($tag, :$depth));
 }
 
-multi sub dump-object(PDF::Field $_, :$tags is copy, :$depth!) {
+multi sub dump-object(PDF::Field $_, :$depth!) {
     warn "todo: dump field obj" if $*debug;
 }
 
-multi sub dump-object(PDF::Annot $_, :$tags is copy, :$depth!) {
+multi sub dump-object(PDF::Annot $_, :$depth!) {
     warn "todo: dump annot obj: " ~ .perl if $*debug;;
 }
 

@@ -7,8 +7,8 @@ class PDF::DOM {
     use PDF::StructTreeRoot;
     subset StructNode of Hash is export(:StructNode) where PDF::Page|PDF::StructElem;
 
-    has %.class-map;
-    has %.role-map;
+    has Hash $.class-map;
+    has Hash $.role-map;
     has NumberTree $.parent-tree;
     has %!deref{Any};
     has Bool $.render = True;
@@ -20,8 +20,8 @@ class PDF::DOM {
     has Cache $!cache .= new;
 
     multi submethod TWEAK(PDF::StructTreeRoot :$root!) {
-        %!class-map = $_ with $root.ClassMap;
-        %!role-map = $_ with $root.RoleMap;
+        $!class-map = $_ with $root.ClassMap;
+        $!role-map = $_ with $root.RoleMap;
         $!parent-tree = .number-tree with $root.ParentTree;
         $!root = (require ::('PDF::DOM::Root')).new: :dom(self), :item($root);
     }

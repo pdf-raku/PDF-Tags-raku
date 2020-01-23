@@ -1,12 +1,14 @@
 use PDF::DOM::Node;
-class PDF::DOM::Tag is PDF::DOM::Item {
+class PDF::DOM::Text is PDF::DOM::Item {
     use PDF::Page;
     use PDF::Content::Tag;
+    use Method::Also;
+
     has PDF::DOM::Node $.parent;
 
     submethod TWEAK(Str :$item!) {
         self.set-item($item);
     }
-    method item(--> Str) { callsame() }
+    method item(--> Str) is also<Str> { callsame() }
     method tag { '#text' }
 }

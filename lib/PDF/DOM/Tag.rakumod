@@ -1,5 +1,5 @@
 use PDF::DOM::Node;
-class PDF::DOM::Tag is PDF::DOM::Item {
+class PDF::DOM::Tag is PDF::DOM::Node {
     use PDF::Page;
     use PDF::Content::Tag;
     has PDF::DOM::Node $.parent;
@@ -17,6 +17,6 @@ class PDF::DOM::Tag is PDF::DOM::Item {
             die "no current marked-content page";
         }
     }
-    method item(--> PDF::Content::Tag) { callsame() }
+    method item(--> PDF::Content::Tag) handles<attributes> { callsame() }
     method tag { $.item.name }
 }

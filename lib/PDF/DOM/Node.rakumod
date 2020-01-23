@@ -5,28 +5,29 @@ class PDF::DOM::Node
 
     has PDF::DOM::Item @.kids;
     has Bool $!loaded;
-    has UInt $.elems is built;
-    submethod TWEAK {
-        $!elems = do with self.item<K> {
+    has UInt $!elems;
+    method elems {
+        $!elems //= do with $.item<K> {
             when Hash { 1 }
             default { .elems }
         } // 0;
     }
 
     method AT-POS(UInt $i) {
-        fail "index out of range 0 .. $!elems: $i" unless 0 <= $i < $!elems;
+        fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         my Any:D $item = $.item<K>[$i];
         @!kids[$i] //= build-item($item, :parent(self), :$.Pg, :$.dom);
     }
     method Array {
         $!loaded ||= do {
-            self.AT-POS($_) for 0 ..^ $!elems;
+            self.AT-POS($_) for 0 ..^ $.elems;
+            True;
         }
         @!kids;
     }
     method kids {
         my class Kids does Iterable does Iterator does Positional {
-            has PDF::DOM::Node $.node is required handles<elems AT-POS>;
+            has PDF::DOM::Item $.node is required handles<elems AT-POS>;
             has int $!idx = 0;
             method iterator { $!idx = 0; self}
             method pull-one {

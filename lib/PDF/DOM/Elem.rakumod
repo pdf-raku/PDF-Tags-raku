@@ -3,7 +3,7 @@ use PDF::StructElem;
 class PDF::DOM::Elem is PDF::DOM::Node {
     method item(--> PDF::StructElem) { callsame() }
     has $.parent is required;
-    has Str  %!attributes;
+    has %!attributes;
     has Bool $!atts-built;
     has Str $.tag is built;
     has Str $.class is built;
@@ -16,9 +16,9 @@ class PDF::DOM::Elem is PDF::DOM::Node {
 
             unless %!attributes {
                 for $.item.class-map-keys {
-                    with $.dom.class-map{$_} -> $class {
-                        %!attributes{$_} = $class{$_}
-                        for $class.keys
+                    with $.dom.class-map{$_} -> $atts {
+                        %!attributes{$_} = $atts{$_}
+                            for $atts.keys
                     }
                 }
             }
