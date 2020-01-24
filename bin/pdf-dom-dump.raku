@@ -59,7 +59,7 @@ sub MAIN(Str $infile,              #= input PDF
         $dom.root;
     }
 
-    dump-node($_) for @nodes;
+    dump-node($_, :depth(0)) for @nodes;
 }
 
 sub pad(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s }
@@ -150,9 +150,8 @@ multi sub dump-node(PDF::DOM::Tag $node, :$depth!) {
     }
 }
 
-multi sub dump-node($_, :$tags, :$depth) is default {
-    die "unknown struct elem of type {.WHAT.^name}";
-    say pad($depth, .perl);
+multi sub dump-node(PDF::DOM::Text $_, :$depth!) {
+    say pad($depth, .Str)
 }
 
 sub tag-content(PDF::DOM::Tag $node, :$depth!) is default {

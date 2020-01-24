@@ -41,4 +41,5 @@ class PDF::DOM::Tag is PDF::DOM::Node {
         $.attributes unless $!atts-built;
         $!actual-text;
     }
+    method text { $.actual-text // $.kids.map(*.text).join }
 }

@@ -28,5 +28,5 @@ class PDF::DOM::Item {
         item-class($item).new: :$item, |c;
     }
     
-
+    method text { '' }
 }

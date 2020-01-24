@@ -31,6 +31,7 @@ class PDF::DOM::Elem is PDF::DOM::Node {
         %!attributes;
     }
     method actual-text { $.item.ActualText }
+    method text { $.actual-text // $.kids.map(*.text).join }
     submethod TWEAK {
         self.Pg = $_ with self.item.Pg;
         my Str:D $tag = self.item.tag;

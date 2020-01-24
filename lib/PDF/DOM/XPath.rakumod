@@ -3,9 +3,13 @@ class PDF::DOM::XPath {
     # currently handles: /<tag>[pos]?/ ...
 
     use PDF::DOM::Item;
+    use PDF::DOM::Elem;
+    use PDF::DOM::Tag;
 
     has Str $.xpath is required;
     has &!compiled;
+
+    our subset Node of PDF::DOM::Item where PDF::DOM::Elem|PDF::DOM::Tag;
 
     our grammar Expression {
         rule TOP { [$<abs>='/']? <step>+ % '/' }
@@ -14,7 +18,7 @@ class PDF::DOM::XPath {
 
         proto rule node-test {*}
         rule node-test:sym<tag> { <tag=.ident> }
-        rule node-test:sym<any> { '*' }
+        rule node-test:sym<node> { '*' }
 
         proto rule predicate {*}
         token int { < + - >? \d+ }
@@ -51,9 +55,9 @@ class PDF::DOM::XPath {
 
             method node-test:sym<tag>($/) {
                 my $tag := ~$<tag>;
-                make -> PDF::DOM::Item $_ { .tag eq $tag; }
+                make -> PDF::DOM::Item $_ { .?tag eq $tag; }
             }
-            method node-test:sym<any>($/) { make -> PDF::DOM::Item $_ { $_ } }
+            method node-test:sym<node>($/) { make -> PDF::DOM::Item $_ { $_ ~~ Node} }
 
             sub child-axis(PDF::DOM::Item $_) { .?kids // [] }
             method axis:sym<child>($/)    { make &child-axis }

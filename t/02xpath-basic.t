@@ -4,7 +4,7 @@ use PDF::DOM::Elem;
 use PDF::DOM::Root;
 use PDF::Class;
 
-plan 9;
+plan 10;
 
 sub tags(@elems) {
     [@elems>>.tag];
@@ -28,6 +28,7 @@ is tags($root.find('Document/L/child::LI[position(1)]/*')), ['Lbl', 'LBody'], 'e
 my $li = $root.first('Document/L/LI[1]');
 is tags($li.find('*')), ['Lbl', 'LBody'], 'relative search';
 is tags($li.find('/*')), ['Document'], 'absolute search';
-is tags($li.find('LBody/Reference/Link/*')), ['#ref', 'Link'], 'tagged content';
+is tags($li.find('LBody/Reference/Link/*')), ['Link'], 'tagged content';
+is $li.text, '• NAME ';
 
 done-testing;
