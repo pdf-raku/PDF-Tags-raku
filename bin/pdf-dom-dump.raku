@@ -35,6 +35,8 @@ sub MAIN(Str $infile,              #= input PDF
          Bool   :$*render = True,  #= include rendered content
          Bool   :$*atts = True,    #= include attributes in tags
          Bool   :$*debug,          #= write extra debugging information
+         Bool   :$*skip,           #= skip some repeated or unimportant tags
+         Bool   :$*strict = True;  #= warn about unknown tags, etc
     ) {
 
     my PDF::IO $input .= coerce(
@@ -48,7 +50,7 @@ sub MAIN(Str $infile,              #= input PDF
     my PDF::StructTreeRoot:D $root =  $pdf.catalog.StructTreeRoot
         // die "document does not contain marked content: $infile";
 
-    my PDF::DOM $dom .= new: :$root, :$*render;
+    my PDF::DOM $dom .= new: :$root, :$*render, :$*strict;
 
     my @nodes = do with $path {
         $dom.find($_);
@@ -69,6 +71,8 @@ multi sub dump-node(PDF::DOM::Root $_, :$depth = 0) {
 sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{.value}\"" }).join;
 }
+
+sub skip($tag) { $*skip && $tag eq 'Span' }
 
 multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
     $depth++;
@@ -98,10 +102,10 @@ multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
             given trim($_) {
                 if $_ eq '' {
                     say pad($depth, "<$tag$att/>")
-                        unless $tag eq 'Span';
+                        unless skip($tag);
                 }
                 else {
-                    say pad($depth, $tag eq 'Span' ?? $_ !! "<$tag$att>{html-escape($_) }</$tag>")
+                    say pad($depth, skip($tag) ?? $_ !! "<$tag$att>{html-escape($_) }</$tag>")
                 }
             }
         }
@@ -109,18 +113,18 @@ multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
             my $elems = $node.elems;
             if $elems {
                 say pad($depth, "<$tag$att>")
-                    unless $tag eq 'Span';
+                    unless skip($tag);
         
                 for 0 ..^ $elems {
                     dump-node($node.kids[$_], :$depth);
                 }
 
                 say pad($depth, "</$tag>")
-                    unless $tag eq 'Span';
+                    unless skip($tag);
             }
             else {
                 say pad($depth, "<$tag$att/>")
-                    unless $tag eq 'Span';
+                    unless skip($tag);
             }
         }
     }
@@ -164,12 +168,13 @@ sub tag-content(PDF::DOM::Tag $node, :$depth!) is default {
     my $text = @text.join;
     my $tag = $node.tag;
     my $atts = atts-str($node.attributes);
-    my $skip-tag = $node.tag eq 'Document'
-       || $item ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag
-       || ! $text;
-    $skip-tag
-    ?? $text
-    !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
+    ($*skip
+     && ($node.tag eq 'Document'
+         || skip($tag)
+         || $item ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag
+         || ! $text))
+        ?? $text
+        !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
 }
 
 sub dump-tag(PDF::DOM::Tag $tag, :$depth!) is default {
@@ -194,8 +199,10 @@ Options:
    --password          password for an encrypted PDF
    --max-depth=n       maximum tag-depth to descend
    --path=XPath        dump selected node(s)
+   --skip              skip some tags, including <Span> and empty </P>
    --/render           omit rendering (avoid finding content-level tags)
-   --/atts             ommit attributes in tags
+   --/atts             omit attributes in tags
+   --/strict           suppress warnings
 
 =head1 DESCRIPTION
 

@@ -10,7 +10,7 @@ class PDF::DOM::XPath {
     our grammar Expression {
         rule TOP { [$<abs>='/']? <step>+ % '/' }
 
-        rule step { [ <axis> '::']? [ <node-test> [ '[' ~ ']' <predicate> ]?] }
+        rule step { [ <axis> ]? <node-test> [ '[' ~ ']' <predicate> ]? }
 
         proto rule node-test {*}
         rule node-test:sym<tag> { <tag=.ident> }
@@ -21,7 +21,7 @@ class PDF::DOM::XPath {
         rule predicate:sym<position> { <int> | 'position(' ~ ')'  <int> }
 
         proto rule axis {*}
-        rule axis:sym<child>   { <sym> }
+        rule axis:sym<child>   { <sym> '::' }
 
         our class Actions {
             method TOP($/) {
@@ -53,7 +53,7 @@ class PDF::DOM::XPath {
                 my $tag := ~$<tag>;
                 make -> PDF::DOM::Item $_ { .tag eq $tag; }
             }
-            method node-test:sym<any>($/) { make -> $_ { $_ } }
+            method node-test:sym<any>($/) { make -> PDF::DOM::Item $_ { $_ } }
 
             sub child-axis(PDF::DOM::Item $_) { .?kids // [] }
             method axis:sym<child>($/)    { make &child-axis }

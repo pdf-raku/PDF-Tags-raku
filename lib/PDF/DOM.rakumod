@@ -12,6 +12,7 @@ class PDF::DOM {
     has NumberTree $.parent-tree;
     has %!deref{Any};
     has Bool $.render = True;
+    has Bool $.strict = True;
     has $.root is built handles<find>;
 
     my class Cache {
@@ -109,7 +110,7 @@ class PDF::DOM {
         %!graphics-tags{$obj} //= do {
             $*ERR.print: '.';
             my &callback = TextDecoder.new(:$!cache).callback;
-            my $gfx = $obj.gfx: :&callback;
+            my $gfx = $obj.gfx: :&callback, :$!strict;
             $obj.render;
             my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map({.mcid => $_ });
         }
