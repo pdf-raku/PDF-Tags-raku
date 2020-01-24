@@ -7,7 +7,7 @@ class PDF::DOM::Node
     has Bool $!loaded;
     has UInt $!elems;
     method elems {
-        $!elems //= do with $.item<K> {
+        $!elems //= do with $.item.kids {
             when Hash { 1 }
             default { .elems }
         } // 0;
@@ -15,7 +15,7 @@ class PDF::DOM::Node
 
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        my Any:D $item = $.item<K>[$i];
+        my Any:D $item = $.item.kids[$i];
         @!kids[$i] //= build-item($item, :parent(self), :$.Pg, :$.dom);
     }
     method Array {

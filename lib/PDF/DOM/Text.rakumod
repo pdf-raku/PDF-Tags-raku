@@ -9,6 +9,6 @@ class PDF::DOM::Text is PDF::DOM::Item {
     submethod TWEAK(Str :$item!) {
         self.set-item($item);
     }
-    method item(--> Str) is also<Str> { callsame() }
+    method item(--> Str) is also<Str gist> { callsame() }
     method tag { '#text' }
 }

@@ -75,7 +75,6 @@ sub atts-str(%atts) {
 sub skip($tag) { $*skip && $tag eq 'Span' }
 
 multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
-    $depth++;
     if $*debug {
         say pad($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
             given $node.item;
@@ -92,11 +91,12 @@ multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
         ''
     }
 
+
     if $depth >= $*max-depth {
         say pad($depth, "<$tag$att/> <!-- depth exceeded, see {$node.item.obj-num} {$node..item.gen-num} R -->");
     }
     else {
-        with $node.item.?ActualText {
+        with $node.actual-text {
             say pad($depth, '<!-- actual text -->')
                 if $*debug;
             given trim($_) {
@@ -112,14 +112,14 @@ multi sub dump-node(PDF::DOM::Elem $node, UInt :$depth is copy = 0) {
         else {
             my $elems = $node.elems;
             if $elems {
-                say pad($depth, "<$tag$att>")
+                say pad($depth++, "<$tag$att>")
                     unless skip($tag);
         
                 for 0 ..^ $elems {
                     dump-node($node.kids[$_], :$depth);
                 }
 
-                say pad($depth, "</$tag>")
+                say pad(--$depth, "</$tag>")
                     unless skip($tag);
             }
             else {
@@ -157,22 +157,22 @@ multi sub dump-node($_, :$tags, :$depth) is default {
 
 sub tag-content(PDF::DOM::Tag $node, :$depth!) is default {
     # join text strings. discard this, and child marked content tags for now
-    my PDF::Content::Tag $item = $node.item;
-    my @text = $item.kids.map: {
-        when PDF::DOM::Tag {
-            my $text = trim(tag-content($_, :$depth));
+    my $text = $node.actual-text // do {
+        my @text = $node.kids.map: {
+            when PDF::DOM::Tag {
+                my $text = trim(tag-content($_, :$depth));
+            }
+            when PDF::DOM::Text { html-escape(.Str) }
+            default { die "unhandled tagged content: {.WHAT.perl}"; }
         }
-        when PDF::DOM::Text|Str { html-escape(.Str) }
-        default { '???' }
+        @text.join;
     }
-    my $text = @text.join;
     my $tag = $node.tag;
     my $atts = atts-str($node.attributes);
     ($*skip
      && ($node.tag eq 'Document'
          || skip($tag)
-         || $item ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag
-         || ! $text))
+         || $node.item ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag))
         ?? $text
         !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
 }
