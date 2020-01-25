@@ -14,15 +14,27 @@ class PDF::DOM::XPath {
     our grammar Expression {
         rule TOP { [$<abs>='/']? <step>+ % '/' }
 
-        rule step { [ <axis> ]? <node-test> [ '[' ~ ']' <predicate> ]? }
+        rule step { [ <axis> ]? <node-test> <predicate>? }
 
         proto rule node-test {*}
         rule node-test:sym<tag> { <tag=.ident> }
         rule node-test:sym<node> { '*' }
 
-        proto rule predicate {*}
+        rule predicate         { '[' ~ ']' <query(4)> }
+        multi rule query(0)     { <term> }
+        multi rule query($pred) { <term=.query($pred-1)> +% <q-op($pred-1)> }
+
+        # query operators - loosest to tightest
+        multi token q-op(3) {or}
+        multi token q-op(2) {and}
+        multi token q-op(1) {'='|'!='}
+        multi token q-op(0) {['<'|'>']'='?}
+
         token int { < + - >? \d+ }
-        rule predicate:sym<position> { <int> | 'position(' ~ ')'  <int> }
+        proto rule term {*}
+        rule term:sym<int> { <int> }
+        rule term:sym<position> { 'position(' ')' }
+        rule term:sym<query> { '(' ~ ')' <query(4)> }
 
         proto rule axis {*}
         rule axis:sym<child>   { <sym> '::' }
@@ -48,8 +60,25 @@ class PDF::DOM::XPath {
                             take $_ if &node-test($_)
                                 for &axis($_);
                         }
-                    };
-                    &predicate.defined ?? &predicate(@set) !! @set;
+                    }
+                    @set = ($_)(@set) with &predicate;
+                    @set;
+                }
+            }
+
+            method predicate($/) {
+                make -> @set {
+                    my &query = $<query>.ast;
+                    my $*position = 0;
+                    my $*last = +@set;
+                    @set = gather {
+                        for @set {
+                            ++$*position;
+                            my $v := &query();
+                            take $_ if ($v ~~ Bool && $v)
+                               || ($v ~~ Int &&  $v == $*position);
+                        }
+                    }
                 }
             }
 
@@ -62,11 +91,47 @@ class PDF::DOM::XPath {
             sub child-axis(PDF::DOM::Item $_) { .?kids // [] }
             method axis:sym<child>($/)    { make &child-axis }
 
-            method predicate:sym<position>($/) {
-                my $index := $<int>.Int;
-                make -> @elems --> PDF::DOM::Item {
-                    @elems[$index-1];
+            method int($/) { make $/.Int }
+            method q-op($/)  { make $/.lc }
+            method query($/) {
+                my @terms;
+                my @ops;
+                if $<term> ~~ Array {
+                    @terms = @<term>>>.ast;
+                    @ops = @<q-op>>>.ast;
                 }
+                else {
+                    @terms.push: $<term>.ast;
+                }
+                make -> {
+                    my $a := (@terms[0]).();
+
+                    for 1 ..^ @terms -> $i {
+                        my $b := (@terms[$i]).();
+                        $a := do given @ops[$i-1] {
+                            when 'or'  { $a or  $b }
+                            when 'and' { $a and $b }
+                            when '='   { $a ==  $b }
+                            when '!='  { $a !=  $b }
+                            when '<'   { $a <   $b }
+                            when '<='  { $a <=  $b }
+                            when '>'   { $a >   $b }
+                            when '>='  { $a >=  $b }
+                            default { die "unhandled operator: '$_'" }
+                        }
+                    }
+                    $a;
+                }
+            }
+            method term:sym<int>($/) {
+                my Int:D $v = $<int>.ast;
+                make -> { $v; }
+            }
+            method term:sym<position>($/) {
+                make -> { $*position; }
+            }
+            method term:sym<query>($/) {
+                make $<query>.ast;
             }
         }
     }
