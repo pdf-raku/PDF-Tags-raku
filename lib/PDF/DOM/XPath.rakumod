@@ -18,7 +18,7 @@ class PDF::DOM::XPath {
     our grammar Expression {
         rule TOP { [$<abs>='/']? <step>+ % '/' }
 
-        rule step { [ <axis> ]? <node-test> <predicate>? }
+        rule step { <axis> <node-test> <predicate>? }
 
         proto rule node-test {*}
         rule node-test:sym<tag> { <tag=.ident> }
@@ -43,7 +43,9 @@ class PDF::DOM::XPath {
         rule term:sym<query> { '(' ~ ')' <query(4)> }
 
         proto rule axis {*}
-        rule axis:sym<child>   { <sym> '::' }
+        rule axis:sym<child>      {[ <sym> '::' ]?}
+        rule axis:sym<descendant> {[ '/' | <sym> '::' ]}
+        rule axis:sym<descendant-or-self> { <sym> '::' }
 
         our class Actions {
             method TOP($/) {
@@ -56,7 +58,7 @@ class PDF::DOM::XPath {
                 }
             }
             method step($/) {
-                my &axis := do with $<axis> { .ast } else { &child-axis };
+                my &axis := $<axis>.ast;
                 my &node-test := $<node-test>.ast;
                 my &predicate = .ast with $<predicate>;
 
@@ -97,7 +99,22 @@ class PDF::DOM::XPath {
             method node-test:sym<text>($/) { make -> PDF::DOM::Item $_ { $_ ~~ Text} }
 
             sub child-axis(PDF::DOM::Item $_) { .?kids // [] }
-            method axis:sym<child>($/)    { make &child-axis }
+            sub descendant-or-self-axis(PDF::DOM::Item $_) {
+                my @nodes = $_;
+                @nodes.append: descendant-or-self-axis($_)
+                    for .?kids // [];
+                @nodes;
+            }
+            sub descendant-axis(PDF::DOM::Item $_) {
+                my @nodes;
+                @nodes.append: descendant-or-self-axis($_)
+                    for .?kids // [];
+                @nodes;
+            }
+
+            method axis:sym<child>($/)              { make &child-axis }
+            method axis:sym<descendant>($/)         { make &descendant-axis }
+            method axis:sym<descendant-or-self>($/) { make &descendant-or-self-axis }
 
             method int($/) { make $/.Int }
             method q-op($/)  { make $/.lc }

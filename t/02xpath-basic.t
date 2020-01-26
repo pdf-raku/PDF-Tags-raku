@@ -4,7 +4,7 @@ use PDF::DOM::Elem;
 use PDF::DOM::Root;
 use PDF::Class;
 
-plan 10;
+plan 12;
 
 sub tags(@elems) {
     [@elems>>.tag];
@@ -23,6 +23,8 @@ for $root.find('Document') -> $elem {
 is tags($root.find('Document/H1/*')), ['Span' xx 5], 'path expression';
 is tags($root.find('Document/H1/*[1]')), ['Span'], 'position';
 is tags($root.find('Document/L/LI[1]/*')), ['Lbl', 'LBody'], 'position/child';
+is tags($root.find('Document/L/LI[1]/LBody//*')), ['Reference', 'Link', 'Link'], 'descendants';
+is tags($root.find('Document/L/LI[1]/LBody/descendant-or-self::*')), ['LBody', 'Reference', 'Link', 'Link'], 'descendant-r-self';
 is tags($root.find('Document/L/child::LI[position()=1]/*')), ['Lbl', 'LBody'], 'explicit (axis and position)';
 
 my $li = $root.first('Document/L/LI[1]');
