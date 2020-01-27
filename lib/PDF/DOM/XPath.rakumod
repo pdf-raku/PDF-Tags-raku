@@ -1,12 +1,12 @@
 class PDF::DOM::XPath {
-    # tiny neophytic XPath like expression evaluator
-    # currently handles: /<tag>[pos]?/ ...
+    # small neophytic XPath like expression evaluator
 
     use PDF::DOM::Item;
     use PDF::DOM::Node;
     use PDF::DOM::Elem;
     use PDF::DOM::Tag;
     use PDF::DOM::Text;
+    use PDF::DOM::XPath::Axis;
 
     has Str $.xpath is required;
     has &!compiled;
@@ -18,17 +18,20 @@ class PDF::DOM::XPath {
     our grammar Expression {
         rule TOP { [$<abs>='/']? <step>+ % '/' }
 
-        rule step { <axis> <node-test> <predicate>? }
+        proto rule step {*}
+        rule step:sym<parent>    { '..' }
+        rule step:sym<self>      { '.' }
+        rule step:sym<regular>   { <axis> <node-test> <predicate>? }
 
         proto rule node-test {*}
-        rule node-test:sym<tag> { <tag=.ident> }
+        rule node-test:sym<tag>  { <tag=.ident> }
         rule node-test:sym<elem> { '*' }
         rule node-test:sym<node> { <sym> '(' ')' }
         rule node-test:sym<text> { <sym> '(' ')' }
 
-        rule predicate         { '[' ~ ']' <query(4)> }
-        multi rule query(0)     { <term> }
-        multi rule query($pred) { <term=.query($pred-1)> +% <q-op($pred-1)> }
+        rule predicate           { '[' ~ ']' <query(4)> }
+        multi rule query(0)      { <term> }
+        multi rule query($pred)  { <term=.query($pred-1)> +% <q-op($pred-1)> }
 
         # query operators - loosest to tightest
         multi token q-op(3) {or}
@@ -43,13 +46,21 @@ class PDF::DOM::XPath {
         rule term:sym<query> { '(' ~ ')' <query(4)> }
 
         proto rule axis {*}
-        rule axis:sym<child>      {[ <sym> '::' ]?}
-        rule axis:sym<descendant> {[ '/' | <sym> '::' ]}
+        rule axis:sym<ancestor>           { <sym> '::' }
+        rule axis:sym<ancestor-or-self>   { <sym> '::' }
+        rule axis:sym<child>              {[ <sym> '::' ]?}
+        rule axis:sym<descendant>         {[ '/' | <sym> '::' ]}
         rule axis:sym<descendant-or-self> { <sym> '::' }
+        rule axis:sym<following>          { <sym> '::' }
+        rule axis:sym<following-sibling>  { <sym> '::' }
+        rule axis:sym<preceding>          { <sym> '::' }
+        rule axis:sym<preceding-sibling>  { <sym> '::' }
+        rule axis:sym<parent>             { <sym> '::' }
+        rule axis:sym<self>               { <sym> '::' }
 
         our class Actions {
             method TOP($/) {
-                make -> PDF::DOM::Item $ref is copy {
+                make -> PDF::DOM::Item:D $ref is copy {
                     $ref .= root() if $<abs>;
                     my @set = ($ref,);
                     @set = (.ast)(@set)
@@ -57,7 +68,13 @@ class PDF::DOM::XPath {
                     @set;
                 }
             }
-            method step($/) {
+            method step:sym<parent>($/) {
+                make -> @set {
+                    my @ = flat @set.map(&parent);
+                }
+            }
+            method step:sym<self>($/)   { make -> @set { @set } }
+            method step:sym<regular>($/) {
                 my &axis := $<axis>.ast;
                 my &node-test := $<node-test>.ast;
                 my &predicate = .ast with $<predicate>;
@@ -98,23 +115,17 @@ class PDF::DOM::XPath {
             method node-test:sym<node>($/) { make -> PDF::DOM::Item $_ { $_ ~~ Node} }
             method node-test:sym<text>($/) { make -> PDF::DOM::Item $_ { $_ ~~ Text} }
 
-            sub child-axis(PDF::DOM::Item $_) { .?kids // [] }
-            sub descendant-or-self-axis(PDF::DOM::Item $_) {
-                my @nodes = $_;
-                @nodes.append: descendant-or-self-axis($_)
-                    for .?kids // [];
-                @nodes;
-            }
-            sub descendant-axis(PDF::DOM::Item $_) {
-                my @nodes;
-                @nodes.append: descendant-or-self-axis($_)
-                    for .?kids // [];
-                @nodes;
-            }
-
-            method axis:sym<child>($/)              { make &child-axis }
-            method axis:sym<descendant>($/)         { make &descendant-axis }
-            method axis:sym<descendant-or-self>($/) { make &descendant-or-self-axis }
+            method axis:sym<ancestor>($/)           { make &ancestor }
+            method axis:sym<ancestor-or-self>($/)   { make &ancestor-or-self }
+            method axis:sym<child>($/)              { make &child }
+            method axis:sym<descendant>($/)         { make &descendant }
+            method axis:sym<descendant-or-self>($/) { make &descendant-or-self }
+            method axis:sym<following>($/)          { make &following }
+            method axis:sym<following-sibling>($/)  { make &following-sibling }
+            method axis:sym<parent>($/)             { make &parent }
+            method axis:sym<preceding>($/)          { make &preceding }
+            method axis:sym<preceding-sibling>($/)  { make &preceding-sibling }
+            method axis:sym<self>($/)               { make &self }
 
             method int($/) { make $/.Int }
             method q-op($/)  { make $/.lc }
