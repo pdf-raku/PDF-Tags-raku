@@ -7,10 +7,12 @@ sub ancestor-or-self(PDF::DOM::Item:D $_) is export {
     my @nodes = $_;
     @nodes.append: ancestor-or-self($_)
         with .?parent;
+    @nodes.reverse;
 }
 sub ancestor(PDF::DOM::Item:D $_) is export {
     my @nodes = ancestor-or-self($_)
         with .?parent;
+    @nodes;
 }
 sub descendant-or-self(PDF::DOM::Item:D $_) is export {
     my @nodes = $_;
@@ -62,7 +64,7 @@ sub preceding(PDF::DOM::Item:D $item) is export {
             }
         }
     }
-    @nodes;
+    @nodes.reverse;
 }
 
 sub preceding-sibling(PDF::DOM::Item:D $item) is export {
@@ -75,7 +77,7 @@ sub preceding-sibling(PDF::DOM::Item:D $item) is export {
             }
         }
     }
-    @nodes;
+    @nodes.reverse;
 }
 
 sub parent(PDF::DOM::Item:D $_) is export {

@@ -42,7 +42,9 @@ class PDF::DOM::XPath {
         token int { < + - >? \d+ }
         proto rule term {*}
         rule term:sym<int> { <int> }
-        rule term:sym<position> { 'position(' ')' }
+        rule term:sym<first>    { <sym> '(' ')' }
+        rule term:sym<last>     { <sym> '(' ')' }
+        rule term:sym<position> { <sym> '(' ')' }
         rule term:sym<query> { '(' ~ ')' <query(4)> }
 
         proto rule axis {*}
@@ -163,6 +165,8 @@ class PDF::DOM::XPath {
                 my Int:D $v = $<int>.ast;
                 make -> { $v; }
             }
+            method term:sym<first>($/) { make -> { 1 } }
+            method term:sym<last>($/)  { make -> { $*last } }
             method term:sym<position>($/) {
                 make -> { $*position; }
             }
