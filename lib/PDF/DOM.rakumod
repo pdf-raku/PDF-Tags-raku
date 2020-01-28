@@ -13,7 +13,7 @@ class PDF::DOM {
     has %!deref{Any};
     has Bool $.render = True;
     has Bool $.strict = True;
-    has $.root is built handles<find>;
+    has $.root is built handles<elems AT-POS Array kids first find tag>;
 
     my class Cache {
         has %.font{Any};

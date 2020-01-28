@@ -67,7 +67,7 @@ class PDF::DOM::XPath {
                     my @set = ($ref,);
                     @set = (.ast)(@set)
                         for @<step>;
-                    @set;
+                    @set.unique;
                 }
             }
             method step:sym<parent>($/) {
@@ -82,14 +82,13 @@ class PDF::DOM::XPath {
                 my &predicate = .ast with $<predicate>;
 
                 make -> @set {
-                    @set = gather {
-                        for @set {
-                            take $_ if &node-test($_)
-                                for &axis($_);
-                        }
+                    my @step;
+                    for @set {
+                        my @group = &axis($_).grep(&node-test);
+                        @group = ($_)(@group) with &predicate;
+                        @step.append: @group;
                     }
-                    @set = ($_)(@set) with &predicate;
-                    @set;
+                    @step;
                 }
             }
 

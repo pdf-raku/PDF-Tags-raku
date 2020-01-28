@@ -7,26 +7,25 @@ use PDF::Class;
 plan 11;
 
 sub tags(@elems) {
-    [@elems>>.tag];
+    @elems>>.tag.join(' ');
 }
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
 my PDF::DOM $dom .= new: :$pdf;
-my PDF::DOM::Root $root = $dom.root;
 
-is tags($root.find('Document/H1/*[1]')), ['Span'];
-is tags($root.find('Document/H1/*[1]/node()')), ['Span'];
-is tags($root.find('Document/H1/*[1]/*/*')), [];
-is tags($root.find('Document/H1/*[1]/*/node()')), ['#text'];
-is tags($root.find('Document/H1/*[1]/*/text()')), ['#text'];
-is $root.first('Document/H1/*[1]/*').text(), 'NAME ';
-is $root.first('Document/H1/*[1]/*/text()').text(), 'NAME ';
+is tags($dom.find('Document/H1/*[1]')), 'Span Span Span Span Span';
+is tags($dom.find('Document/H1[1]/*[1]/node()')), 'Span';
+is tags($dom.find('Document/H1/*[1]/*/*')), [];
+is tags($dom.find('Document/H1[1]/*[1]/*/node()')), '#text';
+is tags($dom.find('Document/H1[1]/*[1]/*/text()')), '#text';
+is $dom.first('Document/H1/*[1]/*').text(), 'NAME ';
+is $dom.first('Document/H1/*[1]/*/text()').text(), 'NAME ';
 
-my $link = $root.first('Document/L[1]/LI[1]/LBody/Reference/Link');
-is tags([$link]), ['Link'];
-is tags($link.find('*')), ['Link'];
-is tags($link.find('text()')), [];
-is tags($link.find('node()')), ['#ref', 'Link'];
+my $link = $dom.first('Document/L[1]/LI[1]/LBody/Reference/Link');
+is tags([$link]), 'Link';
+is tags($link.find('*')), 'Link';
+is tags($link.find('text()')), '';
+is tags($link.find('node()')), '#ref Link';
 
 done-testing;

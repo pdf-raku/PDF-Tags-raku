@@ -3,17 +3,19 @@ unit module PDF::DOM::XPath::Axis;
 use PDF::DOM::Item;
 
 sub child(PDF::DOM::Item:D $_) is export { .?kids // [] }
+
 sub ancestor-or-self(PDF::DOM::Item:D $_) is export {
-    my @nodes = $_;
-    @nodes.append: ancestor-or-self($_)
+    my @nodes = ancestor-or-self($_)
         with .?parent;
-    @nodes.reverse;
-}
+    @nodes.push: $_;
+ }
+
 sub ancestor(PDF::DOM::Item:D $_) is export {
     my @nodes = ancestor-or-self($_)
         with .?parent;
     @nodes;
 }
+
 sub descendant-or-self(PDF::DOM::Item:D $_) is export {
     my @nodes = $_;
     @nodes.append: descendant-or-self($_)

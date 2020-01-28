@@ -4,7 +4,7 @@ use PDF::DOM::Elem;
 use PDF::DOM::Root;
 use PDF::Class;
 
-plan 16;
+plan 18;
 
 sub tags(@elems) {
     @elems>>.tag.join(' ');
@@ -16,7 +16,8 @@ my PDF::DOM $dom .= new: :$pdf;
 my PDF::DOM::Root $root = $dom.root;
 
 is tags($root.find('Document/L')), ['L', 'L'], "child, repeated";
-todo "regressions against LibXML XPath", 6;
+is tags($root.find('Document/L[1]/LI[1]/LBody/ancestor::*')), 'Document L LI', 'ancestor';
+is tags($root.find('/Document/L/LI[1]/LBody')), 'LBody LBody', 'child';
 is tags($root.find('Document/L/LI[1]/LBody/ancestor::*')), 'Document L LI L LI', 'ancestor';
 is tags($root.find('Document/L/LI[1]/LBody/ancestor-or-self::*')), 'Document L LI LBody L LI LBody', 'ancestor-or-self';
 is tags($root.find('Document/L/LI[1]/LBody/child::*')), 'Reference P', 'child';
