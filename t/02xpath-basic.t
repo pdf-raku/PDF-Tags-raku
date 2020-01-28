@@ -1,7 +1,6 @@
 use Test;
 use PDF::DOM;
 use PDF::DOM::Elem;
-use PDF::DOM::Root;
 use PDF::Class;
 
 plan 12;

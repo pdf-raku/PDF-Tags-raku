@@ -16,6 +16,7 @@ class PDF::DOM::Item {
     multi sub item-class(PDF::StructTreeRoot) { require ::('PDF::DOM::Root') }
     multi sub item-class(PDF::StructElem)     { require ::('PDF::DOM::Elem') }
     multi sub item-class(PDF::OBJR)           { require ::('PDF::DOM::ObjRef') }
+    multi sub item-class(PDF::MCR)            { require ::('PDF::DOM::Tag') }
     multi sub item-class(UInt)                { require ::('PDF::DOM::Tag') }
     multi sub item-class(PDF::Content::Tag::Marked) { require ::('PDF::DOM::Tag') }
     multi sub item-class(Str)                 { require ::('PDF::DOM::Text') }
@@ -28,5 +29,6 @@ class PDF::DOM::Item {
         item-class($item).new: :$item, |c;
     }
     
+    method xml(|c) { (require ::('PDF::DOM::XML')).new(|c).Str(self) }
     method text { '' }
 }

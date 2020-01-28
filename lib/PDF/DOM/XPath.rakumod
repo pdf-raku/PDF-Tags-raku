@@ -32,8 +32,8 @@ class PDF::DOM::XPath {
         rule node-test:sym<text> { <sym> '(' ')' }
 
         rule predicate           { '[' ~ ']' <expr(4)> }
-        multi rule expr(0)      { <term> }
-        multi rule expr($pred)  { <term=.expr($pred-1)> +% <q-op($pred-1)> }
+        multi rule expr(0)       { <term> }
+        multi rule expr($pred)   { <term=.expr($pred-1)> +% <q-op($pred-1)> }
 
         # expr operators - loosest to tightest
         multi token q-op(3) {or}

@@ -7,7 +7,7 @@ class PDF::DOM::Elem is PDF::DOM::Node {
     has Bool $!atts-built;
     has Str $.tag is built;
     has Str $.class is built;
-    method attributes handles<AT-KEY> {
+    method attributes {
         $!atts-built ||= do {
             for $.item.attribute-dicts -> $atts {
                 %!attributes{$_} = $atts{$_}

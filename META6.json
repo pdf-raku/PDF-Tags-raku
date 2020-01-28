@@ -19,6 +19,7 @@
         "PDF::DOM::Root"   : "lib/PDF/DOM/Root.rakumod",
         "PDF::DOM::Tag"    : "lib/PDF/DOM/Tag.rakumod",
         "PDF::DOM::Text"   : "lib/PDF/DOM/Text.rakumod",
+        "PDF::DOM::XML"    : "lib/PDF/DOM/XML.rakumod",
         "PDF::DOM::XPath"  : "lib/PDF/DOM/XPath.rakumod",
         "PDF::DOM::XPath::Axis"  : "lib/PDF/DOM/XPath/Axis.rakumod"
      }
