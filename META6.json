@@ -20,7 +20,9 @@
         "PDF::DOM::Tag"    : "lib/PDF/DOM/Tag.rakumod",
         "PDF::DOM::Text"   : "lib/PDF/DOM/Text.rakumod",
         "PDF::DOM::XML"    : "lib/PDF/DOM/XML.rakumod",
-        "PDF::DOM::XPath"  : "lib/PDF/DOM/XPath.rakumod",
-        "PDF::DOM::XPath::Axis"  : "lib/PDF/DOM/XPath/Axis.rakumod"
+        "PDF::DOM::XPath::Actions"  : "lib/PDF/DOM/XPath/Actions.rakumod",
+        "PDF::DOM::XPath::Axis"     : "lib/PDF/DOM/XPath/Axis.rakumod",
+        "PDF::DOM::XPath::Context"  : "lib/PDF/DOM/XPath/Context.rakumod",
+        "PDF::DOM::XPath::Grammar"  : "lib/PDF/DOM/XPath/Grammar.rakumod"
      }
 }

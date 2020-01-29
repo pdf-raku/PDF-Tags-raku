@@ -9,27 +9,27 @@ class PDF::DOM::Tag is PDF::DOM::Node {
     has Bool $!atts-built;
     has Str $!actual-text;
 
-    multi submethod TWEAK(PDF::Content::Tag::Marked:D :$item!) {
-        self.set-item($item);
+    multi submethod TWEAK(PDF::Content::Tag::Marked:D :$value!) {
+        self.set-value($value);
     }
-    multi submethod TWEAK(UInt:D :$item!) {
+    multi submethod TWEAK(UInt:D :$value!) {
         with self.Pg -> PDF::Page $Pg {
-            with self.dom.graphics-tags($Pg){$item} {
-                self.set-item($_);
+            with self.dom.graphics-tags($Pg){$value} {
+                self.set-value($_);
             }
             else {
-                die "unable to resolve MCID: $item";
+                die "unable to resolve MCID: $value";
             }
         }
         else {
             die "no current marked-content page";
         }
     }
-    method item(--> PDF::Content::Tag) { callsame() }
-    method tag { $.item.name }
+    method value(--> PDF::Content::Tag) { callsame() }
+    method tag { $.value.name }
     method attributes handles<AT-KEY> {
         $!atts-built ||= do {
-            %!attributes = $.item.attributes;
+            %!attributes = $.value.attributes;
             do with %!attributes<ActualText>:delete -> $value {
                 $!actual-text = PDF::COS::TextString.new(:$value);
             }

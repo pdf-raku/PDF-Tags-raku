@@ -6,9 +6,9 @@ class PDF::DOM::Text is PDF::DOM::Item {
 
     has PDF::DOM::Node $.parent;
 
-    submethod TWEAK(Str :$item!) {
-        self.set-item($item);
+    submethod TWEAK(Str :$value!) {
+        self.set-value($value);
     }
-    method item(--> Str) is also<Str gist text> { callsame() }
+    method value(--> Str) is also<Str gist text> { callsame() }
     method tag { '#text' }
 }

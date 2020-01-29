@@ -24,7 +24,7 @@ class PDF::DOM {
         $!class-map = $_ with $root.ClassMap;
         $!role-map = $_ with $root.RoleMap;
         $!parent-tree = .number-tree with $root.ParentTree;
-        $!root = (require ::('PDF::DOM::Root')).new: :dom(self), :item($root);
+        $!root = (require ::('PDF::DOM::Root')).new: :dom(self), :value($root);
     }
 
     multi submethod TWEAK(PDF::Class :$pdf!) {
@@ -38,7 +38,7 @@ class PDF::DOM {
 
     multi method deref(StructNode $_) {
         %!deref{$_} //= do with .struct-parent -> $i {
-            with $.item.parent-tree {.[$i + 0]}
+            with $.value.parent-tree {.[$i + 0]}
         } // $_;
     }
 

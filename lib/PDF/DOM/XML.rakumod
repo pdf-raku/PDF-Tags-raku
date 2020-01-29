@@ -115,7 +115,7 @@ multi method Str(PDF::DOM::Tag $node, :$depth!) {
 }
 
 multi method Str(PDF::DOM::Text $_, :$depth!) {
-    line($depth, .Str)
+    html-escape(.Str);
 }
 
 method !tag-content(PDF::DOM::Tag $node, :$depth!) is default {

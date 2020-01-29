@@ -8,8 +8,8 @@ class PDF::DOM::Item {
     use PDF::Content::Tag::Marked;
 
     has PDF::DOM $.dom handles<root> is required;
-    has $.item is required;
-    method set-item($!item) {}
+    has $.value is required;
+    method set-value($!value) {}
     has PDF::Page $.Pg is rw; # current page scope
 
     proto sub item-class($) is export(:item-class) {*}
@@ -25,8 +25,8 @@ class PDF::DOM::Item {
     multi sub build-item(PDF::MCR $item, PDF::Page :$Pg, |c) {
         build-item($item.MCID, :Pg($item.Pg // $Pg), |c);
     }
-    multi sub build-item($item, |c) {
-        item-class($item).new: :$item, |c;
+    multi sub build-item($value, |c) {
+        item-class($value).new: :$value, |c;
     }
     
     method xml(|c) { (require ::('PDF::DOM::XML')).new(|c).Str(self) }

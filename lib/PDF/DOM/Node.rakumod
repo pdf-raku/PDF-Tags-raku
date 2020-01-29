@@ -3,11 +3,15 @@ use PDF::DOM::Item :&item-class, :&build-item;
 class PDF::DOM::Node
     is PDF::DOM::Item {
 
+    my subset NCName of Str where { !.defined || $_ ~~ /^<ident>$/ }
+
     has PDF::DOM::Item @.kids;
+    has Hash $!store;
     has Bool $!loaded;
     has UInt $!elems;
+
     method elems {
-        $!elems //= do with $.item.kids {
+        $!elems //= do with $.value.kids {
             when Hash { 1 }
             default { .elems }
         } // 0;
@@ -15,8 +19,8 @@ class PDF::DOM::Node
 
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        my Any:D $item = $.item.kids[$i];
-        @!kids[$i] //= build-item($item, :parent(self), :$.Pg, :$.dom);
+        my Any:D $value = $.value.kids[$i];
+        @!kids[$i] //= build-item($value, :parent(self), :$.Pg, :$.dom);
     }
     method Array {
         $!loaded ||= do {
@@ -24,6 +28,22 @@ class PDF::DOM::Node
             True;
         }
         @!kids;
+    }
+    method Hash handles <keys pairs> {
+        $!store //= do {
+            my %h;
+            %h{.tag}.push: $_ for self.Array;
+            %h;
+        }
+        $!store;
+    }
+    multi method AT-KEY(NCName:D $tag) {
+        # special case to handle default namespaces without a prefix.
+        # https://stackoverflow.com/questions/16717211/
+        self.Hash{$tag};
+    }
+    multi method AT-KEY(Str:D $xpath) is default {
+        $.xpath-context.AT-KEY($xpath);
     }
     method kids {
         my class Kids does Iterable does Iterator does Positional {
@@ -38,10 +58,12 @@ class PDF::DOM::Node
         Kids.new: :node(self);
     }
 
-    method find(Str $xpath) {
-        (require ::('PDF::DOM::XPath')).new(:$xpath).find(:ref(self))
+    method xpath-context {
+        (require ::('PDF::DOM::XPath::Context')).new: :node(self);
     }
-    method first(Str $xpath) {
-        self.find($xpath)[0] // PDF::DOM::Node
+    method find($expr) { $.xpath-context.find($expr) }
+
+    method first($expr) {
+        self.find($expr)[0] // PDF::DOM::Node
     }
 }
