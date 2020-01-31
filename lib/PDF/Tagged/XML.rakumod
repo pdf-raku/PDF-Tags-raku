@@ -42,7 +42,7 @@ multi method Str(PDF::Tagged::Elem $node, UInt :$depth is copy = 0) {
     my @frag;
     if $!debug {
         @frag.push: line($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
-            given $node.item;
+            given $node.value;
     }
     my $tag = $node.tag;
     my $att = do if $!atts {
@@ -58,7 +58,7 @@ multi method Str(PDF::Tagged::Elem $node, UInt :$depth is copy = 0) {
 
 
     if $depth >= $!max-depth {
-        @frag.push: line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.item.obj-num} {$node..item.gen-num} R -->");
+        @frag.push: line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
     }
     else {
         with $node.actual-text {
@@ -101,10 +101,10 @@ multi method Str(PDF::Tagged::Tag $node, :$depth!) {
     my @frag;
     if $!debug {
         @frag.push: line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
-            given $node.item;
+            given $node.value;
     }
     if $!render {
-        with $node.item.?Stm {
+        with $node.value.?Stm {
             warn "can't handle marked content streams yet";
         }
         else {
@@ -135,7 +135,7 @@ method !tag-content(PDF::Tagged::Tag $node, :$depth!) is default {
     ($!skip
      && ($node.tag eq 'Document'
          || self!skip($tag)
-         || $node.item ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag))
+         || $node.value ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag))
         ?? $text
         !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
 }

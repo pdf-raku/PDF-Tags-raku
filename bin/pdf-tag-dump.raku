@@ -5,7 +5,6 @@ use PDF::Class;
 use PDF::Catalog;
 use PDF::StructTreeRoot;
 use PDF::Tagged::XML;
-use PDF::Tagged::XPath;
 use PDF::IO;
 
 subset Number of Int where { !.defined || $_ > 0 };
