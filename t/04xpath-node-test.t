@@ -1,7 +1,7 @@
 use Test;
-use PDF::DOM;
-use PDF::DOM::Elem;
-use PDF::DOM::Root;
+use PDF::Tagged;
+use PDF::Tagged::Elem;
+use PDF::Tagged::Root;
 use PDF::Class;
 
 plan 11;
@@ -12,7 +12,7 @@ sub tags(@elems) {
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::DOM $dom .= new: :$pdf;
+my PDF::Tagged $dom .= new: :$pdf;
 
 is tags($dom.find('Document/H1/*[1]')), 'Span Span Span Span Span';
 is tags($dom.find('Document/H1[1]/*[1]/node()')), 'Span';

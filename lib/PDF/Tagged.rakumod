@@ -1,5 +1,5 @@
 
-class PDF::DOM {
+class PDF::Tagged {
     use PDF::Class;
     use PDF::Page;
     use PDF::NumberTree :NumberTree;
@@ -24,7 +24,7 @@ class PDF::DOM {
         $!class-map = $_ with $root.ClassMap;
         $!role-map = $_ with $root.RoleMap;
         $!parent-tree = .number-tree with $root.ParentTree;
-        $!root = (require ::('PDF::DOM::Root')).new: :dom(self), :value($root);
+        $!root = (require ::('PDF::Tagged::Root')).new: :dom(self), :value($root);
     }
 
     multi submethod TWEAK(PDF::Class :$pdf!) {

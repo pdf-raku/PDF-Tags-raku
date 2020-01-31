@@ -1,6 +1,6 @@
-use PDF::DOM::Node;
+use PDF::Tagged::Node;
 use PDF::OBJR;
-class PDF::DOM::ObjRef is PDF::DOM::Item {
+class PDF::Tagged::ObjRef is PDF::Tagged::Item {
     submethod TWEAK {
         self.Pg = $_ with self.item.Pg;
     }

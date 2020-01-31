@@ -1,11 +1,11 @@
 use Test;
-use PDF::DOM;
+use PDF::Tagged;
 use PDF::Class;
 
 plan 2;
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
-my PDF::DOM $dom .= new: :$pdf;
+my PDF::Tagged $dom .= new: :$pdf;
 
 is-deeply $dom.xml.lines.head(3), (
     '<Document>',

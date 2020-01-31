@@ -1,36 +1,36 @@
-unit module PDF::DOM::XPath::Axis;
+unit module PDF::Tagged::XPath::Axis;
 
-use PDF::DOM::Item;
+use PDF::Tagged::Item;
 
-sub child(PDF::DOM::Item:D $_) is export { .?kids // [] }
+sub child(PDF::Tagged::Item:D $_) is export { .?kids // [] }
 
-sub ancestor-or-self(PDF::DOM::Item:D $_) is export {
+sub ancestor-or-self(PDF::Tagged::Item:D $_) is export {
     my @nodes = ancestor-or-self($_)
         with .?parent;
     @nodes.push: $_;
  }
 
-sub ancestor(PDF::DOM::Item:D $_) is export {
+sub ancestor(PDF::Tagged::Item:D $_) is export {
     my @nodes = ancestor-or-self($_)
         with .?parent;
     @nodes;
 }
 
-sub descendant-or-self(PDF::DOM::Item:D $_) is export {
+sub descendant-or-self(PDF::Tagged::Item:D $_) is export {
     my @nodes = $_;
     @nodes.append: descendant-or-self($_)
         for .?kids // [];
     @nodes;
 }
 
-sub descendant(PDF::DOM::Item:D $_) is export {
+sub descendant(PDF::Tagged::Item:D $_) is export {
     my @nodes;
     @nodes.append: descendant-or-self($_)
         for .?kids // [];
     @nodes;
 }
 
-sub following(PDF::DOM::Item:D $item) is export {
+sub following(PDF::Tagged::Item:D $item) is export {
     my @nodes;
     with $item.?parent {
         my @kids = .kids;
@@ -43,7 +43,7 @@ sub following(PDF::DOM::Item:D $item) is export {
     @nodes;
 }
 
-sub following-sibling(PDF::DOM::Item:D $item) is export {
+sub following-sibling(PDF::Tagged::Item:D $item) is export {
     my @nodes;
     with $item.?parent {
         my @kids = .kids;
@@ -56,7 +56,7 @@ sub following-sibling(PDF::DOM::Item:D $item) is export {
     @nodes;
 }
 
-sub preceding(PDF::DOM::Item:D $item) is export {
+sub preceding(PDF::Tagged::Item:D $item) is export {
     my @nodes;
     with $item.?parent -> $parent {
         for 0 ..^ $parent.elems {
@@ -69,7 +69,7 @@ sub preceding(PDF::DOM::Item:D $item) is export {
     @nodes.reverse;
 }
 
-sub preceding-sibling(PDF::DOM::Item:D $item) is export {
+sub preceding-sibling(PDF::Tagged::Item:D $item) is export {
     my @nodes;
     with $item.?parent -> $parent {
         for 0 ..^ $parent.elems {
@@ -82,10 +82,10 @@ sub preceding-sibling(PDF::DOM::Item:D $item) is export {
     @nodes.reverse;
 }
 
-sub parent(PDF::DOM::Item:D $_) is export {
+sub parent(PDF::Tagged::Item:D $_) is export {
     with .?parent { [ $_ ] } else { [] }
 }
 
-sub self(PDF::DOM::Item:D $_) is export {
+sub self(PDF::Tagged::Item:D $_) is export {
     [ $_ ];
 }

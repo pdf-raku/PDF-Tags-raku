@@ -1,6 +1,6 @@
-use PDF::DOM::Node;
+use PDF::Tagged::Node;
 use PDF::StructTreeRoot;
-class PDF::DOM::Root is PDF::DOM::Node {
+class PDF::Tagged::Root is PDF::Tagged::Node {
     method value(--> PDF::StructTreeRoot) { callsame() }
     method parent { fail "already at root" }
     method tag { '#root' }
