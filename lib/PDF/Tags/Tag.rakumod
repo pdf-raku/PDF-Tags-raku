@@ -1,10 +1,10 @@
-use PDF::Tagged::Node;
-class PDF::Tagged::Tag is PDF::Tagged::Node {
+use PDF::Tags::Node;
+class PDF::Tags::Tag is PDF::Tags::Node {
     use PDF::Page;
     use PDF::COS::TextString;
     use PDF::Content::Tag;
     use PDF::Content::Tag::Marked;
-    has PDF::Tagged::Node $.parent;
+    has PDF::Tags::Node $.parent;
     has %!attributes;
     has Bool $!atts-built;
     has Str $!actual-text;

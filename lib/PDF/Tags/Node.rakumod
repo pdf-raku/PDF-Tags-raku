@@ -1,11 +1,11 @@
-use PDF::Tagged::Item :&item-class, :&build-item;
+use PDF::Tags::Item :&item-class, :&build-item;
 
-class PDF::Tagged::Node
-    is PDF::Tagged::Item {
+class PDF::Tags::Node
+    is PDF::Tags::Item {
 
     my subset NCName of Str where { !.defined || $_ ~~ /^<ident>$/ }
 
-    has PDF::Tagged::Item @.kids;
+    has PDF::Tags::Item @.kids;
     has Hash $!store;
     has Bool $!loaded;
     has UInt $!elems;
@@ -47,7 +47,7 @@ class PDF::Tagged::Node
     }
     method kids {
         my class Kids does Iterable does Iterator does Positional {
-            has PDF::Tagged::Item $.node is required handles<elems AT-POS>;
+            has PDF::Tags::Item $.node is required handles<elems AT-POS>;
             has int $!idx = 0;
             method iterator { $!idx = 0; self}
             method pull-one {
@@ -59,11 +59,11 @@ class PDF::Tagged::Node
     }
 
     method xpath-context {
-        (require ::('PDF::Tagged::XPath::Context')).new: :node(self);
+        (require ::('PDF::Tags::XPath::Context')).new: :node(self);
     }
     method find($expr) { $.xpath-context.find($expr) }
 
     method first($expr) {
-        self.find($expr)[0] // PDF::Tagged::Node
+        self.find($expr)[0] // PDF::Tags::Node
     }
 }

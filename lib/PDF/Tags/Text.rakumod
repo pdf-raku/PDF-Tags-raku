@@ -1,10 +1,10 @@
-use PDF::Tagged::Node;
-class PDF::Tagged::Text is PDF::Tagged::Item {
+use PDF::Tags::Node;
+class PDF::Tags::Text is PDF::Tags::Item {
     use PDF::Page;
     use PDF::Content::Tag;
     use Method::Also;
 
-    has PDF::Tagged::Node $.parent;
+    has PDF::Tags::Node $.parent;
 
     submethod TWEAK(Str :$value!) {
         self.set-value($value);

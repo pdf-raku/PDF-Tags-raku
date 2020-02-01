@@ -1,4 +1,4 @@
-grammar PDF::Tagged::XPath::Grammar {
+grammar PDF::Tags::XPath::Grammar {
     # small neophytic XPath like expression evaluator
 
     rule TOP { <query>+ % '|' }

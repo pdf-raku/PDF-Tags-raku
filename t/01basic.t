@@ -1,13 +1,13 @@
 use Test;
-use PDF::Tagged;
-use PDF::Tagged::Root;
+use PDF::Tags;
+use PDF::Tags::Root;
 use PDF::Class;
 
 plan 9;
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::Tagged $dom;
+my PDF::Tags $dom;
 
 lives-ok { $dom .= new: :$pdf;};
 

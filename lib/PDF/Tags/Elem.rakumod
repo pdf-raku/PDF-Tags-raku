@@ -1,6 +1,6 @@
-use PDF::Tagged::Node;
+use PDF::Tags::Node;
 use PDF::StructElem;
-class PDF::Tagged::Elem is PDF::Tagged::Node {
+class PDF::Tags::Elem is PDF::Tags::Node {
     method value(--> PDF::StructElem) { callsame() }
     has $.parent is required;
     has %!attributes;

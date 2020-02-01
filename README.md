@@ -1,4 +1,4 @@
-PDF-Tagged-raku (under construction)
+PDF-Tags-raku (under construction)
 ============
 
 A small DOM-like API for the navigation of PDF tagged content; simple XPath queries.
@@ -8,12 +8,12 @@ SYNOPSIS
 
 ```
 use PDF::Class;
-use PDF::Tagged;
-use PDF::Tagged::Elem;
+use PDF::Tags;
+use PDF::Tags::Elem;
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
-my PDF::Tagged $dom .= new: :$pdf;
-my PDF::Tagged::Elem $doc = $dom.root[0];
+my PDF::Tags $dom .= new: :$pdf;
+my PDF::Tags::Elem $doc = $dom.root[0];
 say $doc.tag, 'Document';
 
 for $doc.kids {
@@ -28,11 +28,11 @@ say @tags.join(','); # Reference,Link,Link,P,P,Code,Code
 Node Types
 ----------
 
-- `PDF::Tagged::Root` - Structure Tree root element
-- `PDF::Tagged::Elem` - A 'Structure Tree' Item
-- `PDF::Tagged::Tag` - A content-mapped item
-- `PDF::Tagged::Text` - Document Text
-- `PDF::Tagged::ObjRef` - A reference to a PDF::Class object (such as PDF::Annot or PDF::Field)
+- `PDF::Tags::Root` - Structure Tree root element
+- `PDF::Tags::Elem` - A 'Structure Tree' Item
+- `PDF::Tags::Tag` - A content-mapped item
+- `PDF::Tags::Text` - Document Text
+- `PDF::Tags::ObjRef` - A reference to a PDF::Class object (such as PDF::Annot or PDF::Field)
 
 
 Scripts in this Distribution

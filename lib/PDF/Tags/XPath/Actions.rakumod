@@ -1,21 +1,21 @@
-class PDF::Tagged::XPath::Actions {
+class PDF::Tags::XPath::Actions {
 
-    use PDF::Tagged::Item;
-    use PDF::Tagged::Node;
-    use PDF::Tagged::Elem;
-    use PDF::Tagged::Tag;
-    use PDF::Tagged::Text;
-    use PDF::Tagged::XPath::Axis;
+    use PDF::Tags::Item;
+    use PDF::Tags::Node;
+    use PDF::Tags::Elem;
+    use PDF::Tags::Tag;
+    use PDF::Tags::Text;
+    use PDF::Tags::XPath::Axis;
 
     our constant Expression = Code;
-    our subset Elem of PDF::Tagged::Node where PDF::Tagged::Elem|PDF::Tagged::Tag;
-    constant Node = PDF::Tagged::Item;
-    constant Text = PDF::Tagged::Text;
+    our subset Elem of PDF::Tags::Node where PDF::Tags::Elem|PDF::Tags::Tag;
+    constant Node = PDF::Tags::Item;
+    constant Text = PDF::Tags::Text;
 
     method TOP($/) {
         my @query = @<query>>>.ast;
 
-        make  -> PDF::Tagged::Item:D $ref {
+        make  -> PDF::Tags::Item:D $ref {
             if @query == 1 {
                 (@query[0])($ref);
             }
@@ -29,7 +29,7 @@ class PDF::Tagged::XPath::Actions {
     }
 
     method query($/) {
-        make -> PDF::Tagged::Item:D $ref is copy {
+        make -> PDF::Tags::Item:D $ref is copy {
             $ref .= root() if $<abs>;
             my @set = ($ref,);
             @set = (.ast)(@set).unique
@@ -80,7 +80,7 @@ class PDF::Tagged::XPath::Actions {
 
     method node-test:sym<tag>($/) {
         my $tag := ~$<tag>;
-        make -> PDF::Tagged::Item $_ { .?tag eq $tag; }
+        make -> PDF::Tags::Item $_ { .?tag eq $tag; }
     }
     method node-test:sym<elem>($/) { make -> Node $_ { $_ ~~ Elem} }
     method node-test:sym<node>($/) { make -> Node $_ { $_ ~~ Node} }

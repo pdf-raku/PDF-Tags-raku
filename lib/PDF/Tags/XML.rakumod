@@ -1,13 +1,13 @@
-unit class PDF::Tagged::XML;
+unit class PDF::Tags::XML;
 
 use PDF::Annot;
-use PDF::Tagged :StructNode;
-use PDF::Tagged::Elem;
-use PDF::Tagged::Item;
-use PDF::Tagged::ObjRef;
-use PDF::Tagged::Root;
-use PDF::Tagged::Tag;
-use PDF::Tagged::Text;
+use PDF::Tags :StructNode;
+use PDF::Tags::Elem;
+use PDF::Tags::Item;
+use PDF::Tags::ObjRef;
+use PDF::Tags::Root;
+use PDF::Tags::Tag;
+use PDF::Tags::Text;
 
 has UInt $.max-depth = 16;
 has Bool $.render = True;
@@ -28,7 +28,7 @@ sub str-escape(Str $_) {
     html-escape($_).trans: /\"/ => '&quote;';
 }
 
-multi method Str(PDF::Tagged::Root $_, :$depth = 0) {
+multi method Str(PDF::Tags::Root $_, :$depth = 0) {
     .kids.map({self.Str($_, :$depth)}).join;
 }
 
@@ -38,7 +38,7 @@ sub atts-str(%atts) {
 
 method !skip($tag) { $!skip && $tag eq 'Span' }
 
-multi method Str(PDF::Tagged::Elem $node, UInt :$depth is copy = 0) {
+multi method Str(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my @frag;
     if $!debug {
         @frag.push: line($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
@@ -92,12 +92,12 @@ multi method Str(PDF::Tagged::Elem $node, UInt :$depth is copy = 0) {
     @frag.join;
 }
 
-multi method Str(PDF::Tagged::ObjRef $_, :$depth!) {
+multi method Str(PDF::Tags::ObjRef $_, :$depth!) {
     ($!debug ?? line($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->") !! '')
      ~ self.dump-object(.object, :$depth);
 }
 
-multi method Str(PDF::Tagged::Tag $node, :$depth!) {
+multi method Str(PDF::Tags::Tag $node, :$depth!) {
     my @frag;
     if $!debug {
         @frag.push: line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
@@ -114,18 +114,18 @@ multi method Str(PDF::Tagged::Tag $node, :$depth!) {
     @frag.join;
 }
 
-multi method Str(PDF::Tagged::Text $_, :$depth!) {
+multi method Str(PDF::Tags::Text $_, :$depth!) {
     html-escape(.Str);
 }
 
-method !tag-content(PDF::Tagged::Tag $node, :$depth!) is default {
+method !tag-content(PDF::Tags::Tag $node, :$depth!) is default {
     # join text strings. discard this, and child marked content tags for now
     my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
-            when PDF::Tagged::Tag {
+            when PDF::Tags::Tag {
                 my $text = trim(self!tag-content($_, :$depth));
             }
-            when PDF::Tagged::Text { html-escape(.Str) }
+            when PDF::Tags::Text { html-escape(.Str) }
             default { die "unhandled tagged content: {.WHAT.perl}"; }
         }
         @text.join;

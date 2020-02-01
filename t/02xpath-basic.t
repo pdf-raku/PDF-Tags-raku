@@ -1,6 +1,6 @@
 use Test;
-use PDF::Tagged;
-use PDF::Tagged::Elem;
+use PDF::Tags;
+use PDF::Tags::Elem;
 use PDF::Class;
 
 plan 12;
@@ -11,10 +11,10 @@ sub tags(@elems) {
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::Tagged $dom .= new: :$pdf;
+my PDF::Tags $dom .= new: :$pdf;
 
 for $dom.find('Document') -> $elem {
-    isa-ok($elem, PDF::Tagged::Elem);
+    isa-ok($elem, PDF::Tags::Elem);
     is $elem.tag, 'Document', 'find root element';
 }
 
