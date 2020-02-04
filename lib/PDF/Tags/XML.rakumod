@@ -24,9 +24,12 @@ sub html-escape(Str $_) {
         /\>/ => '&gt;',
         
 }
-sub str-escape(Str $_) {
+multi sub str-escape(@a) { @a.map({str-escape($_)}).join: ' '; }
+multi sub str-escape(Str $_) {
     html-escape($_).trans: /\"/ => '&quote;';
 }
+multi sub str-escape(Pair $_) { str-escape(.value) }
+multi sub str-escape($_) is default { str-escape(.Str) }
 
 multi method Str(PDF::Tags::Root $_, :$depth = 0) {
     .kids.map({self.Str($_, :$depth)}).join;

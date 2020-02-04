@@ -1,5 +1,5 @@
 
-class PDF::Tags {
+class PDF::Tags:ver<0.0.1> {
     use PDF::Class;
     use PDF::Page;
     use PDF::NumberTree :NumberTree;

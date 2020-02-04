@@ -24,5 +24,6 @@
         "PDF::Tags::XPath::Axis"    : "lib/PDF/Tags/XPath/Axis.rakumod",
         "PDF::Tags::XPath::Context" : "lib/PDF/Tags/XPath/Context.rakumod",
         "PDF::Tags::XPath::Grammar" : "lib/PDF/Tags/XPath/Grammar.rakumod"
-     }
+    },
+    "version": "0.0.1"
 }
