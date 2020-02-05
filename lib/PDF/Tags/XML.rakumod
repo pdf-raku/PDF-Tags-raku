@@ -31,20 +31,34 @@ multi sub str-escape(Str $_) {
 multi sub str-escape(Pair $_) { str-escape(.value) }
 multi sub str-escape($_) is default { str-escape(.Str) }
 
-multi method Str(PDF::Tags::Root $_, :$depth = 0) {
-    .kids.map({self.Str($_, :$depth)}).join;
-}
-
 sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{str-escape(.value)}\"" }).join;
 }
 
 method !skip($tag) { $!skip && $tag eq 'Span' }
 
-multi method Str(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
-    my @frag;
+method Str(PDF::Tags::Item $item) {
+    my @chunks = gather { self.take-xml($item) };
+    @chunks.join;
+}
+
+method print(IO::Handle $fh, PDF::Tags::Item $item) {
+    for gather self.take-xml($item) {
+        $fh.print($_);
+    }
+}
+method say(IO::Handle $fh, PDF::Tags::Item $item) {
+    self.print($fh, $item);
+    $fh.say: '';
+}
+
+multi method take-xml(PDF::Tags::Root $_, :$depth = 0) {
+    self.take-xml($_, :$depth) for .kids;
+}
+
+multi method take-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     if $!debug {
-        @frag.push: line($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
+        take line($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
             given $node.value;
     }
     my $tag = $node.tag;
@@ -59,51 +73,49 @@ multi method Str(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         ''
     }
 
-
     if $depth >= $!max-depth {
-        @frag.push: line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
+        take line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
     }
     else {
         with $node.actual-text {
-            @frag.push: line($depth, '<!-- actual text -->')
+            take line($depth, '<!-- actual text -->')
                 if $!debug;
             given trim($_) {
-                @frag.push: $_ eq ''
-                            ?? line($depth, "<$tag$att/>")
-                            !! line($depth, self!skip($tag) ?? $_ !! "<$tag$att>{html-escape($_) }</$tag>");
+                take $_ eq ''
+                    ?? line($depth, "<$tag$att/>")
+                    !! line($depth, self!skip($tag) ?? $_ !! "<$tag$att>{html-escape($_) }</$tag>");
             }
         }
         else {
             my $elems = $node.elems;
             if $elems {
-                @frag.push: line($depth++, "<$tag$att>")
+                take line($depth++, "<$tag$att>")
                     unless self!skip($tag);
         
                 for 0 ..^ $elems {
-                    @frag.push: self.Str($node.kids[$_], :$depth);
+                    self.take-xml($node.kids[$_], :$depth);
                 }
 
-                @frag.push: line(--$depth, "</$tag>")
+                take line(--$depth, "</$tag>")
                     unless self!skip($tag);
             }
             else {
-                @frag.push: line($depth, "<$tag$att/>")
+                take line($depth, "<$tag$att/>")
                     unless self!skip($tag);
             }
         }
     }
-    @frag.join;
 }
 
-multi method Str(PDF::Tags::ObjRef $_, :$depth!) {
-    ($!debug ?? line($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->") !! '')
-     ~ self.dump-object(.object, :$depth);
+multi method take-xml(PDF::Tags::ObjRef $_, :$depth!) {
+    take line($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->")
+        if $!debug;
+     take self.take-object(.object, :$depth);
 }
 
-multi method Str(PDF::Tags::Tag $node, :$depth!) {
-    my @frag;
+multi method take-xml(PDF::Tags::Tag $node, :$depth!) {
     if $!debug {
-        @frag.push: line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
+        take line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
             given $node.value;
     }
     if $!render {
@@ -111,14 +123,13 @@ multi method Str(PDF::Tags::Tag $node, :$depth!) {
             warn "can't handle marked content streams yet";
         }
         else {
-            @frag.push: line($depth, self!tag-content($node, :$depth));
+            take line($depth, self!tag-content($node, :$depth));
         }
     }
-    @frag.join;
 }
 
-multi method Str(PDF::Tags::Text $_, :$depth!) {
-    html-escape(.Str);
+multi method take-xml(PDF::Tags::Text $_, :$depth!) {
+    take line($depth, html-escape(.Str));
 }
 
 method !tag-content(PDF::Tags::Tag $node, :$depth!) is default {
@@ -135,19 +146,18 @@ method !tag-content(PDF::Tags::Tag $node, :$depth!) is default {
     }
     my $tag = $node.tag;
     my $atts = atts-str($node.attributes);
-    ($!skip
-     && ($node.tag eq 'Document'
-         || self!skip($tag)
-         || $node.value ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag))
+    $!skip
+    && ($node.tag eq 'Document'
+        || self!skip($tag)
+        || $node.value ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag)
         ?? $text
-        !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
+        !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>")
 }
 
-multi method dump-object(PDF::Field $_, :$depth!) {
+multi method take-object(PDF::Field $_, :$depth!) {
     warn "todo: dump field obj" if $!debug; '';
 }
 
-multi method dump-object(PDF::Annot $_, :$depth!) {
+multi method take-object(PDF::Annot $_, :$depth!) {
     warn "todo: dump annot obj: " ~ .perl if $!debug;
-    '';
 }

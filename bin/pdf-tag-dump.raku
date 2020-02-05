@@ -12,7 +12,7 @@ subset Number of Int where { !.defined || $_ > 0 };
 sub MAIN(Str $infile,              #= input PDF
 	 Str :$password = '',      #= password for the input PDF, if encrypted
          Number :$max-depth = 16,  #= depth to ascend/descend struct tree
-         Str    :$path,            #= XPath expression of nodes to dump 
+         Str    :$xpath,           #= Dump only selected nodes 
          Bool   :$render = True,   #= include rendered content
          Bool   :$atts = True,     #= include attributes in tags
          Bool   :$debug,           #= write extra debugging information
@@ -34,14 +34,14 @@ sub MAIN(Str $infile,              #= input PDF
     my PDF::Tags $dom .= new: :$root, :$render, :$strict;
     my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$skip;
 
-    my @nodes = do with $path {
+    my @nodes = do with $xpath {
         $dom.find($_);
     }
     else {
         $dom.root;
     }
 
-    say $xml.Str($_) for @nodes;
+    $xml.say($*OUT, $_) for @nodes;
 }
 
 =begin pod
@@ -53,7 +53,7 @@ pdf-dom-dump.raku [options] file.pdf
 Options:
    --password          password for an encrypted PDF
    --max-depth=n       maximum tag-depth to descend
-   --path=XPath        dump selected node(s)
+   --xpath=expr        dump selected node(s)
    --skip              skip some tags, including <Span> and empty </P>
    --/render           omit rendering (avoid finding content-level tags)
    --/atts             omit attributes in tags
