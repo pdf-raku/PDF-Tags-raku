@@ -1,13 +1,14 @@
 unit class PDF::Tags::XML;
 
 use PDF::Annot;
-use PDF::Tags :StructNode;
+use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Item;
 use PDF::Tags::ObjRef;
 use PDF::Tags::Root;
 use PDF::Tags::Tag;
 use PDF::Tags::Text;
+use PDF::Class::StructItem;
 
 has UInt $.max-depth = 16;
 has Bool $.render = True;
@@ -38,12 +39,12 @@ sub atts-str(%atts) {
 method !skip($tag) { $!skip && $tag eq 'Span' }
 
 method Str(PDF::Tags::Item $item) {
-    my @chunks = gather { self.take-xml($item) };
+    my @chunks = gather { self.stream-xml($item) };
     @chunks.join;
 }
 
 method print(IO::Handle $fh, PDF::Tags::Item $item) {
-    for gather self.take-xml($item) {
+    for gather self.stream-xml($item) {
         $fh.print($_);
     }
 }
@@ -52,11 +53,11 @@ method say(IO::Handle $fh, PDF::Tags::Item $item) {
     $fh.say: '';
 }
 
-multi method take-xml(PDF::Tags::Root $_, :$depth = 0) {
-    self.take-xml($_, :$depth) for .kids;
+multi method stream-xml(PDF::Tags::Root $_, :$depth = 0) {
+    self.stream-xml($_, :$depth) for .kids;
 }
 
-multi method take-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
+multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     if $!debug {
         take line($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
             given $node.value;
@@ -93,7 +94,8 @@ multi method take-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     unless self!skip($tag);
         
                 for 0 ..^ $elems {
-                    self.take-xml($node.kids[$_], :$depth);
+                    my $kid = $node.kids[$_];
+                    self.stream-xml($kid, :$depth);
                 }
 
                 take line(--$depth, "</$tag>")
@@ -107,13 +109,13 @@ multi method take-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
 }
 
-multi method take-xml(PDF::Tags::ObjRef $_, :$depth!) {
+multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
     take line($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->")
         if $!debug;
-     take self.take-object(.object, :$depth);
+     take self.stream-xml($_, :$depth) with .parent;
 }
 
-multi method take-xml(PDF::Tags::Tag $node, :$depth!) {
+multi method stream-xml(PDF::Tags::Tag $node, :$depth!) {
     if $!debug {
         take line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
             given $node.value;
@@ -128,7 +130,7 @@ multi method take-xml(PDF::Tags::Tag $node, :$depth!) {
     }
 }
 
-multi method take-xml(PDF::Tags::Text $_, :$depth!) {
+multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
     take line($depth, html-escape(.Str));
 }
 
@@ -152,12 +154,4 @@ method !tag-content(PDF::Tags::Tag $node, :$depth!) is default {
         || $node.value ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag)
         ?? $text
         !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>")
-}
-
-multi method take-object(PDF::Field $_, :$depth!) {
-    warn "todo: dump field obj" if $!debug; '';
-}
-
-multi method take-object(PDF::Annot $_, :$depth!) {
-    warn "todo: dump annot obj: " ~ .perl if $!debug;
 }

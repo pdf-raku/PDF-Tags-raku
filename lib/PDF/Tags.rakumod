@@ -1,15 +1,14 @@
 
 class PDF::Tags:ver<0.0.1> {
-    use PDF::Class;
+    use PDF::Class:ver<0.4.1+>;
     use PDF::Page;
     use PDF::NumberTree :NumberTree;
     use PDF::StructElem;
     use PDF::StructTreeRoot;
-    subset StructNode of Hash is export(:StructNode) where PDF::Page|PDF::StructElem;
 
-    has Hash $.class-map;
-    has Hash $.role-map;
-    has NumberTree $.parent-tree;
+    has Hash $.class-map         is built;
+    has Hash $.role-map          is built;
+    has NumberTree $.parent-tree is built;
     has %!deref{Any};
     has Bool $.render = True;
     has Bool $.strict = True;
@@ -34,12 +33,6 @@ class PDF::Tags:ver<0.0.1> {
         else {
             fail "document does not contain marked content";
         }
-    }
-
-    multi method deref(StructNode $_) {
-        %!deref{$_} //= do with .struct-parent -> $i {
-            with $.value.parent-tree {.[$i + 0]}
-        } // $_;
     }
 
     class TextDecoder {

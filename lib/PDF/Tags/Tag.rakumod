@@ -25,7 +25,7 @@ class PDF::Tags::Tag is PDF::Tags::Node {
             die "no current marked-content page";
         }
     }
-    method value(--> PDF::Content::Tag) { callsame() }
+    method value(--> PDF::Content::Tag::Marked) { callsame() }
     method tag { $.value.name }
     method attributes handles<AT-KEY> {
         $!atts-built ||= do {

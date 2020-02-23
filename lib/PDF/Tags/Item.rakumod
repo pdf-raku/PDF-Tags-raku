@@ -5,6 +5,7 @@ class PDF::Tags::Item {
     use PDF::Page;
     use PDF::StructTreeRoot;
     use PDF::StructElem;
+    use PDF::Class::StructItem;
     use PDF::Content::Tag::Marked;
 
     has PDF::Tags $.dom handles<root> is required;
@@ -24,6 +25,9 @@ class PDF::Tags::Item {
     proto sub build-item($, |c) is export(:build-item) {*}
     multi sub build-item(PDF::MCR $item, PDF::Page :$Pg, |c) {
         build-item($item.MCID, :Pg($item.Pg // $Pg), |c);
+    }
+    multi sub build-item(PDF::OBJR $value, PDF::Page :$Pg, |c) {
+        item-class(PDF::OBJR).new( :$value, :Pg($value.Pg // $Pg), |c)
     }
     multi sub build-item($value, |c) {
         item-class($value).new: :$value, |c;
