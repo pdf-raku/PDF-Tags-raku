@@ -15,13 +15,7 @@ has UInt $.max-depth = 16;
 has Bool $.render = True;
 has Bool $.atts = True;
 has Bool $.debug = False;
-has &!exclude;
-
-submethod TWEAK(:$exclude) {
-    with $exclude {
-        &!exclude = $_ ~~ Code ?? $_ !! PDF::Tags::XPath::Context.compile(.Str);
-    }
-}
+has Str  $.omit;
 
 sub line(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s ~ "\n" }
 
@@ -58,7 +52,7 @@ method say(IO::Handle $fh, PDF::Tags::Item $item) {
     $fh.say: '';
 }
 
-multi method stream-xml(PDF::Tags::Root $_, :$depth = 0) {
+multi method stream-xml(PDF::Tags::Root $_, :$depth!) {
     self.stream-xml($_, :$depth) for .kids;
 }
 
@@ -78,7 +72,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             with $node.dom.role-map{$tag};
         ''
     }
-    my $omit-tag = ? .($node) with &!exclude;
+    my $omit-tag = $tag ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
         take line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
@@ -159,5 +153,8 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
     }
     my $tag := $node.tag;
     my $atts := atts-str($node.attributes);
-    $text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>";
+    my $omit-tag = $tag ~~ $_ with $!omit;
+    $omit-tag
+        ?? $text
+        !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
 }

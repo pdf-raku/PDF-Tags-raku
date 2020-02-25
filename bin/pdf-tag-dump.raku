@@ -18,7 +18,7 @@ sub MAIN(Str $infile,              #= input PDF
          Bool   :$marks,           #= also include content stream tags
          Bool   :$strict = True;   #= warn about unknown tags, etc
          Str    :$include,         #= XPath of twigs to include (relative to root)
-         Str    :$exclude,         #= XPath of excluded nodes (applied after include)
+         Str    :$omit,            #= Tags to omit from output
         ) {
 
     my PDF::IO $input .= coerce(
@@ -33,7 +33,7 @@ sub MAIN(Str $infile,              #= input PDF
         // die "PDF document does not contain marked content: $infile";
 
     my PDF::Tags $dom .= new: :$root, :$render, :$strict, :$marks;
-    my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$exclude;
+    my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit;
 
     my @nodes = do with $include {
         $dom.find($_);

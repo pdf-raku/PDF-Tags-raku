@@ -22,7 +22,7 @@ for $doc.kids {
 
 # XPath navigation
 my @tags = $root.find('Document/L/LI[1]/LBody//*')>>.tag
-say @tags.join(','); # Reference,Link,Link,P,P,Code,Code
+say @tags.join(','); # Reference,P,Code
 ```
 
 Node Types
@@ -38,4 +38,4 @@ Node Types
 Scripts in this Distribution
 ------
 
-##### `pdf-tag-dump.p6 --path=XPath --password=Xxxx --max-depth=n --marks --/render --/atts --debug t/pdf/tagged.pdf`
+##### `pdf-tag-dump.p6 --include=XPath --exclude=XPath --password=Xxxx --max-depth=n --marks --/render --/atts --debug t/pdf/tagged.pdf`
