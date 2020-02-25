@@ -3,12 +3,12 @@ class PDF::Tags::XPath::Actions {
     use PDF::Tags::Item;
     use PDF::Tags::Node;
     use PDF::Tags::Elem;
-    use PDF::Tags::Tag;
+    use PDF::Tags::Mark;
     use PDF::Tags::Text;
     use PDF::Tags::XPath::Axis;
 
     our constant Expression = Code;
-    our subset Elem of PDF::Tags::Node where PDF::Tags::Elem|PDF::Tags::Tag;
+    our subset Elem of PDF::Tags::Node where PDF::Tags::Elem|PDF::Tags::Mark;
     constant Node = PDF::Tags::Item;
     constant Text = PDF::Tags::Text;
 
@@ -80,10 +80,10 @@ class PDF::Tags::XPath::Actions {
 
     method node-test:sym<tag>($/) {
         my $tag := ~$<tag>;
-        make -> PDF::Tags::Item $_ { .?tag eq $tag; }
+        make -> Node $_ { .tag eq $tag }
     }
     method node-test:sym<elem>($/) { make -> Node $_ { $_ ~~ Elem} }
-    method node-test:sym<node>($/) { make -> Node $_ { $_ ~~ Node} }
+    method node-test:sym<node>($/) { make -> Node $_ { True } }
     method node-test:sym<text>($/) { make -> Node $_ { $_ ~~ Text} }
 
     method axis:sym<ancestor>($/)           { make &ancestor }

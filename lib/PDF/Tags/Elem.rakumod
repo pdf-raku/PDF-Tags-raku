@@ -1,6 +1,9 @@
 use PDF::Tags::Node;
-use PDF::StructElem;
+
 class PDF::Tags::Elem is PDF::Tags::Node {
+    use PDF::StructElem;
+    use PDF::Tags::Mark;
+
     method value(--> PDF::StructElem) { callsame() }
     has $.parent is required;
     has %!attributes;
@@ -30,6 +33,17 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
 
         %!attributes;
+    }
+    method build-kid($) {
+        given callsame() {
+            when ! $.dom.marks && $_ ~~ PDF::Tags::Mark {
+                # skip marked content tags. just get the aggregate text
+                $.build-kid(.text);
+            }
+            default {
+                $_;
+            }
+        }
     }
     method Hash {
        my $store := callsame();

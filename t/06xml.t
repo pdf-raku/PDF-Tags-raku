@@ -15,7 +15,7 @@ is-deeply $dom.xml.lines.head(3), (
 is-deeply $dom.root[0][0][0][1][0].xml.lines, (
     '<Reference>',
     '  <Link TextDecorationType="Underline">',
-    '    <Link>NAME </Link>',
+    '    NAME ',
     '  </Link>',
     '</Reference>',
 );

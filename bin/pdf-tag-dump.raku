@@ -12,13 +12,14 @@ subset Number of Int where { !.defined || $_ > 0 };
 sub MAIN(Str $infile,              #= input PDF
 	 Str :$password = '',      #= password for the input PDF, if encrypted
          Number :$max-depth = 16,  #= depth to ascend/descend struct tree
-         Str    :$xpath,           #= Dump only selected nodes 
          Bool   :$render = True,   #= include rendered content
          Bool   :$atts = True,     #= include attributes in tags
          Bool   :$debug,           #= write extra debugging information
-         Bool   :$skip,            #= skip some repeated or unimportant tags
+         Bool   :$marks,           #= also include content stream tags
          Bool   :$strict = True;   #= warn about unknown tags, etc
-    ) {
+         Str    :$include,         #= XPath of twigs to include (relative to root)
+         Str    :$exclude,         #= XPath of excluded nodes (applied after include)
+        ) {
 
     my PDF::IO $input .= coerce(
        $infile eq '-'
@@ -31,10 +32,10 @@ sub MAIN(Str $infile,              #= input PDF
     my PDF::StructTreeRoot:D $root =  $pdf.catalog.StructTreeRoot
         // die "PDF document does not contain marked content: $infile";
 
-    my PDF::Tags $dom .= new: :$root, :$render, :$strict;
-    my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$skip;
+    my PDF::Tags $dom .= new: :$root, :$render, :$strict, :$marks;
+    my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$exclude;
 
-    my @nodes = do with $xpath {
+    my @nodes = do with $include {
         $dom.find($_);
     }
     else {
@@ -54,7 +55,7 @@ Options:
    --password          password for an encrypted PDF
    --max-depth=n       maximum tag-depth to descend
    --xpath=expr        dump selected node(s)
-   --skip              skip some tags, including <Span> and empty </P>
+   --marks             dump content markersd
    --/render           omit rendering (avoid finding content-level tags)
    --/atts             omit attributes in tags
    --/strict           suppress warnings

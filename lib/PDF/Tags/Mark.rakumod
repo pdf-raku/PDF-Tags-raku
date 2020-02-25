@@ -1,15 +1,15 @@
 use PDF::Tags::Node;
-class PDF::Tags::Tag is PDF::Tags::Node {
+class PDF::Tags::Mark is PDF::Tags::Node {
     use PDF::Page;
     use PDF::COS::TextString;
     use PDF::Content::Tag;
-    use PDF::Content::Tag::Marked;
+    use PDF::Content::Tag::Mark;
     has PDF::Tags::Node $.parent;
     has %!attributes;
     has Bool $!atts-built;
     has Str $!actual-text;
 
-    multi submethod TWEAK(PDF::Content::Tag::Marked:D :$value!) {
+    multi submethod TWEAK(PDF::Content::Tag::Mark:D :$value!) {
         self.set-value($value);
     }
     multi submethod TWEAK(UInt:D :$value!) {
@@ -25,7 +25,7 @@ class PDF::Tags::Tag is PDF::Tags::Node {
             die "no current marked-content page";
         }
     }
-    method value(--> PDF::Content::Tag::Marked) { callsame() }
+    method value(--> PDF::Content::Tag::Mark) { callsame() }
     method tag { $.value.name }
     method attributes handles<AT-KEY> {
         $!atts-built ||= do {

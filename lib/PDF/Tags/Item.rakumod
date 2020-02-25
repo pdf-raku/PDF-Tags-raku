@@ -6,7 +6,7 @@ class PDF::Tags::Item {
     use PDF::StructTreeRoot;
     use PDF::StructElem;
     use PDF::Class::StructItem;
-    use PDF::Content::Tag::Marked;
+    use PDF::Content::Tag::Mark;
 
     has PDF::Tags $.dom handles<root> is required;
     has $.value is required;
@@ -17,9 +17,9 @@ class PDF::Tags::Item {
     multi sub item-class(PDF::StructTreeRoot) { require ::('PDF::Tags::Root') }
     multi sub item-class(PDF::StructElem)     { require ::('PDF::Tags::Elem') }
     multi sub item-class(PDF::OBJR)           { require ::('PDF::Tags::ObjRef') }
-    multi sub item-class(PDF::MCR)            { require ::('PDF::Tags::Tag') }
-    multi sub item-class(UInt)                { require ::('PDF::Tags::Tag') }
-    multi sub item-class(PDF::Content::Tag::Marked) { require ::('PDF::Tags::Tag') }
+    multi sub item-class(PDF::MCR)            { require ::('PDF::Tags::Mark') }
+    multi sub item-class(UInt)                { require ::('PDF::Tags::Mark') }
+    multi sub item-class(PDF::Content::Tag::Mark) { require ::('PDF::Tags::Mark') }
     multi sub item-class(Str)                 { require ::('PDF::Tags::Text') }
 
     proto sub build-item($, |c) is export(:build-item) {*}

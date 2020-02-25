@@ -17,10 +17,10 @@ class PDF::Tags::Node
         } // 0;
     }
 
+    method build-kid($value) { build-item($value, :parent(self), :$.Pg, :$.dom); }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        my Any:D $value = $.value.kids[$i];
-        @!kids[$i] //= build-item($value, :parent(self), :$.Pg, :$.dom);
+        @!kids[$i] //= self.build-kid($.value.kids[$i]);
     }
     method Array {
         $!loaded ||= do {
@@ -65,5 +65,12 @@ class PDF::Tags::Node
 
     method first($expr) {
         self.find($expr)[0] // PDF::Tags::Node
+    }
+
+    multi method ACCEPTS(PDF::Tags::Node:D: Str $xpath) {
+        ? self.find($xpath);
+    }
+    multi method ACCEPTS(PDF::Tags::Node:D: Code $xpath) {
+        ? self.find($xpath);
     }
 }

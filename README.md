@@ -14,7 +14,7 @@ use PDF::Tags::Elem;
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 my PDF::Tags $dom .= new: :$pdf;
 my PDF::Tags::Elem $doc = $dom.root[0];
-say $doc.tag, 'Document';
+say $doc.tag; # Document
 
 for $doc.kids {
     say .tag;
@@ -30,7 +30,7 @@ Node Types
 
 - `PDF::Tags::Root` - Structure Tree root element
 - `PDF::Tags::Elem` - A 'Structure Tree' Item
-- `PDF::Tags::Tag` - A content-mapped item
+- `PDF::Tags::Mark` - A content marker item
 - `PDF::Tags::Text` - Document Text
 - `PDF::Tags::ObjRef` - A reference to a PDF::Class object (such as PDF::Annot or PDF::Field)
 
@@ -38,5 +38,4 @@ Node Types
 Scripts in this Distribution
 ------
 
-##### `pdf-tag-dump.p6 --path=XPath --password=Xxxx --max-depth=n --skip --/render --/atts --debug t/pdf/tagged.pdf
-
+##### `pdf-tag-dump.p6 --path=XPath --password=Xxxx --max-depth=n --marks --/render --/atts --debug t/pdf/tagged.pdf`

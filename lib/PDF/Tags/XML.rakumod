@@ -6,15 +6,22 @@ use PDF::Tags::Elem;
 use PDF::Tags::Item;
 use PDF::Tags::ObjRef;
 use PDF::Tags::Root;
-use PDF::Tags::Tag;
+use PDF::Tags::Mark;
 use PDF::Tags::Text;
+use PDF::Tags::XPath::Context;
 use PDF::Class::StructItem;
 
 has UInt $.max-depth = 16;
 has Bool $.render = True;
 has Bool $.atts = True;
 has Bool $.debug = False;
-has Bool $.skip = False;
+has &!exclude;
+
+submethod TWEAK(:$exclude) {
+    with $exclude {
+        &!exclude = $_ ~~ Code ?? $_ !! PDF::Tags::XPath::Context.compile(.Str);
+    }
+}
 
 sub line(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s ~ "\n" }
 
@@ -36,15 +43,13 @@ sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{str-escape(.value)}\"" }).join;
 }
 
-method !skip($tag) { $!skip && $tag eq 'Span' }
-
 method Str(PDF::Tags::Item $item) {
-    my @chunks = gather { self.stream-xml($item) };
+    my @chunks = gather { self.stream-xml($item, :depth(0)) };
     @chunks.join;
 }
 
 method print(IO::Handle $fh, PDF::Tags::Item $item) {
-    for gather self.stream-xml($item) {
+    for gather self.stream-xml($item, :depth(0)) {
         $fh.print($_);
     }
 }
@@ -73,6 +78,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             with $node.dom.role-map{$tag};
         ''
     }
+    my $omit-tag = ? .($node) with &!exclude;
 
     if $depth >= $!max-depth {
         take line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
@@ -81,17 +87,22 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         with $node.actual-text {
             take line($depth, '<!-- actual text -->')
                 if $!debug;
-            given trim($_) {
-                take $_ eq ''
-                    ?? line($depth, "<$tag$att/>")
-                    !! line($depth, self!skip($tag) ?? $_ !! "<$tag$att>{html-escape($_) }</$tag>");
+            given html-escape(trim($_)) -> $text {
+                if $omit-tag {
+                    take $text;
+                }
+                else {
+                    take $_ eq ''
+                        ?? line($depth, "<$tag$att/>")
+                        !! line($depth, "<$tag$att>{$text}</$tag>");
+                }
             }
         }
         else {
             my $elems = $node.elems;
             if $elems {
                 take line($depth++, "<$tag$att>")
-                    unless self!skip($tag);
+                    unless $omit-tag;
         
                 for 0 ..^ $elems {
                     my $kid = $node.kids[$_];
@@ -99,11 +110,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 }
 
                 take line(--$depth, "</$tag>")
-                    unless self!skip($tag);
+                     unless $omit-tag;
             }
             else {
                 take line($depth, "<$tag$att/>")
-                    unless self!skip($tag);
+                    unless $omit-tag;
             }
         }
     }
@@ -112,10 +123,10 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
     take line($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->")
         if $!debug;
-     take self.stream-xml($_, :$depth) with .parent;
+##     take self.stream-xml($_, :$depth) with .parent;
 }
 
-multi method stream-xml(PDF::Tags::Tag $node, :$depth!) {
+multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
     if $!debug {
         take line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
             given $node.value;
@@ -125,7 +136,7 @@ multi method stream-xml(PDF::Tags::Tag $node, :$depth!) {
             warn "can't handle marked content streams yet";
         }
         else {
-            take line($depth, self!tag-content($node, :$depth));
+            take line($depth, trim(self!marked-content($node, :$depth)));
         }
     }
 }
@@ -134,24 +145,19 @@ multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
     take line($depth, html-escape(.Str));
 }
 
-method !tag-content(PDF::Tags::Tag $node, :$depth!) is default {
+method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
     # join text strings. discard this, and child marked content tags for now
     my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
-            when PDF::Tags::Tag {
-                my $text = trim(self!tag-content($_, :$depth));
+            when PDF::Tags::Mark {
+                my $text = self!marked-content($_, :$depth);
             }
             when PDF::Tags::Text { html-escape(.Str) }
             default { die "unhandled tagged content: {.WHAT.perl}"; }
         }
         @text.join;
     }
-    my $tag = $node.tag;
-    my $atts = atts-str($node.attributes);
-    $!skip
-    && ($node.tag eq 'Document'
-        || self!skip($tag)
-        || $node.value ~~ PDF::Content::Tag::Marked && $node.tag eq $node.parent.tag)
-        ?? $text
-        !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>")
+    my $tag := $node.tag;
+    my $atts := atts-str($node.attributes);
+    $text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>";
 }

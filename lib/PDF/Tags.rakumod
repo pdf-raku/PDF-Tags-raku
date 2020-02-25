@@ -12,6 +12,7 @@ class PDF::Tags:ver<0.0.1> {
     has %!deref{Any};
     has Bool $.render = True;
     has Bool $.strict = True;
+    has Bool $.marks;
     has $.root is built handles<elems AT-POS Array kids first find tag xml>;
 
     my class Cache {

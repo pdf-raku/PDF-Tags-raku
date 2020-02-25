@@ -21,14 +21,14 @@ is tags($dom.find('Document/L/LI[1]/LBody/ancestor::*')), 'Document L LI L LI', 
 is tags($dom.find('Document/L/LI[1]/LBody/ancestor-or-self::*')), 'Document L LI LBody L LI LBody', 'ancestor-or-self';
 is tags($dom.find('Document/L/LI[1]/LBody/child::*')), 'Reference P', 'child';
 is tags($dom.find('Document/L/LI[1]/LBody/*')), 'Reference P', 'child abbreviated';
-is tags($dom.find('Document/L/LI[1]/LBody/descendant::*')), 'Reference Link Link P P Code Code', 'descendant';
-is tags($dom.find('Document/L/LI[1]/LBody/descendant-or-self::*')), 'LBody Reference Link Link LBody P P Code Code', 'descendant-or-self';
-is tags($dom.find('/Document/H1[last()]/following::*')), 'P P', 'following';
+is tags($dom.find('Document/L/LI[1]/LBody/descendant::*')), 'Reference Link P Code', 'descendant';
+is tags($dom.find('Document/L/LI[1]/LBody/descendant-or-self::*')), 'LBody Reference Link LBody P Code', 'descendant-or-self';
+is tags($dom.find('/Document/H1[last()]/following::*')), 'P', 'following';
 my $li = $dom.first('Document/L[1]/LI[2]');
 my $lbl = $li.first('Lbl');
 my $lbody = $li.first('LBody');
 is tags($lbl.find('following-sibling::*')), 'LBody', 'following-sibling';
-is tags($lbody.find('/Document/L[1]/LI[1]/LBody/preceding::*')), 'Lbl Lbl', 'preceding';
+is tags($lbody.find('/Document/L[1]/LI[1]/LBody/preceding::*')), 'Lbl', 'preceding';
 is tags($lbody.find('preceding-sibling::*')), ['Lbl'], 'preceding-sibling';
 is tags($lbody.find('self::*')), ['LBody'], 'self';
 is tags($lbody.find('.')), ['LBody'], 'self (abbreviated)';
