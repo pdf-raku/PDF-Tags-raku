@@ -20,9 +20,9 @@
         "PDF::Tags::Mark"   : "lib/PDF/Tags/Mark.rakumod",
         "PDF::Tags::Text"   : "lib/PDF/Tags/Text.rakumod",
         "PDF::Tags::XML"    : "lib/PDF/Tags/XML.rakumod",
+        "PDF::Tags::XPath" : "lib/PDF/Tags/XPath.rakumod",
         "PDF::Tags::XPath::Actions" : "lib/PDF/Tags/XPath/Actions.rakumod",
         "PDF::Tags::XPath::Axis"    : "lib/PDF/Tags/XPath/Axis.rakumod",
-        "PDF::Tags::XPath::Context" : "lib/PDF/Tags/XPath/Context.rakumod",
         "PDF::Tags::XPath::Grammar" : "lib/PDF/Tags/XPath/Grammar.rakumod"
     },
     "version": "0.0.1"

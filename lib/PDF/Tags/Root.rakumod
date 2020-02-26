@@ -5,3 +5,6 @@ class PDF::Tags::Root is PDF::Tags::Node {
     method parent { fail "already at root" }
     method tag { '#root' }
 }
+
+=begin pod
+=end pod

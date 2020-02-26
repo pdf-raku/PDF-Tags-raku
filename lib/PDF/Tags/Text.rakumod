@@ -12,3 +12,6 @@ class PDF::Tags::Text is PDF::Tags::Item {
     method tag { '#text' }
     method value(--> Str) is also<Str gist text> { callsame() }
 }
+
+=begin pod
+=end pod

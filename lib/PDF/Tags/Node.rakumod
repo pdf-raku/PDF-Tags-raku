@@ -59,7 +59,7 @@ class PDF::Tags::Node
     }
 
     method xpath-context {
-        (require ::('PDF::Tags::XPath::Context')).new: :node(self);
+        (require ::('PDF::Tags::XPath')).new: :node(self);
     }
     method find($expr) { $.xpath-context.find($expr) }
 

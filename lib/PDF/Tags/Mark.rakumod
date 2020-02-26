@@ -43,3 +43,6 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     }
     method text { $.actual-text // $.kids.map(*.text).join }
 }
+
+=begin pod
+=end pod

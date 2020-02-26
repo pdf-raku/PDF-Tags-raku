@@ -71,3 +71,6 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
     }
 }
+
+=begin pod
+=end pod

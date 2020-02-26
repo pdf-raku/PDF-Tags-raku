@@ -111,3 +111,6 @@ class PDF::Tags:ver<0.0.1> {
     }
 
 }
+
+=begin pod
+=end pod

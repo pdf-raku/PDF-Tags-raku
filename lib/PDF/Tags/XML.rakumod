@@ -8,7 +8,7 @@ use PDF::Tags::ObjRef;
 use PDF::Tags::Root;
 use PDF::Tags::Mark;
 use PDF::Tags::Text;
-use PDF::Tags::XPath::Context;
+use PDF::Tags::XPath;
 use PDF::Class::StructItem;
 
 has UInt $.max-depth = 16;
@@ -158,3 +158,6 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
         ?? $text
         !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
 }
+
+=begin pod
+=end pod

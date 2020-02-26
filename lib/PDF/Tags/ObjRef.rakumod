@@ -17,3 +17,6 @@ class PDF::Tags::ObjRef is PDF::Tags::Item {
 
     method tag { '#ref' }
 }
+
+=begin pod
+=end pod

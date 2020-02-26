@@ -1,4 +1,4 @@
-class PDF::Tags::XPath::Context {
+class PDF::Tags::XPath {
 
     use PDF::Tags::Node;
     use PDF::Tags::XPath::Grammar;
@@ -36,3 +36,6 @@ class PDF::Tags::XPath::Context {
     }
 
 }
+
+=begin pod
+=end pod
