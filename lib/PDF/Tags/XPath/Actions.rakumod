@@ -1,16 +1,19 @@
 class PDF::Tags::XPath::Actions {
 
+    use PDF::Tags::Elem;
     use PDF::Tags::Item;
     use PDF::Tags::Node;
-    use PDF::Tags::Elem;
     use PDF::Tags::Mark;
+    use PDF::Tags::ObjRef;
     use PDF::Tags::Text;
     use PDF::Tags::XPath::Axis;
 
     our constant Expression = Code;
-    our subset Elem of PDF::Tags::Node where PDF::Tags::Elem|PDF::Tags::Mark;
-    constant Node = PDF::Tags::Item;
-    constant Text = PDF::Tags::Text;
+    constant Elem      = PDF::Tags::Elem;
+    constant Mark      = PDF::Tags::Mark;
+    constant Node      = PDF::Tags::Item;
+    constant ObjectRef = PDF::Tags::ObjRef;
+    constant Text      = PDF::Tags::Text;
 
     method TOP($/) {
         my @query = @<query>>>.ast;
@@ -82,9 +85,11 @@ class PDF::Tags::XPath::Actions {
         my $tag := ~$<tag>;
         make -> Node $_ { .tag eq $tag }
     }
-    method node-test:sym<elem>($/) { make -> Node $_ { $_ ~~ Elem} }
-    method node-test:sym<node>($/) { make -> Node $_ { True } }
-    method node-test:sym<text>($/) { make -> Node $_ { $_ ~~ Text} }
+    method node-test:sym<elem>($/)   { make -> Node $_ { $_ ~~ Elem} }
+    method node-test:sym<node>($/)   { make -> Node $_ { True } }
+    method node-test:sym<text>($/)   { make -> Node $_ { $_ ~~ Text} }
+    method node-test:sym<object-ref>($/) { make -> Node $_ { $_ ~~ ObjectRef} }
+    method node-test:sym<mark>($/)   { make -> Node $_ { $_ ~~ Mark} }
 
     method axis:sym<ancestor>($/)           { make &ancestor }
     method axis:sym<ancestor-or-self>($/)   { make &ancestor-or-self }

@@ -11,10 +11,12 @@ grammar PDF::Tags::XPath::Grammar {
     rule step:sym<regular>   { <axis> <node-test> <predicate>? }
 
     proto rule node-test {*}
-    rule node-test:sym<tag>  { <tag=.ident> }
-    rule node-test:sym<elem> { '*' }
-    rule node-test:sym<node> { <sym> '(' ')' }
-    rule node-test:sym<text> { <sym> '(' ')' }
+    rule node-test:sym<tag>    { <tag=.ident> }
+    rule node-test:sym<elem>       { '*' }
+    rule node-test:sym<node>       { <sym> '(' ')' }
+    rule node-test:sym<text>       { <sym> '(' ')' }
+    rule node-test:sym<object-ref> { <sym> '(' ')' }
+    rule node-test:sym<mark>       { <sym> '(' ')' }
 
     rule predicate           { '[' ~ ']' <expr(4)> }
     multi rule expr(0)       { <term> }
@@ -32,7 +34,7 @@ grammar PDF::Tags::XPath::Grammar {
     rule term:sym<first>    { <sym> '(' ')' }
     rule term:sym<last>     { <sym> '(' ')' }
     rule term:sym<position> { <sym> '(' ')' }
-    rule term:sym<expr> { '(' ~ ')' <expr(4)> }
+    rule term:sym<expr>     { '(' ~ ')' <expr(4)> }
 
     proto rule axis {*}
     rule axis:sym<ancestor>           { <sym> '::' }

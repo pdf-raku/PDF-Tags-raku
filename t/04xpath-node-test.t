@@ -1,10 +1,11 @@
 use Test;
 use PDF::Tags;
 use PDF::Tags::Elem;
+use PDF::Tags::ObjRef;
 use PDF::Tags::Root;
 use PDF::Class;
 
-plan 10;
+plan 11;
 
 sub tags(@elems) {
     @elems>>.tag.join(' ');
@@ -26,5 +27,8 @@ my $link = $dom.first('Document/L[1]/LI[1]/LBody/Reference/Link');
 is tags([$link]), 'Link';
 is tags($link.find('text()')), '#text';
 is tags($link.find('node()')), '#ref #text';
+
+my PDF::Tags::ObjRef $ref = $link.first('//object-ref()');
+isa-ok $ref.object, 'PDF::Annot', 'object()';
 
 done-testing;
