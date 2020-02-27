@@ -1,5 +1,6 @@
 class PDF::Tags::XPath {
 
+    use PDF::Tags;
     use PDF::Tags::Node;
     use PDF::Tags::XPath::Grammar;
     use PDF::Tags::XPath::Actions;

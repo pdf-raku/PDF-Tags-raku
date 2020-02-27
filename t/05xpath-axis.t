@@ -12,7 +12,7 @@ sub tags(@elems) {
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::Tags $dom .= new: :$pdf;
+my PDF::Tags $dom .= read: :$pdf;
 
 is tags($dom.find('Document/L')), ['L', 'L'], "child, repeated";
 is tags($dom.find('Document/L[1]/LI[1]/LBody/ancestor::*')), 'Document L LI', 'ancestor';

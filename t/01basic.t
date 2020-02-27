@@ -7,17 +7,17 @@ plan 9;
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::Tags $dom;
+my PDF::Tags $tags;
 
-lives-ok { $dom .= new: :$pdf;};
+lives-ok {$tags .= read: :$pdf;};
 
-my $doc = $dom[0];
+my $doc = $tags[0];
 is $doc.tag, 'Document';
 my $node = $doc[2];
 is $node.tag, 'H1';
 is-deeply $doc[0].kids>>.tag.join(' '), 'LI LI LI LI LI';
 is $node.parent.tag, 'Document';
-is $dom.tag, '#root';
+is $tags.tag, '#root';
 
 is-deeply $doc.keys.sort, ('H1', 'H2', 'L', 'P');
 is $doc<H1>[2].tag, 'H1';

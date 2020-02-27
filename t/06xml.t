@@ -5,7 +5,7 @@ use PDF::Class;
 plan 2;
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
-my PDF::Tags $dom .= new: :$pdf;
+my PDF::Tags $dom .= read: :$pdf;
 
 is-deeply $dom.xml.lines.head(3), (
     '<Document>',

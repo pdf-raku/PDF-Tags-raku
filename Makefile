@@ -2,14 +2,14 @@ SRC=src
 
 all : doc
 
-test : all
+test :
 	@prove -e"perl6 -I ." t
 
-loudtest : all
+loudtest :
 	@prove -e"perl6 -I ." -v t
 
 clean :
-	@rm -f Makefile doc/*.md doc/*/*.md
+	@rm -f Makefile doc/Tags/*.md doc/Tags/*/*.md
 
 doc : doc/Tags.md doc/Tags/Elem.md doc/Tags/Mark.md doc/Tags/ObjRef.md doc/Tags/Root.md doc/Tags/Text.md doc/Tags/XML.md doc/Tags/XPath.md
 

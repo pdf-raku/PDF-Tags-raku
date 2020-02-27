@@ -20,7 +20,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
 
             unless %!attributes {
                 for $.value.class-map-keys {
-                    with $.dom.class-map{$_} -> $atts {
+                    with $.root.class-map{$_} -> $atts {
                         %!attributes{$_} = $atts{$_}
                             for $atts.keys
                     }
@@ -36,7 +36,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     }
     method build-kid($) {
         given callsame() {
-            when ! $.dom.marks && $_ ~~ PDF::Tags::Mark {
+            when ! $.root.marks && $_ ~~ PDF::Tags::Mark {
                 # skip marked content tags. just get the aggregate text
                 $.build-kid(.text);
             }
@@ -62,7 +62,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     submethod TWEAK {
         self.Pg = $_ with self.value.Pg;
         my Str:D $tag = self.value.tag;
-        with self.dom.role-map{$tag} {
+        with self.root.role-map{$tag} {
             $!class = $tag;
             $!tag = $_;
         }

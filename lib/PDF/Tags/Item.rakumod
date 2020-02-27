@@ -1,5 +1,4 @@
 class PDF::Tags::Item {
-    use PDF::Tags;
     use PDF::OBJR; # object reference
     use PDF::MCR;  # marked content reference
     use PDF::Page;
@@ -7,8 +6,9 @@ class PDF::Tags::Item {
     use PDF::StructElem;
     use PDF::Class::StructItem;
     use PDF::Content::Tag::Mark;
+    use PDF::Tags::Root;
 
-    has PDF::Tags $.dom handles<root> is required;
+    has PDF::Tags::Root $.root is required;
     has $.value is required;
     method set-value($!value) {}
     has PDF::Page $.Pg is rw; # current page scope

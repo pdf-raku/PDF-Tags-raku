@@ -13,7 +13,7 @@ sub tags(@elems) {
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::Tags $dom .= new: :$pdf;
+my PDF::Tags $dom .= read: :$pdf;
 
 is tags($dom.find('Document/H1/*[1]')), 'Span Span Span Span Span';
 is tags($dom.find('Document/H1[1]/node()')), 'Span';

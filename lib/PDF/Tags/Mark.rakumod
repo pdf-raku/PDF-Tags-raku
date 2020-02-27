@@ -14,7 +14,7 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     }
     multi submethod TWEAK(UInt:D :$value!) {
         with self.Pg -> PDF::Page $Pg {
-            with self.dom.graphics-tags($Pg){$value} {
+            with self.root.graphics-tags($Pg){$value} {
                 self.set-value($_);
             }
             else {

@@ -17,7 +17,7 @@ class PDF::Tags::Node
         } // 0;
     }
 
-    method build-kid($value) { build-item($value, :parent(self), :$.Pg, :$.dom); }
+    method build-kid($value) { build-item($value, :parent(self), :$.Pg, :$.root); }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         @!kids[$i] //= self.build-kid($.value.kids[$i]);

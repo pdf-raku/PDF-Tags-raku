@@ -1,5 +1,10 @@
+use PDF::Tags::Node;
+use PDF::Tags::Root;
 
-class PDF::Tags:ver<0.0.1> {
+class PDF::Tags:ver<0.0.1>
+    is PDF::Tags::Node
+    does PDF::Tags::Root {
+
     use PDF::Class:ver<0.4.1+>;
     use PDF::Page;
     use PDF::NumberTree :NumberTree;
@@ -13,27 +18,29 @@ class PDF::Tags:ver<0.0.1> {
     has Bool $.render = True;
     has Bool $.strict = True;
     has Bool $.marks;
-    has $.root is built handles<elems AT-POS Array kids first find tag xml>;
+    method root { self }
 
     my class Cache {
         has %.font{Any};
     }
     has Cache $!cache .= new;
 
-    multi submethod TWEAK(PDF::StructTreeRoot :$root!) {
-        $!class-map = $_ with $root.ClassMap;
-        $!role-map = $_ with $root.RoleMap;
-        $!parent-tree = .number-tree with $root.ParentTree;
-        $!root = (require ::('PDF::Tags::Root')).new: :dom(self), :value($root);
+    submethod TWEAK(PDF::StructTreeRoot :$value!) {
+        $!class-map = $_ with $value.ClassMap;
+        $!role-map = $_ with $value.RoleMap;
+        $!parent-tree = .number-tree with $value.ParentTree;
     }
 
-    multi submethod TWEAK(PDF::Class :$pdf!) {
-        with $pdf.catalog.StructTreeRoot -> $root {
-            self.TWEAK: :$root;
+    multi method read(PDF::Class :$pdf!) {
+        with $pdf.catalog.StructTreeRoot -> $value {
+            self.new: :$value, :root(self.WHAT);;
         }
         else {
             fail "document does not contain marked content";
         }
+    }
+    multi method read(:$pdf!, |c) is default {
+        self.read: PDF::Class.open($pdf, |c);
     }
 
     class TextDecoder {
@@ -106,11 +113,27 @@ class PDF::Tags:ver<0.0.1> {
             my &callback = TextDecoder.new(:$!cache).callback;
             my $gfx = $obj.gfx: :&callback, :$!strict;
             $obj.render;
-            my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map({.mcid => $_ });
+            my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map: {.mcid => $_ };
         }
     }
 
 }
 
 =begin pod
+=head1 NAME
+
+PDF::Tags - Tagged PDF root node
+
+=head1 SYNOPSIS
+
+```
+use PDF::Class;
+use PDF::Tags;
+use PDF::Tags::Elem;
+
+my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
+my PDF::Tags $tags .= read: :$pdf;
+my PDF::Tags::Elem $doc = $tags[0];
+```
+
 =end pod

@@ -13,8 +13,8 @@ use PDF::Tags;
 use PDF::Tags::Elem;
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
-my PDF::Tags $tags .= new: :$pdf;
-my PDF::Tags::Elem $doc = $tags.root[0];
+my PDF::Tags $tags .= read: :$pdf;
+my PDF::Tags::Elem $doc = $tags[0];
 say $doc.tag; # Document
 
 # DOM traversal
@@ -35,7 +35,7 @@ A tagged PDF contains additional markup information describing the logical
 document structure. This enables PDF readers and other assistive tools to
 optimize reading and access of PDF documents.
 
-PDF tagging may also assist automated tools in traversing PDF documents and extracting
+PDF tagging may also assist automated tools in reading PDF documents and locating
 content such as text and images.
 
 This module provides a DOM  like interface for traversing Tagged PDF content,
@@ -52,14 +52,13 @@ Tagged:       yes
 Classes in this Distribution
 ----------
 
-- [PDF::Tags](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags.md) - DOM management class
-- [PDF::Tags::Root](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Root.md) - Structure Tree root node
+- [PDF::Tags](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags.md) - Tagged PDF root node
 - [PDF::Tags::Elem](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Elem.md) - Structure Tree descendant node
 - [PDF::Tags::Mark](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Mark.md) - Leaf content marker node
 - [PDF::Tags::Text](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Text.md) - Text content node
 - [PDF::Tags::ObjRef](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/ObjRef.md) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
 - [PDF::Tags::XML](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/XML.md) - XML Serializer
-- [PDF::Tags::XPath)(https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/XPath.md) - XPath evaluation context
+- [PDF::Tags::XPath](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/XPath.md) - XPath evaluation context
 
 Scripts in this Distribution
 ------

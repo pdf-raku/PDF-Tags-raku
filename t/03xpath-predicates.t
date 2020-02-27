@@ -11,7 +11,7 @@ sub tags(@elems) {
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
 
-my PDF::Tags $dom .= new: :$pdf;
+my PDF::Tags $dom .= read: :$pdf;
 
 for $dom.find('Document') -> $elem {
     isa-ok($elem, PDF::Tags::Elem);
