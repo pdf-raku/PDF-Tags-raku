@@ -29,10 +29,10 @@ sub MAIN(Str $infile,              #= input PDF
 
     my PDF::Class $pdf .= open( $input, :$password );
     my PDF::Catalog $catalog = $pdf.catalog;
-    my PDF::StructTreeRoot:D $root =  $pdf.catalog.StructTreeRoot
+    my PDF::StructTreeRoot:D $value =  $pdf.catalog.StructTreeRoot
         // die "PDF document does not contain marked content: $infile";
 
-    my PDF::Tags $dom .= new: :$root, :$render, :$strict, :$marks;
+    my PDF::Tags $dom .= new: :$value, :$render, :$strict, :$marks, :root(PDF::Tags);
     my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit;
 
     my @nodes = do with $include {

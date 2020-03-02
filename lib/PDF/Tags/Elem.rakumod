@@ -13,9 +13,9 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     has Bool $!hash-init;
     method attributes {
         $!atts-built ||= do {
-            for $.value.attribute-dicts -> $atts {
+            for $.value.attribute-dicts -> Hash $atts {
                 %!attributes{$_} = $atts{$_}
-                for $atts.keys
+                    for $atts.keys
             }
 
             unless %!attributes {

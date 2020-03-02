@@ -4,7 +4,7 @@ class PDF::Tags::ObjRef is PDF::Tags::Item {
     use PDF::OBJR;
     use PDF::StructElem;
     submethod TWEAK {
-        self.Pg = $_ with self.item.Pg;
+        self.Pg = $_ with self.value.Pg;
     }
     has PDF::Tags::Item $!parent;
     method parent {

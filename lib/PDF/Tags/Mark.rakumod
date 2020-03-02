@@ -1,20 +1,24 @@
 use PDF::Tags::Node;
 class PDF::Tags::Mark is PDF::Tags::Node {
+
     use PDF::Page;
     use PDF::COS::TextString;
     use PDF::Content::Tag;
     use PDF::Content::Tag::Mark;
+    use PDF::Content::Graphics;
+
     has PDF::Tags::Node $.parent;
     has %!attributes;
     has Bool $!atts-built;
     has Str $!actual-text;
+    has PDF::Content::Graphics $.Stm;
 
     multi submethod TWEAK(PDF::Content::Tag::Mark:D :$value!) {
         self.set-value($value);
     }
     multi submethod TWEAK(UInt:D :$value!) {
-        with self.Pg -> PDF::Page $Pg {
-            with self.root.graphics-tags($Pg){$value} {
+        with self.Stm // self.Pg -> PDF::Content::Graphics $_ {
+            with self.root.graphics-tags($_){$value} {
                 self.set-value($_);
             }
             else {

@@ -58,7 +58,7 @@ multi method stream-xml(PDF::Tags::Root $_, :$depth!) {
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     if $!debug {
-        take line($depth, "<!-- elem {.obj-num} {.gen-num} R ({.WHAT.^name})) -->")
+        take line($depth, "<!-- elem {.obj-num} {.gen-num} R -->")
             given $node.value;
     }
     my $tag = $node.tag;
@@ -122,16 +122,11 @@ multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
 
 multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
     if $!debug {
-        take line($depth, "<!-- tag <{.name}> ({.WHAT.^name})) -->")
+        take line($depth, "<!-- mark <{.name}> -->")
             given $node.value;
     }
     if $!render {
-        with $node.value.?Stm {
-            warn "can't handle marked content streams yet";
-        }
-        else {
-            take line($depth, trim(self!marked-content($node, :$depth)));
-        }
+        take line($depth, trim(self!marked-content($node, :$depth)));
     }
 }
 
@@ -151,12 +146,17 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
         }
         @text.join;
     }
+
     my $tag := $node.tag;
-    my $atts := atts-str($node.attributes);
     my $omit-tag = $tag ~~ $_ with $!omit;
-    $omit-tag
-        ?? $text
-        !! ($text ?? "<$tag$atts>"~$text~"</$tag>" !! "<$tag$atts/>");
+
+    if $omit-tag {
+        $text;
+    }
+    else {
+        my $atts := atts-str($node.attributes);
+        "\<$tag$atts" ~ ($text ?? "\>$text\</$tag\>" !! '/>');
+    }
 }
 
 =begin pod

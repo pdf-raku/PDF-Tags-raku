@@ -1,4 +1,5 @@
 class PDF::Tags::Item {
+
     use PDF::OBJR; # object reference
     use PDF::MCR;  # marked content reference
     use PDF::Page;
@@ -6,6 +7,7 @@ class PDF::Tags::Item {
     use PDF::StructElem;
     use PDF::Class::StructItem;
     use PDF::Content::Tag::Mark;
+    use PDF::Content::Graphics;
     use PDF::Tags::Root;
 
     has PDF::Tags::Root $.root is required;
@@ -24,7 +26,9 @@ class PDF::Tags::Item {
 
     proto sub build-item($, |c) is export(:build-item) {*}
     multi sub build-item(PDF::MCR $item, PDF::Page :$Pg, |c) {
-        build-item($item.MCID, :Pg($item.Pg // $Pg), |c);
+        my PDF::Content::Graphics $Stm = $_ with $item.Stm;
+        my UInt:D $value = $item.MCID;
+        item-class(PDF::MCR).new(:$value, :Pg($item.Pg // $Pg), :$Stm, |c);
     }
     multi sub build-item(PDF::OBJR $value, PDF::Page :$Pg, |c) {
         item-class(PDF::OBJR).new( :$value, :Pg($value.Pg // $Pg), |c)
