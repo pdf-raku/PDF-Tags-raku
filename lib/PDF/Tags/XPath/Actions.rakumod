@@ -82,8 +82,8 @@ class PDF::Tags::XPath::Actions {
     }
 
     method node-test:sym<tag>($/) {
-        my $tag := ~$<tag>;
-        make -> Node $_ { .tag eq $tag }
+        my $name := ~$<tag>;
+        make -> Node $_ { .name eq $name }
     }
     method node-test:sym<elem>($/)   { make -> Node $_ { $_ ~~ Elem} }
     method node-test:sym<node>($/)   { make -> Node $_ { True } }

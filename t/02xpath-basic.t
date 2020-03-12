@@ -6,7 +6,7 @@ use PDF::Class;
 plan 11;
 
 sub tags(@elems) {
-    @elems>>.tag.join(' ');
+    @elems>>.name.join(' ');
 }
 
 my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
@@ -15,7 +15,7 @@ my PDF::Tags $dom .= read: :$pdf;
 
 for $dom.find('Document') -> $elem {
     isa-ok($elem, PDF::Tags::Elem);
-    is $elem.tag, 'Document', 'find root element';
+    is $elem.name, 'Document', 'find root element';
 }
 
 is tags($dom.find('Document/H1/*')), 'Span Span Span Span Span', 'path expression';

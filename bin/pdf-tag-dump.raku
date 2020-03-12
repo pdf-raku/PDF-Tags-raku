@@ -4,7 +4,7 @@ use v6;
 use PDF::Class;
 use PDF::Catalog;
 use PDF::StructTreeRoot;
-use PDF::Tags::XML;
+use PDF::Tags::XML-Writer;
 use PDF::IO;
 
 subset Number of Int where { !.defined || $_ > 0 };
@@ -33,7 +33,7 @@ sub MAIN(Str $infile,              #= input PDF
         // die "PDF document does not contain marked content: $infile";
 
     my PDF::Tags $dom .= new: :$value, :$render, :$strict, :$marks, :root(PDF::Tags);
-    my PDF::Tags::XML $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit;
+    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit;
 
     my @nodes = do with $include {
         $dom.find($_);

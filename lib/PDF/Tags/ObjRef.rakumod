@@ -15,7 +15,7 @@ class PDF::Tags::ObjRef is PDF::Tags::Item {
     }
     method value(--> PDF::OBJR) handles<object> { callsame() }
 
-    method tag { '#ref' }
+    method name { '#ref' }
 }
 
 =begin pod

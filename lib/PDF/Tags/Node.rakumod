@@ -3,9 +3,11 @@ use PDF::Tags::Item :&item-class, :&build-item;
 class PDF::Tags::Node
     is PDF::Tags::Item {
 
+    use PDF::StructElem;
     my subset NCName of Str where { !.defined || $_ ~~ /^<ident>$/ }
 
     has PDF::Tags::Item @.kids;
+    method kids-raw { @!kids }
     has Hash $!store;
     has Bool $!loaded;
     has UInt $!elems;
@@ -17,7 +19,34 @@ class PDF::Tags::Node
         } // 0;
     }
 
-    method build-kid($value) { build-item($value, :parent(self), :$.Pg, :$.root); }
+    method build-kid($value, :$Pg = $.Pg) { build-item($value, :parent(self), :$Pg, :$.root); }
+    multi method add-kid(PDF::Tags::Node:D $node) {
+        die "node already parented"
+            with $node.parent;
+        die "unable to add a node to itself"
+            if $node === self || $node.value === $node.parent.value;
+
+        $node.parent = self;
+        @!kids.push: $node;
+    }
+    multi method add-kid(Str:D $name) {
+        my $P := self.value;
+        my PDF::StructElem $value = PDF::COS.coerce: %(
+            :Type( :name<StructElem> ),
+            :S( :$name ),
+            :$P,
+        );
+        self.add-kid($value)
+    }
+    multi method add-kid($value, |c ) is default {
+        my $kid := self.build-kid($value, |c);
+        given self.value.kids //= [] {
+            $_ = [$_] if $_ ~~ Hash;
+            .push($kid.value);
+        }
+        @!kids.push: $kid;
+        $kid;
+    }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         @!kids[$i] //= self.build-kid($.value.kids[$i]);
@@ -32,15 +61,15 @@ class PDF::Tags::Node
     method Hash handles <keys pairs> {
         $!store //= do {
             my %h;
-            %h{.tag}.push: $_ for self.Array;
+            %h{.name}.push: $_ for self.Array;
             %h;
         }
         $!store;
     }
-    multi method AT-KEY(NCName:D $tag) {
+    multi method AT-KEY(NCName:D $name) {
         # special case to handle default namespaces without a prefix.
         # https://stackoverflow.com/questions/16717211/
-        self.Hash{$tag};
+        self.Hash{$name};
     }
     multi method AT-KEY(Str:D $xpath) is default {
         $.xpath-context.AT-KEY($xpath);

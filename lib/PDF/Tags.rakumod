@@ -8,6 +8,7 @@ class PDF::Tags:ver<0.0.1>
     use PDF::Class:ver<0.4.1+>;
     use PDF::Page;
     use PDF::NumberTree :NumberTree;
+    use PDF::COS;
     use PDF::StructElem;
     use PDF::StructTreeRoot;
 
@@ -33,7 +34,7 @@ class PDF::Tags:ver<0.0.1>
 
     multi method read(PDF::Class :$pdf!) {
         with $pdf.catalog.StructTreeRoot -> $value {
-            self.new: :$value, :root(self.WHAT);;
+            self.new: :$value, :root(self.WHAT);
         }
         else {
             fail "document does not contain marked content";
@@ -41,6 +42,12 @@ class PDF::Tags:ver<0.0.1>
     }
     multi method read(:$pdf!, |c) is default {
         self.read: PDF::Class.open($pdf, |c);
+    }
+
+    method create(
+        PDF::StructTreeRoot :$value = PDF::COS.coerce: { :Type( :name<StructTreeRoot> )},
+    ) {
+        self.new: :$value, :root(self.WHAT), :marks;
     }
 
     class TextDecoder {

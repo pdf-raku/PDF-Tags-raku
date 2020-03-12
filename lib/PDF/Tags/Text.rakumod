@@ -9,7 +9,7 @@ class PDF::Tags::Text is PDF::Tags::Item {
     submethod TWEAK(Str :$value!) {
         self.set-value($value);
     }
-    method tag { '#text' }
+    method name { '#text' }
     method value(--> Str) is also<Str gist text> { callsame() }
 }
 

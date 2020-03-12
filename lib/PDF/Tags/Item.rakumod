@@ -6,7 +6,7 @@ class PDF::Tags::Item {
     use PDF::StructTreeRoot;
     use PDF::StructElem;
     use PDF::Class::StructItem;
-    use PDF::Content::Tag::Mark;
+    use PDF::Content::Tag;
     use PDF::Content::Graphics;
     use PDF::Tags::Root;
 
@@ -16,13 +16,22 @@ class PDF::Tags::Item {
     has PDF::Page $.Pg is rw; # current page scope
 
     proto sub item-class($) is export(:item-class) {*}
-    multi sub item-class(PDF::StructTreeRoot) { require ::('PDF::Tags::Root') }
-    multi sub item-class(PDF::StructElem)     { require ::('PDF::Tags::Elem') }
-    multi sub item-class(PDF::OBJR)           { require ::('PDF::Tags::ObjRef') }
-    multi sub item-class(PDF::MCR)            { require ::('PDF::Tags::Mark') }
-    multi sub item-class(UInt)                { require ::('PDF::Tags::Mark') }
-    multi sub item-class(PDF::Content::Tag::Mark) { require ::('PDF::Tags::Mark') }
-    multi sub item-class(Str)                 { require ::('PDF::Tags::Text') }
+    multi sub item-class(PDF::StructTreeRoot)     { require ::('PDF::Tags::Root') }
+    multi sub item-class(PDF::StructElem)         { require ::('PDF::Tags::Elem') }
+    multi sub item-class(PDF::Class::StructItem)  { require ::('PDF::Tags::ObjRef') }
+    multi sub item-class(PDF::OBJR)               { require ::('PDF::Tags::ObjRef') }
+    multi sub item-class(PDF::MCR)                { require ::('PDF::Tags::Mark') }
+    multi sub item-class(UInt)                    { require ::('PDF::Tags::Mark') }
+    multi sub item-class(PDF::Content::Tag) { require ::('PDF::Tags::Mark') }
+    multi sub item-class(Str)                     { require ::('PDF::Tags::Text') }
+
+    sub objref($Obj, :$Pg! --> PDF::OBJR) {
+        PDF::COS.coerce: %(
+            :Type( :name<OBJR> ),
+            :$Obj,
+            :$Pg;
+        );
+    }
 
     proto sub build-item($, |c) is export(:build-item) {*}
     multi sub build-item(PDF::MCR $item, PDF::Page :$Pg, |c) {
@@ -30,13 +39,16 @@ class PDF::Tags::Item {
         my UInt:D $value = $item.MCID;
         item-class(PDF::MCR).new(:$value, :Pg($item.Pg // $Pg), :$Stm, |c);
     }
-    multi sub build-item(PDF::OBJR $value, PDF::Page :$Pg, |c) {
-        item-class(PDF::OBJR).new( :$value, :Pg($value.Pg // $Pg), |c)
+    multi sub build-item(PDF::OBJR $value, PDF::Page:D :$Pg = $value.Pg, |c) {
+        item-class(PDF::OBJR).new( :$value, :$Pg, |c)
+    }
+    multi sub build-item(PDF::Class::StructItem $object, PDF::Page:D :$Pg, |c) {
+        build-item( objref($object, :$Pg), |c);
     }
     multi sub build-item($value, |c) {
         item-class($value).new: :$value, |c;
     }
     
-    method xml(|c) { (require ::('PDF::Tags::XML')).new(|c).Str(self) }
+    method xml(|c) { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
     method text { '' }
 }

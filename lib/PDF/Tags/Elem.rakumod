@@ -1,6 +1,7 @@
 use PDF::Tags::Node;
 
 class PDF::Tags::Elem is PDF::Tags::Node {
+
     use PDF::StructElem;
     use PDF::Tags::Mark;
 
@@ -8,7 +9,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     has $.parent is required;
     has %!attributes;
     has Bool $!atts-built;
-    has Str $.tag is built;
+    has Str $.name is built;
     has Str $.class is built;
     has Bool $!hash-init;
     method attributes {
@@ -64,12 +65,48 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         my Str:D $tag = self.value.tag;
         with self.root.role-map{$tag} {
             $!class = $tag;
-            $!tag = $_;
+            $!name = $_;
         }
         else {
-            $!tag = $tag;
+            $!name = $tag;
         }
     }
+
+    method mark(PDF::Content $gfx, &action, |c) {
+        my $kid = $gfx.tag(self.name, &action, :mark, |c);
+        self.add-kid: $kid;
+    }
+
+    method do(PDF::Content $gfx, PDF::Content::XObject $xobj, Bool :$marks, |c) {
+        my @rect = $gfx.do($xobj, |c);
+
+        if $marks && $xobj ~~ PDF::Content::XObject['Form'] {
+            # import marked content tags from the xobject
+            my $owner = $gfx.owner;
+            my PDF::Content::Tag @tags = $xobj.gfx.tags.descendants.grep(*.mcid.defined);
+            for @tags {
+                my PDF::Content::Tag $mark = .clone(:$owner, :content($xobj));
+                my $name = $mark.name;
+                my $kid = self.add-kid($name);
+                $kid.add-kid: $mark;
+            }
+        }
+
+        self.set-bbox($gfx, @rect)
+            if self.name ~~ 'Figure'|'Form'|'Table'|'Formula';
+
+        @rect;
+    }
+
+    method set-bbox(PDF::Content $gfx, @rect) {
+        self.attributes<BBox> = $gfx.base-coords(@rect).Array;
+    }
+
+    method reference(PDF::Content $gfx, PDF::COS::Dict $object, |c) {
+        my $Pg = $gfx.owner;
+        self.add-kid($object, :$Pg);
+    }
+
 }
 
 =begin pod

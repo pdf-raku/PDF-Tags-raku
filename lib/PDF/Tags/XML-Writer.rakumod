@@ -1,4 +1,4 @@
-unit class PDF::Tags::XML;
+unit class PDF::Tags::XML-Writer;
 
 use PDF::Annot;
 use PDF::Tags;
@@ -61,21 +61,21 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         take line($depth, "<!-- elem {.obj-num} {.gen-num} R -->")
             given $node.value;
     }
-    my $tag = $node.tag;
+    my $name = $node.name;
     my $att = do if $!atts {
         my %attributes = $node.attributes;
         %attributes<O>:delete;
         atts-str(%attributes);
     }
     else {
-        $tag = $_
-            with $node.dom.role-map{$tag};
+        $name = $_
+            with $node.dom.role-map{$name};
         ''
     }
-    my $omit-tag = $tag ~~ $_ with $!omit;
+    my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
-        take line($depth, "<$tag$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
+        take line($depth, "<$name$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
     }
     else {
         with $node.actual-text {
@@ -87,15 +87,15 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 }
                 else {
                     take $_ eq ''
-                        ?? line($depth, "<$tag$att/>")
-                        !! line($depth, "<$tag$att>{$text}</$tag>");
+                        ?? line($depth, "<$name$att/>")
+                        !! line($depth, "<$name$att>{$text}</$name>");
                 }
             }
         }
         else {
             my $elems = $node.elems;
             if $elems {
-                take line($depth++, "<$tag$att>")
+                take line($depth++, "<$name$att>")
                     unless $omit-tag;
         
                 for 0 ..^ $elems {
@@ -103,11 +103,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     self.stream-xml($kid, :$depth);
                 }
 
-                take line(--$depth, "</$tag>")
+                take line(--$depth, "</$name>")
                      unless $omit-tag;
             }
             else {
-                take line($depth, "<$tag$att/>")
+                take line($depth, "<$name$att/>")
                     unless $omit-tag;
             }
         }
@@ -135,7 +135,6 @@ multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
 }
 
 method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
-    # join text strings. discard this, and child marked content tags for now
     my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
             when PDF::Tags::Mark {
@@ -147,15 +146,15 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
         @text.join;
     }
 
-    my $tag := $node.tag;
-    my $omit-tag = $tag ~~ $_ with $!omit;
+    my $name := $node.name;
+    my $omit-tag = $name ~~ $_ with $!omit;
 
     if $omit-tag {
         $text;
     }
     else {
         my $atts := atts-str($node.attributes);
-        "\<$tag$atts" ~ ($text ?? "\>$text\</$tag\>" !! '/>');
+        "\<$name$atts" ~ ($text ?? "\>$text\</$name\>" !! '/>');
     }
 }
 
