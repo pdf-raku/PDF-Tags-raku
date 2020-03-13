@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 8;
+plan 9;
 
 use lib 't';
 use PDF::Class;
@@ -19,7 +19,7 @@ my $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
 
-my PDF::Tags $tags .= create();
+my PDF::Tags $tags .= create: :$pdf;
 my PDF::Tags::Elem $doc = $tags.add-kid(Document);
 
 $page.graphics: -> $gfx {
@@ -86,10 +86,10 @@ $page.graphics: -> $gfx {
     $doc.add-kid(Form).do: $gfx, $form, :marks, :position[150, 70];
 }
 
-$pdf.Root<StructTreeRoot> //= $tags.value;
-.<Marked> = True
-    given $pdf.Root<MarkInfo> //= {};
-
 lives-ok { $pdf.save-as: "t/write-tags.pdf" }
+
+$pdf .= open: "t/write-tags.pdf";
+$tags .= read: :$pdf;
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Link,Form,H1,P';
 
 done-testing;

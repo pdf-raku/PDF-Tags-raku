@@ -15,7 +15,6 @@ class PDF::Tags:ver<0.0.1>
     has Hash $.class-map         is built;
     has Hash $.role-map          is built;
     has NumberTree $.parent-tree is built;
-    has %!deref{Any};
     has Bool $.render = True;
     has Bool $.strict = True;
     has Bool $.marks;
@@ -29,24 +28,37 @@ class PDF::Tags:ver<0.0.1>
     submethod TWEAK(PDF::StructTreeRoot :$value!) {
         $!class-map = $_ with $value.ClassMap;
         $!role-map = $_ with $value.RoleMap;
-        $!parent-tree = .number-tree with $value.ParentTree;
+        $!parent-tree = .number-tree
+            given $value.ParentTree //= { :Nums[] };
     }
 
-    multi method read(PDF::Class :$pdf!) {
+    method read(PDF::Class :$pdf!, Bool :$create) {
         with $pdf.catalog.StructTreeRoot -> $value {
             self.new: :$value, :root(self.WHAT);
         }
         else {
-            fail "document does not contain marked content";
+            $create
+                ?? self.create(:$pdf)
+                !! fail "document does not contain marked content";
         }
-    }
-    multi method read(:$pdf!, |c) is default {
-        self.read: PDF::Class.open($pdf, |c);
     }
 
     method create(
-        PDF::StructTreeRoot :$value = PDF::COS.coerce: { :Type( :name<StructTreeRoot> )},
+        PDF::StructTreeRoot :$value = PDF::COS.coerce({ :Type( :name<StructTreeRoot> )}),
+        PDF::Class :$pdf,
     ) {
+        $value.check;
+
+        with $pdf {
+            with .catalog.StructTreeRoot {
+                fail "document already contains marked content";
+            }
+            else {
+                $_ = $value;
+            }
+            .<Marked> = True
+                given .Root<MarkInfo> //= {};
+        }
         self.new: :$value, :root(self.WHAT), :marks;
     }
 
@@ -134,20 +146,43 @@ PDF::Tags - Tagged PDF root node
 =head1 SYNOPSIS
 
 ```
+use PDF::Content::Tag :ParagraphTags;
 use PDF::Class;
 use PDF::Tags;
 use PDF::Tags::Elem;
 
-my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
+# create tags
+my PDF::Class $pdf .= new;
+
+my $page = $pdf.add-page;
+my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
+my $body-font = $page.core-font: :family<Helvetica>;
+
+my PDF::Tags $tags .= create: :$pdf;
+my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+
+$page.graphics: -> $gfx {
+    $doc.add-kid(Paragraph).mark: $gfx, {
+        .say('Hello tagged world!',
+             :$font,
+             :font-size(15),
+             :position[50, 120]);
+    }
+}
+$pdf.save-as: "t/pdf/tagged.pdf";
+
+# read tags
+my PDF::Class $pdf .= open: "t/pdf/tagged.pdf");
 my PDF::Tags $tags .= read: :$pdf;
 my PDF::Tags::Elem $doc = $tags[0];
+
+# search tags
+my PDF::Tags @elems = $tags.find('Document//*');
 ```
 
 =head1 DESCRIPTION
 
 A tagged PDF contains additional markup information describing the logical
 document structure.
-
-There is a standa
 
 =end pod
