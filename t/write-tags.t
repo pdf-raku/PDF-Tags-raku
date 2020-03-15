@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 9;
+plan 12;
 
 use lib 't';
 use PDF::Class;
@@ -8,6 +8,7 @@ use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :Struc
 use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Mark;
+use PDF::Tags::ObjRef;
 use PDF::Content::XObject;
 
 # ensure consistant document ID generation
@@ -72,8 +73,13 @@ $page.graphics: -> $gfx {
         :P($page),
     };
 
-    skip "todo: handle links";
-    $doc.add-kid(Link).reference($gfx, $link);
+    my PDF::Tags::ObjRef $obj-ref;
+    lives-ok {$obj-ref = $doc.add-kid(Link).reference($gfx, $link)}, 'add reference';
+    # inspect objects
+    my $cos-obj = $obj-ref.object;
+    isa-ok $cos-obj, "PDF::Annot::Link", '$obj-ref.object';
+    is $cos-obj.struct-parent, 0, '$obj-ref.object.struct-parent';
+    is-deeply $tags.parent-tree[0], $obj-ref.value, 'parent-tree entry'; 
 
     my  PDF::Content::XObject $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     $form.text: {

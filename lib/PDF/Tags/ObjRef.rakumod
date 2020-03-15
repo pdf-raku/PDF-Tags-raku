@@ -8,9 +8,8 @@ class PDF::Tags::ObjRef is PDF::Tags::Item {
     }
     has PDF::Tags::Item $!parent;
     method parent {
-        my $dom := $.dom;
         $!parent //= do with $.value.object.struct-parent {
-            build-item($dom.parent-tree[$_+0], :$.Pg, :$dom, :parent($dom.root));
+            build-item($.root.parent-tree[$_+0], :$.Pg, :parent($.root));
         }
     }
     method value(--> PDF::OBJR) handles<object> { callsame() }
