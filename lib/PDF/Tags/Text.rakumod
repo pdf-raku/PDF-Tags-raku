@@ -6,11 +6,11 @@ class PDF::Tags::Text is PDF::Tags::Item {
 
     has PDF::Tags::Node $.parent;
 
-    submethod TWEAK(Str :$value!) {
-        self.set-value($value);
+    submethod TWEAK(Str :$cos!) {
+        self.set-cos($cos);
     }
     method name { '#text' }
-    method value(--> Str) is also<Str gist text> { callsame() }
+    method cos(--> Str) is also<Str gist text> { callsame() }
 }
 
 =begin pod

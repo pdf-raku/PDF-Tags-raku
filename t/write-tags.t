@@ -76,11 +76,11 @@ $page.graphics: -> $gfx {
     my PDF::Tags::Elem $link;
     lives-ok { $link = $doc.add-kid(Link).reference($gfx, $annot);}, 'add reference';
     # inspect COS objects
-    my PDF::OBJR $obj-ref = $link.kids[0].value;
+    my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;
     isa-ok $cos-obj, "PDF::Annot::Link", '$obj-ref.object';
     is $cos-obj.struct-parent, 0, '$obj-ref.object.struct-parent';
-    is-deeply $tags.parent-tree[0], $link.value, 'parent-tree entry'; 
+    is-deeply $tags.parent-tree[0], $link.cos, 'parent-tree entry'; 
 
     my  PDF::Content::XObject $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     $form.text: {

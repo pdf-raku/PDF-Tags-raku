@@ -25,16 +25,16 @@ class PDF::Tags:ver<0.0.1>
     }
     has Cache $!cache .= new;
 
-    submethod TWEAK(PDF::StructTreeRoot :$value!) {
-        $!class-map = $_ with $value.ClassMap;
-        $!role-map = $_ with $value.RoleMap;
+    submethod TWEAK(PDF::StructTreeRoot :$cos!) {
+        $!class-map = $_ with $cos.ClassMap;
+        $!role-map = $_ with $cos.RoleMap;
         $!parent-tree = .number-tree
-            given $value.ParentTree //= { :Nums[] };
+            given $cos.ParentTree //= { :Nums[] };
     }
 
     method read(PDF::Class :$pdf!, Bool :$create) {
-        with $pdf.catalog.StructTreeRoot -> $value {
-            self.new: :$value, :root(self.WHAT);
+        with $pdf.catalog.StructTreeRoot -> $cos {
+            self.new: :$cos, :root(self.WHAT);
         }
         else {
             $create
@@ -44,22 +44,22 @@ class PDF::Tags:ver<0.0.1>
     }
 
     method create(
-        PDF::StructTreeRoot :$value = PDF::COS.coerce({ :Type( :name<StructTreeRoot> )}),
+        PDF::StructTreeRoot :$cos = PDF::COS.coerce({ :Type( :name<StructTreeRoot> )}),
         PDF::Class :$pdf,
     ) {
-        $value.check;
+        $cos.check;
 
         with $pdf {
             with .catalog.StructTreeRoot {
                 fail "document already contains marked content";
             }
             else {
-                $_ = $value;
+                $_ = $cos;
             }
             .<Marked> = True
                 given .Root<MarkInfo> //= {};
         }
-        self.new: :$value, :root(self.WHAT), :marks;
+        self.new: :$cos, :root(self.WHAT), :marks;
     }
 
     class TextDecoder {

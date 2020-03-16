@@ -59,7 +59,7 @@ multi method stream-xml(PDF::Tags::Root $_, :$depth!) {
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     if $!debug {
         take line($depth, "<!-- elem {.obj-num} {.gen-num} R -->")
-            given $node.value;
+            given $node.cos;
     }
     my $name = $node.name;
     my $att = do if $!atts {
@@ -75,7 +75,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
-        take line($depth, "<$name$att/> <!-- depth exceeded, see {$node.value.obj-num} {$node.value.gen-num} R -->");
+        take line($depth, "<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->");
     }
     else {
         with $node.actual-text {
@@ -123,7 +123,7 @@ multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
 multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
     if $!debug {
         take line($depth, "<!-- mark <{.name}> -->")
-            given $node.value;
+            given $node.cos;
     }
     if $!render {
         take line($depth, trim(self!marked-content($node, :$depth)));

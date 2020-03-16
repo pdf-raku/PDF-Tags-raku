@@ -13,43 +13,43 @@ class PDF::Tags::Node
     has UInt $!elems;
 
     method elems {
-        $!elems //= do with $.value.kids {
+        $!elems //= do with $.cos.kids {
             when Hash { 1 }
             default { .elems }
         } // 0;
     }
 
-    method build-kid($value, :$Pg = $.Pg) { build-item($value, :parent(self), :$Pg, :$.root); }
+    method build-kid($cos, :$Pg = $.Pg) { build-item($cos, :parent(self), :$Pg, :$.root); }
     multi method add-kid(PDF::Tags::Node:D $node) {
         die "node already parented"
             with $node.parent;
         die "unable to add a node to itself"
-            if $node === self || $node.value === $node.parent.value;
+            if $node === self || $node.cos === $node.parent.cos;
 
         $node.parent = self;
         @!kids.push: $node;
     }
     multi method add-kid(Str:D $name) {
-        my $P := self.value;
-        my PDF::StructElem $value = PDF::COS.coerce: %(
+        my $P := self.cos;
+        my PDF::StructElem $cos = PDF::COS.coerce: %(
             :Type( :name<StructElem> ),
             :S( :$name ),
             :$P,
         );
-        self.add-kid($value)
+        self.add-kid($cos)
     }
-    multi method add-kid($value, |c ) is default {
-        my $kid := self.build-kid($value, |c);
-        given self.value.kids //= [] {
+    multi method add-kid($cos, |c ) is default {
+        my $kid := self.build-kid($cos, |c);
+        given self.cos.kids //= [] {
             $_ = [$_] if $_ ~~ Hash;
-            .push($kid.value);
+            .push($kid.cos);
         }
         @!kids.push: $kid;
         $kid;
     }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        @!kids[$i] //= self.build-kid($.value.kids[$i]);
+        @!kids[$i] //= self.build-kid($.cos.kids[$i]);
     }
     method Array {
         $!loaded ||= do {

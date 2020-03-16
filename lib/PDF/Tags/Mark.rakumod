@@ -17,7 +17,7 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     has PDF::Content::Tag $.mark is built handles<name mcid elems>;
     my subset PageLike of Hash where .<Type> ~~ 'Page';
 
-    method set-value($!mark) {
+    method set-cos($!mark) {
         my PDF::MCR $mcr;
         with $.mcid -> $MCID {
             # only linked into the struct-tree if it has an MCID attribute
@@ -39,28 +39,28 @@ class PDF::Tags::Mark is PDF::Tags::Node {
         callwith($mcr);
     }
 
-    multi submethod TWEAK(PDF::Content::Tag:D :value($_)!) {
-        self.set-value($_);
+    multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!) {
+        self.set-cos($_);
     }
-    multi submethod TWEAK(UInt:D :$value!) {
+    multi submethod TWEAK(UInt:D :$cos!) {
         with self.Stm // self.Pg -> PDF::Content::Graphics $_ {
-            with self.root.graphics-tags($_){$value} {
-                self.set-value($_);
+            with self.root.graphics-tags($_){$cos} {
+                self.set-cos($_);
             }
             else {
-                die "unable to resolve MCID: $value";
+                die "unable to resolve MCID: $cos";
             }
         }
         else {
             die "no current marked-content page";
         }
     }
-    method value(--> PDF::MCR) { callsame() }
+    method cos(--> PDF::MCR) { callsame() }
     method attributes handles<AT-KEY> {
         $!atts-built ||= do {
             %!attributes = $!mark.attributes;
-            do with %!attributes<ActualText>:delete -> $value {
-                $!actual-text = PDF::COS::TextString.new(:$value);
+            do with %!attributes<ActualText>:delete -> $cos {
+                $!actual-text = PDF::COS::TextString.new(:$cos);
             }
             True;
         }

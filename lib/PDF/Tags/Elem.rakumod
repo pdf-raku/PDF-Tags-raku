@@ -10,7 +10,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
 
-    method value(--> PDF::StructElem) { callsame() }
+    method cos(--> PDF::StructElem) { callsame() }
     has $.parent is required;
     has %!attributes;
     has Bool $!atts-built;
@@ -20,13 +20,13 @@ class PDF::Tags::Elem is PDF::Tags::Node {
 
     method attributes {
         $!atts-built ||= do {
-            for $.value.attribute-dicts -> Hash $atts {
+            for $.cos.attribute-dicts -> Hash $atts {
                 %!attributes{$_} = $atts{$_}
                     for $atts.keys
             }
 
             unless %!attributes {
-                for $.value.class-map-keys {
+                for $.cos.class-map-keys {
                     with $.root.class-map{$_} -> $atts {
                         %!attributes{$_} = $atts{$_}
                             for $atts.keys
@@ -68,13 +68,13 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         self.attributes{.substr(1)};
     }
 
-    method actual-text { $.value.ActualText }
+    method actual-text { $.cos.ActualText }
 
     method text { $.actual-text // $.kids.map(*.text).join }
 
     submethod TWEAK {
-        self.Pg = $_ with self.value.Pg;
-        my Str:D $tag = self.value.tag;
+        self.Pg = $_ with self.cos.Pg;
+        my Str:D $tag = self.cos.tag;
         with self.root.role-map{$tag} {
             $!class = $tag;
             $!name = $_;
@@ -123,7 +123,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         );
         without $Obj.StructParent {
             $_ = $.root.parent-tree.max-key + 1;
-            $.root.parent-tree[$_ + 0] = self.value;
+            $.root.parent-tree[$_ + 0] = self.cos;
         }
         self;
     }

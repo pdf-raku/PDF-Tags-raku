@@ -1,5 +1,6 @@
 class PDF::Tags::Item {
 
+    use PDF::COS;
     use PDF::OBJR; # object reference
     use PDF::MCR;  # marked content reference
     use PDF::Page;
@@ -10,8 +11,8 @@ class PDF::Tags::Item {
     use PDF::Tags::Root;
 
     has PDF::Tags::Root $.root is required;
-    has $.value is required;
-    method set-value($!value) {}
+    has $.cos is required;
+    method set-cos($!cos) {}
     has PDF::Page $.Pg is rw; # current page scope
 
     proto sub item-class($) is export(:item-class) {*}
@@ -26,14 +27,14 @@ class PDF::Tags::Item {
     proto sub build-item($, |c) is export(:build-item) {*}
     multi sub build-item(PDF::MCR $item, PDF::Page :$Pg, |c) {
         my PDF::Content::Graphics $Stm = $_ with $item.Stm;
-        my UInt:D $value = $item.MCID;
-        item-class(PDF::MCR).new(:$value, :Pg($item.Pg // $Pg), :$Stm, |c);
+        my UInt:D $cos = $item.MCID;
+        item-class(PDF::MCR).new(:$cos, :Pg($item.Pg // $Pg), :$Stm, |c);
     }
-    multi sub build-item(PDF::OBJR $value, PDF::Page:D :$Pg = $value.Pg, |c) {
-        item-class(PDF::OBJR).new( :$value, :$Pg, |c)
+    multi sub build-item(PDF::OBJR $cos, PDF::Page:D :$Pg = $cos.Pg, |c) {
+        item-class(PDF::OBJR).new( :$cos, :$Pg, |c)
     }
-    multi sub build-item($value, |c) {
-        item-class($value).new: :$value, |c;
+    multi sub build-item($_, |c) {
+        item-class($_).new: :cos($_), |c;
     }
     
     method xml(|c) { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }

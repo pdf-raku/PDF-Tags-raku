@@ -1,6 +1,6 @@
 role PDF::Tags::Root {
     use PDF::StructTreeRoot;
-    method value(--> PDF::StructTreeRoot) { callsame() }
+    method cos(--> PDF::StructTreeRoot) { callsame() }
     method parent { fail "already at root" }
     method tag is DEPRECATED<name> { $.name }
     method name { '#root' }
