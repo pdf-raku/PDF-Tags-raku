@@ -7,6 +7,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::Page;
     use PDF::StructElem;
     use PDF::Class::StructItem;
+    use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
 
     method value(--> PDF::StructElem) { callsame() }
@@ -113,28 +114,19 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         self.attributes<BBox> = $gfx.base-coords(@rect).Array;
     }
 
-    method !obj-ref(PDF::Class::StructItem $Obj, PDF::Page :$Pg! --> PDF::OBJR:D) {
-        my $parent-tree := $.root.parent-tree;
-        with $Obj.struct-parent {
-            # already has a struct-parents entry
-            $parent-tree[$_ + 0];
-        }
-        else {
-            # create a new struct-parents entry
-            my $idx := $Obj.struct-parent = $parent-tree.max-key + 1;
-            $parent-tree[$idx + 0] = PDF::COS.coerce: %(
-                :Type( :name<OBJR> ),
-                :$Obj,
-                :$Pg;
-            );
-        }
-    }
-
-    method reference(PDF::Content $gfx, PDF::Class::StructItem $object, |c) {
+    method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
         my PDF::Page $Pg = $gfx.owner;
-        self.add-kid: self!obj-ref($object, :$Pg);
+        self.add-kid: PDF::COS.coerce: %(
+            :Type( :name<OBJR> ),
+            :$Obj,
+            :$Pg;
+        );
+        without $Obj.StructParent {
+            $_ = $.root.parent-tree.max-key + 1;
+            $.root.parent-tree[$_ + 0] = self.value;
+        }
+        self;
     }
-
 }
 
 =begin pod

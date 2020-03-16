@@ -64,7 +64,7 @@ $page.graphics: -> $gfx {
     $mark.parent.set-bbox($gfx, @rect);
     is-deeply $mark.parent.attributes<BBox>, [40, 60, 81, 89], 'image tag BBox';
 
-    my Hash $link = PDF::COS.coerce: :dict{
+    my Hash $annot = PDF::COS.coerce: :dict{
         :Type(:name<Annot>),
         :Subtype(:name<Link>),
         :Rect[71, 717, 190, 734],
@@ -73,13 +73,14 @@ $page.graphics: -> $gfx {
         :P($page),
     };
 
-    my PDF::Tags::ObjRef $obj-ref;
-    lives-ok {$obj-ref = $doc.add-kid(Link).reference($gfx, $link)}, 'add reference';
-    # inspect objects
+    my PDF::Tags::Elem $link;
+    lives-ok { $link = $doc.add-kid(Link).reference($gfx, $annot);}, 'add reference';
+    # inspect COS objects
+    my PDF::OBJR $obj-ref = $link.kids[0].value;
     my $cos-obj = $obj-ref.object;
     isa-ok $cos-obj, "PDF::Annot::Link", '$obj-ref.object';
     is $cos-obj.struct-parent, 0, '$obj-ref.object.struct-parent';
-    is-deeply $tags.parent-tree[0], $obj-ref.value, 'parent-tree entry'; 
+    is-deeply $tags.parent-tree[0], $link.value, 'parent-tree entry'; 
 
     my  PDF::Content::XObject $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     $form.text: {
