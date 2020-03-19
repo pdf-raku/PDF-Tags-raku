@@ -9,7 +9,8 @@ use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Mark;
 use PDF::Tags::ObjRef;
-use PDF::Content::XObject;
+use PDF::XObject::Image;
+use PDF::XObject::Form;
 
 # ensure consistant document ID generation
 srand(123456);
@@ -52,7 +53,7 @@ $page.graphics: -> $gfx {
         ]
     }
 
-    my PDF::Content::XObject $img .= open: "t/images/lightbulb.gif";
+    my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
     my @rect;
     $mark = $doc.add-kid(Figure).mark: $gfx, {
@@ -74,7 +75,7 @@ $page.graphics: -> $gfx {
     };
 
     my PDF::Tags::Elem $link;
-    lives-ok { $link = $doc.add-kid(Link).reference($gfx, $annot);}, 'add reference';
+    lives-ok { $link = $doc.add-kid(Link).reference($gfx, $annot); }, 'add reference';
     # inspect COS objects
     my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;
@@ -82,21 +83,23 @@ $page.graphics: -> $gfx {
     is $cos-obj.struct-parent, 0, '$obj-ref.object.struct-parent';
     is-deeply $tags.parent-tree[0], $link.cos, 'parent-tree entry'; 
 
-    my  PDF::Content::XObject $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my  PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        .mark: Header1, { .say: "Tagged XObject header", :font($header-font), :$font-size};
+        .mark: Header2, { .say: "Tagged XObject header", :font($header-font), :$font-size};
         .mark: Paragraph, { .say: "Some sample tagged text", :font($body-font), :$font-size};
     }
 
-    $doc.add-kid(Form).do: $gfx, $form, :marks, :position[150, 70];
+    for 1..2 {
+        $doc.add-kid(Form).do: $gfx, $form, :position[150, 70];
+    }
 }
 
 lives-ok { $pdf.save-as: "t/write-tags.pdf" }
 
 $pdf .= open: "t/write-tags.pdf";
 $tags .= read: :$pdf;
-is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Link,Form,H1,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Link,Form,H2,P,Form,H2,P';
 
 done-testing;

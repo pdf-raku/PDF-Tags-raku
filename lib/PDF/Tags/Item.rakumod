@@ -10,19 +10,19 @@ class PDF::Tags::Item {
     use PDF::Content::Graphics;
     use PDF::Tags::Root;
 
-    has PDF::Tags::Root $.root is required;
     has $.cos is required;
+    has PDF::Tags::Root $.root is required;
     method set-cos($!cos) {}
     has PDF::Page $.Pg is rw; # current page scope
 
     proto sub item-class($) is export(:item-class) {*}
-    multi sub item-class(PDF::StructTreeRoot)     { require ::('PDF::Tags::Root') }
-    multi sub item-class(PDF::StructElem)         { require ::('PDF::Tags::Elem') }
-    multi sub item-class(PDF::OBJR)               { require ::('PDF::Tags::ObjRef') }
-    multi sub item-class(PDF::MCR)                { require ::('PDF::Tags::Mark') }
-    multi sub item-class(UInt)                    { require ::('PDF::Tags::Mark') }
-    multi sub item-class(PDF::Content::Tag) { require ::('PDF::Tags::Mark') }
-    multi sub item-class(Str)                     { require ::('PDF::Tags::Text') }
+    multi sub item-class(PDF::StructTreeRoot) { require ::('PDF::Tags::Root') }
+    multi sub item-class(PDF::StructElem)     { require ::('PDF::Tags::Elem') }
+    multi sub item-class(PDF::OBJR)           { require ::('PDF::Tags::ObjRef') }
+    multi sub item-class(PDF::MCR)            { require ::('PDF::Tags::Mark') }
+    multi sub item-class(UInt)                { require ::('PDF::Tags::Mark') }
+    multi sub item-class(PDF::Content::Tag)   { require ::('PDF::Tags::Mark') }
+    multi sub item-class(Str)                 { require ::('PDF::Tags::Text') }
 
     proto sub build-item($, |c) is export(:build-item) {*}
     multi sub build-item(PDF::MCR $item, PDF::Page :$Pg, |c) {

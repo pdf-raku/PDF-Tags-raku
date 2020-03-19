@@ -4,7 +4,7 @@ class PDF::Tags::Text is PDF::Tags::Item {
     use PDF::Content::Tag;
     use Method::Also;
 
-    has PDF::Tags::Node $.parent;
+    has PDF::Tags::Node $.parent is rw;
 
     submethod TWEAK(Str :$cos!) {
         self.set-cos($cos);

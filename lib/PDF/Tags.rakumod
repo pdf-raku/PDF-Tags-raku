@@ -32,9 +32,9 @@ class PDF::Tags:ver<0.0.1>
             given $cos.ParentTree //= { :Nums[] };
     }
 
-    method read(PDF::Class :$pdf!, Bool :$create) {
+    method read(PDF::Class :$pdf!, Bool :$create, Bool :$marks = False) {
         with $pdf.catalog.StructTreeRoot -> $cos {
-            self.new: :$cos, :root(self.WHAT);
+            self.new: :$cos, :root(self.WHAT), :$marks;
         }
         else {
             $create

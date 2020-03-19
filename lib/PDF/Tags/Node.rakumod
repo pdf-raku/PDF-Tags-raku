@@ -3,16 +3,18 @@ use PDF::Tags::Item :&item-class, :&build-item;
 class PDF::Tags::Node
     is PDF::Tags::Item {
 
+    use Method::Also;
+    use PDF::COS;
     use PDF::StructElem;
     my subset NCName of Str where { !.defined || $_ ~~ /^<ident>$/ }
 
     has PDF::Tags::Item @.kids;
     method kids-raw { @!kids }
     has Hash $!store;
-    has Bool $!loaded;
+    has Bool $!reified;
     has UInt $!elems;
 
-    method elems {
+    method elems is also<Numeric> {
         $!elems //= do with $.cos.kids {
             when Hash { 1 }
             default { .elems }
@@ -20,39 +22,57 @@ class PDF::Tags::Node
     }
 
     method build-kid($cos, :$Pg = $.Pg) { build-item($cos, :parent(self), :$Pg, :$.root); }
-    multi method add-kid(PDF::Tags::Node:D $node) {
-        die "node already parented"
-            with $node.parent;
+    method !adopt-node($node) {
+        # checks
         die "unable to add a node to itself"
-            if $node === self || $node.cos === $node.parent.cos;
+            if $node === self || $node.cos === self.cos;
 
+        with $node.parent {
+            die "node already parented"
+                unless $_ === self;
+        }
+
+        # reparent cos node
+        given self.cos.kids //= [] {
+            $_ = [$_] if $_ ~~ Hash;
+            $node.cos.P = self.cos
+                if $node.cos ~~ PDF::StructElem;
+            .push($node.cos);
+        }
+
+        # reparent dom node
         $node.parent = self;
         @!kids.push: $node;
+
+        # update caches
+        $!elems = Nil;
+        self.AT_POS($.elems-1) if $!reified;
+        .{$node.name}.push: $node with $!store;
+
+        $node;
     }
-    multi method add-kid(Str:D $name) {
+    multi method add-kid(PDF::Tags::Node:D $node) {
+        self!adopt-node($node);
+    }
+    multi method add-kid(Str:D $name, |c) {
         my $P := self.cos;
         my PDF::StructElem $cos = PDF::COS.coerce: %(
             :Type( :name<StructElem> ),
             :S( :$name ),
             :$P,
         );
-        self.add-kid($cos)
+        self.add-kid($cos, |c)
     }
     multi method add-kid($cos, |c ) is default {
         my $kid := self.build-kid($cos, |c);
-        given self.cos.kids //= [] {
-            $_ = [$_] if $_ ~~ Hash;
-            .push($kid.cos);
-        }
-        @!kids.push: $kid;
-        $kid;
+        self!adopt-node($kid);
     }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         @!kids[$i] //= self.build-kid($.cos.kids[$i]);
     }
     method Array {
-        $!loaded ||= do {
+        $!reified ||= do {
             self.AT-POS($_) for 0 ..^ $.elems;
             True;
         }
@@ -76,7 +96,7 @@ class PDF::Tags::Node
     }
     method kids {
         my class Kids does Iterable does Iterator does Positional {
-            has PDF::Tags::Item $.node is required handles<elems AT-POS>;
+            has PDF::Tags::Item $.node is required handles<elems AT-POS Numeric>;
             has int $!idx = 0;
             method iterator { $!idx = 0; self}
             method pull-one {

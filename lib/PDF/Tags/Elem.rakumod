@@ -3,15 +3,21 @@ use PDF::Tags::Node;
 class PDF::Tags::Elem is PDF::Tags::Node {
 
     use PDF::COS;
+    use PDF::COS::Dict;
+    use PDF::COS::Stream;
     use PDF::OBJR;
     use PDF::Page;
     use PDF::StructElem;
+    use PDF::XObject;
+    use PDF::XObject::Image;
+    use PDF::XObject::Form;
     use PDF::Class::StructItem;
+    use PDF::Tags::Item :&build-item;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
 
     method cos(--> PDF::StructElem) { callsame() }
-    has $.parent is required;
+    has PDF::Tags::Node $.parent is rw = self.root;
     has %!attributes;
     has Bool $!atts-built;
     has Str $.name is built;
@@ -41,8 +47,8 @@ class PDF::Tags::Elem is PDF::Tags::Node {
 
         %!attributes;
     }
- 
-   method build-kid($) {
+
+    method build-kid($) {
         given callsame() {
             when ! $.root.marks && $_ ~~ PDF::Tags::Mark {
                 # skip marked content tags. just get the aggregate text
@@ -84,23 +90,86 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
     }
 
-    method mark(PDF::Content $gfx, &action, |c) {
-        my $kid = $gfx.tag(self.name, &action, :mark, |c);
+    method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
+        my $kid = $gfx.tag($name, &action, :mark, |c);
         self.add-kid: $kid;
     }
 
-    method do(PDF::Content $gfx, PDF::Content::XObject $xobj, Bool :$marks, |c) {
+    # build intermediate node
+    multi method copy-tree(PDF::Tags::Elem $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
+         my PDF::StructElem $from-cos = $from-elem.cos;
+        my $S = $from-cos.S;
+        my PDF::StructElem $P = $parent.cos;
+        my PDF::StructElem $to-cos =  PDF::COS.coerce: %(
+            :Type( :name<StructElem> ),
+            :$S,
+            :$P,
+            :$.Pg,
+            :$Stm,
+        );
+        for <A C T Lang Alt E ActualText> -> $k {
+            $to-cos{$k} = $_ with $from-cos{$k};
+        }
+        my PDF::Tags::Elem $to-elem = build-item($to-cos, :$.root, :$parent);
+        for $from-elem.kids {
+            my PDF::Tags::Item:D $kid = $.copy-tree($_, :$Stm, :parent($to-elem));
+            $to-elem.add-kid: $kid;
+        }
+        $to-elem;
+    }
+
+    # build leaf nodes
+    multi method copy-tree(PDF::Tags::Mark $item, PDF::COS::Stream :$Stm!) {
+        $item.clone: :$Stm, :parent(PDF::Tags::Elem);
+    }
+    multi method copy-tree(PDF::Tags::ObjRef $ref) {
+        $ref.cos;
+    }
+
+    multi method do(PDF::Content $gfx, PDF::XObject $xobj where .StructParent.defined, |c) {
+        my @rect = $gfx.do($xobj, |c);
+        self.reference($gfx, $xobj);
+        @rect;
+    }
+
+    multi method do(PDF::Content $gfx, PDF::XObject::Image $img, |c) {
+        $gfx.do($img, |c);
+    }
+
+   multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, |c) {
         my @rect = $gfx.do($xobj, |c);
 
-        if $marks && $xobj ~~ PDF::Content::XObject['Form'] {
-            # import marked content tags from the xobject
-            my $owner = $gfx.owner;
+        my $owner = $gfx.owner;
+        my PDF::Page $Pg = $owner
+            if $owner ~~ PDF::Page;
+
+        with $xobj.StructParents {
+            # avoid rendering the xobject, if possible; likely to
+            # work better with foreign xobjects
+            my Array $parents = self.root.parent-tree[$_+0];
+
+            for $parents.keys {
+                # copy sub-trees
+                my PDF::StructElem $cos = $parents[$_];
+                my PDF::Tags::Elem $elem = build-item($cos, :$.root, :$Pg, :parent(self));
+                self.add-kid: $elem.copy-tree(:Stm($xobj), :parent(self));
+                
+            }
+        }
+        else {
+            # build marked content tags from the xobject
             my PDF::Content::Tag @tags = $xobj.gfx.tags.descendants.grep(*.mcid.defined);
-            for @tags {
-                my PDF::Content::Tag $mark = .clone(:$owner, :content($xobj));
-                my $name = $mark.name;
-                my $kid = self.add-kid($name);
-                $kid.add-kid: $mark;
+            if @tags {
+                my @new-kids =  @tags.map: {
+                    my PDF::Content::Tag $mark = .clone(:$owner, :content($xobj));
+                    my $name = $mark.name;
+                    my $kid = self.add-kid($name, :$Pg);
+                    $kid.add-kid: $mark;
+                    $kid;
+                }
+                my $idx = $.root.parent-tree.max-key + 1;
+                $xobj.StructParents = $idx;
+                $.root.parent-tree[$idx] = [ @new-kids.map(*.cos) ];
             }
         }
 

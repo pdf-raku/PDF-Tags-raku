@@ -9,32 +9,25 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     use PDF::Content::Graphics;
     use PDF::MCR;
 
-    has PDF::Tags::Node $.parent;
+    has PDF::Tags::Node $.parent is rw;
     has %!attributes;
     has Bool $!atts-built;
     has Str $!actual-text;
     has PDF::Content::Graphics $.Stm;
     has PDF::Content::Tag $.mark is built handles<name mcid elems>;
-    my subset PageLike of Hash where .<Type> ~~ 'Page';
 
     method set-cos($!mark) {
         my PDF::MCR $mcr;
         with $.mcid -> $MCID {
             # only linked into the struct-tree if it has an MCID attribute
-            my PageLike $Pg = $!mark.owner ~~ PageLike ?? $!mark.owner !! $.Pg;
+            my PDF::Page $Pg = $!mark.owner ~~ PDF::Page ?? $!mark.owner !! $.Pg;
 
             $mcr = PDF::COS.coerce: %(
                 :Type( :name<MCR> ),
                 :$MCID,
                 :$Pg,
             );
-            my $struct-parent = do with $!mark.content {
-                $mcr<Stm> = $_;
-            }
-            else {
-                $Pg;
-            }
-            #%parents{$struct-parent}.push: $mcr;
+            $mcr<Stm> = $_ with $!Stm;
         }
         callwith($mcr);
     }
