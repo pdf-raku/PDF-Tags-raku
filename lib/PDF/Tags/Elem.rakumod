@@ -5,6 +5,9 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::COS;
     use PDF::COS::Dict;
     use PDF::COS::Stream;
+    use PDF::Content;
+    use PDF::Content::Graphics;
+    # PDF:Class imports
     use PDF::OBJR;
     use PDF::Page;
     use PDF::StructElem;
@@ -12,6 +15,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::XObject::Image;
     use PDF::XObject::Form;
     use PDF::Class::StructItem;
+
     use PDF::Tags::Item :&build-item;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
@@ -129,11 +133,14 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     multi method do(PDF::Content $gfx, PDF::XObject $xobj where .StructParent.defined, |c) {
         my @rect = $gfx.do($xobj, |c);
         self.reference($gfx, $xobj);
+        self!bbox($gfx, @rect);
         @rect;
     }
 
     multi method do(PDF::Content $gfx, PDF::XObject::Image $img, |c) {
-        $gfx.do($img, |c);
+        my @rect = $gfx.do($img, |c);
+        self!bbox($gfx, @rect);
+        @rect;
     }
 
    multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, |c) {
@@ -158,25 +165,36 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
         else {
             # build marked content tags from the xobject
-            my PDF::Content::Tag @tags = $xobj.gfx.tags.descendants.grep(*.mcid.defined);
-            if @tags {
+            self.finish-graphics: $xobj, :$owner, :parent(self);
+        }
+
+        self!bbox($gfx, @rect);
+        @rect;
+    }
+
+    method finish-graphics(PDF::Content::Graphics $content, PDF::Content::Graphics :$owner!) {
+        my PDF::Content::Tag @tags = $content.gfx.tags.descendants.grep(*.mcid.defined);
+        if @tags {
+            $content.StructParents //= do {
+                my PDF::Page $Pg = $owner
+                    if $owner ~~ PDF::Page;
+               my UInt $idx := $.root.parent-tree.max-key + 1;
                 my @new-kids =  @tags.map: {
-                    my PDF::Content::Tag $mark = .clone(:$owner, :content($xobj));
+                    my PDF::Content::Tag $mark = .clone(:$owner, :$content);
                     my $name = $mark.name;
                     my $kid = self.add-kid($name, :$Pg);
                     $kid.add-kid: $mark;
                     $kid;
                 }
-                my $idx = $.root.parent-tree.max-key + 1;
-                $xobj.StructParents = $idx;
                 $.root.parent-tree[$idx] = [ @new-kids.map(*.cos) ];
+                $idx;
             }
         }
+    }
 
+    method !bbox($gfx, @rect) {
         self.set-bbox($gfx, @rect)
             if self.name ~~ 'Figure'|'Form'|'Table'|'Formula';
-
-        @rect;
     }
 
     method set-bbox(PDF::Content $gfx, @rect) {

@@ -2,7 +2,6 @@ use v6;
 use Test;
 plan 12;
 
-use lib 't';
 use PDF::Class;
 use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :StructureTags;
 use PDF::Tags;
