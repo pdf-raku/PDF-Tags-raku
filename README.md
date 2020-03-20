@@ -1,8 +1,8 @@
 PDF-Tags-raku (under construction)
 ============
 
-A small DOM-like API for the navigation of PDF tagged content,
-simple XPath queries and basic XML serialization.
+A small DOM-like API for the navigation of PDF tagged content;
+read and creation of tagged content with simple XPath queries and basic XML serialization.
 
 SYNOPSIS
 --------

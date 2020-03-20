@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 12;
+plan 14;
 
 use PDF::Class;
 use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :StructureTags;
@@ -38,6 +38,9 @@ $page.graphics: -> $gfx {
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
     is $mark.parent.name, 'H1', 'parent elem name';
+
+    is $page.struct-parent, 0, '$page.struct-parent';
+    is-deeply $tags.parent-tree[0][0], $header.cos, 'parent-tree entry'; 
 
     $mark = $doc.add-kid(Paragraph).mark: $gfx, {
         .say('Some body text', :position[50, 100], :font($body-font), :font-size(12));
@@ -79,8 +82,8 @@ $page.graphics: -> $gfx {
     my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;
     isa-ok $cos-obj, "PDF::Annot::Link", '$obj-ref.object';
-    is $cos-obj.struct-parent, 0, '$obj-ref.object.struct-parent';
-    is-deeply $tags.parent-tree[0], $link.cos, 'parent-tree entry'; 
+    is $cos-obj.struct-parent, 1, '$obj-ref.object.struct-parent';
+    is-deeply $tags.parent-tree[1], $link.cos, 'parent-tree entry'; 
 
     my  PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     $form.text: {

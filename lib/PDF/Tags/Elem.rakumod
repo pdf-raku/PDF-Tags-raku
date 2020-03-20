@@ -7,7 +7,10 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::COS::Stream;
     use PDF::Content;
     use PDF::Content::Graphics;
-    # PDF:Class imports
+    use PDF::Tags::Item :&build-item;
+    use PDF::Tags::ObjRef;
+    use PDF::Tags::Mark;
+    # PDF:Class
     use PDF::OBJR;
     use PDF::Page;
     use PDF::StructElem;
@@ -15,10 +18,6 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::XObject::Image;
     use PDF::XObject::Form;
     use PDF::Class::StructItem;
-
-    use PDF::Tags::Item :&build-item;
-    use PDF::Tags::ObjRef;
-    use PDF::Tags::Mark;
 
     method cos(--> PDF::StructElem) { callsame() }
     has PDF::Tags::Node $.parent is rw = self.root;
@@ -95,8 +94,17 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     }
 
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
-        my $kid = $gfx.tag($name, &action, :mark, |c);
-        self.add-kid: $kid;
+        my $kid = self.add-kid: $gfx.tag($name, &action, :mark, |c);
+        given $gfx.parent {
+            when PDF::Page {
+                my $idx = (.StructParents //= $.root.parent-tree.max-key + 1);
+                $.root.parent-tree[$idx+0][$kid.mcid] //= self.cos;
+            }
+            default {
+                warn "ignoring mark call on {.WHAT.raku} object";
+            }
+        }
+        $kid;
     }
 
     # build intermediate node
@@ -165,28 +173,28 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
         else {
             # build marked content tags from the xobject
-            self.finish-graphics: $xobj, :$owner, :parent(self);
+            self!finish-form: $xobj, :$owner, :parent(self);
         }
 
         self!bbox($gfx, @rect);
         @rect;
     }
 
-    method finish-graphics(PDF::Content::Graphics $content, PDF::Content::Graphics :$owner!) {
+    method !finish-form(PDF::XObject::Form $content, PDF::Content::Graphics :$owner!) {
         my PDF::Content::Tag @tags = $content.gfx.tags.descendants.grep(*.mcid.defined);
         if @tags {
             $content.StructParents //= do {
                 my PDF::Page $Pg = $owner
                     if $owner ~~ PDF::Page;
                my UInt $idx := $.root.parent-tree.max-key + 1;
-                my @new-kids =  @tags.map: {
+                my @parents =  @tags.map: {
                     my PDF::Content::Tag $mark = .clone(:$owner, :$content);
                     my $name = $mark.name;
                     my $kid = self.add-kid($name, :$Pg);
                     $kid.add-kid: $mark;
                     $kid;
                 }
-                $.root.parent-tree[$idx] = [ @new-kids.map(*.cos) ];
+                $.root.parent-tree[$idx] = [ @parents.map(*.cos) ];
                 $idx;
             }
         }
