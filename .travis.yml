@@ -7,7 +7,7 @@ perl6:
 install:
   - rakudobrew build zef
   - git clone https://github.com/p6-pdf/PDF-Class-p6.git
-  - zef install PDF-Class-p6
+  - (cd PDF-Class-p6/ && zef install .)
   - zef --depsonly install .
 script:
   - prove -ve "perl6 -I."
