@@ -93,17 +93,13 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
     }
 
-    method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
+    my subset PageContent of PDF::Content where .parent ~~ PDF::Page;
+    method mark(PageContent $gfx, &action, :$name = self.name, |c) {
         my $kid = self.add-kid: $gfx.tag($name, &action, :mark, |c);
-        given $gfx.parent {
-            when PDF::Page {
-                my $idx = (.StructParents //= $.root.parent-tree.max-key + 1);
-                $.root.parent-tree[$idx+0][$kid.mcid] //= self.cos;
-            }
-            default {
-                warn "ignoring mark call on {.WHAT.raku} object";
-            }
-        }
+
+        my $idx = (.StructParents //= $.root.parent-tree.max-key + 1);
+        $.root.parent-tree[$idx+0][$kid.mcid] //= self.cos;
+
         $kid;
     }
 

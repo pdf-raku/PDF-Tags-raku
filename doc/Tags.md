@@ -6,22 +6,51 @@ PDF::Tags - Tagged PDF root node
 SYNOPSIS
 ========
 
-``` use PDF::Content::Tag :ParagraphTags; use PDF::Class; use PDF::Tags; use PDF::Tags::Elem;
+    use PDF::Content::Tag :ParagraphTags;
+    use PDF::Class;
+    use PDF::Tags;
+    use PDF::Tags::Elem;
 
-# create tags my PDF::Class $pdf .= new;
+    # create tags
+    my PDF::Class $pdf .= new;
 
-my $page = $pdf.add-page; my $font = $page.core-font: :family<Helvetica>, :weight<bold>; my $body-font = $page.core-font: :family<Helvetica>;
+    my $page = $pdf.add-page;
+    my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
+    my $body-font = $page.core-font: :family<Helvetica>;
 
-my PDF::Tags $tags .= create: :$pdf; my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+    my PDF::Tags $tags .= create: :$pdf;
+    my PDF::Tags::Elem $doc = $tags.add-kid(Document);
 
-$page.graphics: -> $gfx { $doc.add-kid(Paragraph).mark: $gfx, { .say('Hello tagged world!', :$font, :font-size(15), :position[50, 120]); } } $pdf.save-as: "t/pdf/tagged.pdf";
+    $page.graphics: -> $gfx {
+        $doc.add-kid(Paragraph).mark: $gfx, {
+            .say('Hello tagged world!',
+                 :$font,
+                 :font-size(15),
+                 :position[50, 120]);
+        }
+    }
+    $pdf.save-as: "t/pdf/tagged.pdf";
 
-# read tags my PDF::Class $pdf .= open: "t/pdf/tagged.pdf"); my PDF::Tags $tags .= read: :$pdf; my PDF::Tags::Elem $doc = $tags[0];
+    # read tags
+    my PDF::Class $pdf .= open: "t/pdf/tagged.pdf");
+    my PDF::Tags $tags .= read: :$pdf;
+    my PDF::Tags::Elem $doc = $tags[0];
+    say "document root {$doc.name}";
+    say " - child {.name}" for $doc.kids;
 
-# search tags my PDF::Tags @elems = $tags.find('Document//*'); ```
+    # search tags
+    my PDF::Tags @elems = $tags.find('Document//*');
 
 DESCRIPTION
 ===========
 
-A tagged PDF contains additional markup information describing the logical document structure.
+A tagged PDF contains additional logical document structure. For example in terms of Table of Contents, Sections, Paragraphs or Indexes.
+
+The logical structure follows a layout model that is similar to (and is designed to map to) other layouts such as XML, HTML, TeX and DocBook.
+
+The leaves of the structure tree are usually references to: - sections Page or XObject Form content, - images, annotations or Acrobat forms
+
+In addition to the structure tree, PDF documents may contain additional page level mark-up that further assist with accessibility and organization and processing of the content stream.
+
+This module is under construction as an experimental tool for reading or creating tagged PDF content.
 

@@ -14,7 +14,7 @@ use PDF::Class;
 use PDF::Tags;
 use PDF::Tags::Elem;
 
-my PDF::Class $pdf .= open("t/pdf/tagged.pdf");
+my PDF::Class $pdf .= open: "t/pdf/tagged.pdf";
 my PDF::Tags $tags .= read: :$pdf;
 my PDF::Tags::Elem $doc = $tags[0];
 say $doc.tag; # Document
@@ -39,7 +39,7 @@ use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags;
 use PDF::Tags;
 use PDF::Tags::Elem;
 
-# PDF::Class imports
+# PDF::Class
 use PDF::Class;
 use PDF::Annot;
 use PDF::XObject::Image;
@@ -92,7 +92,7 @@ $page.graphics: -> $gfx {
         .mark: Paragraph, { .say: "Some sample tagged text", :font($body-font), :$font-size};
     }
 
-    # render the form. Inline its marked content
+    # render the form. Inline its marked content.
     $doc.add-kid(Form).do: $gfx, $form, :position[150, 70];
 }
 
