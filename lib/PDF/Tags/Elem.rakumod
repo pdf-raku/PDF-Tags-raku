@@ -93,11 +93,10 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
     }
 
-    my subset PageContent of PDF::Content where .parent ~~ PDF::Page;
-    method mark(PageContent $gfx, &action, :$name = self.name, |c) {
+    method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
         my $kid = self.add-kid: $gfx.tag($name, &action, :mark, |c);
 
-        my $idx = (.StructParents //= $.root.parent-tree.max-key + 1);
+        my $idx = ($gfx.parent.StructParents //= $.root.parent-tree.max-key + 1);
         $.root.parent-tree[$idx+0][$kid.mcid] //= self.cos;
 
         $kid;
@@ -127,14 +126,14 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     }
 
     # build leaf nodes
-    multi method copy-tree(PDF::Tags::Mark $item, PDF::COS::Stream :$Stm!) {
-        $item.clone: :$Stm, :parent(PDF::Tags::Elem);
+    multi method copy-tree(PDF::Tags::Mark $item, PDF::COS::Stream :$Stm!, PDF::Tags::Elem :$parent!) {
+        $item.clone: :$Stm, :$parent;
     }
     multi method copy-tree(PDF::Tags::ObjRef $ref) {
         $ref.cos;
     }
 
-    multi method do(PDF::Content $gfx, PDF::XObject $xobj where .StructParent.defined, |c) {
+    method !do-reference(PDF::Content $gfx, PDF::XObject $xobj, |c) {
         my @rect = $gfx.do($xobj, |c);
         self.reference($gfx, $xobj);
         self!bbox($gfx, @rect);
@@ -142,12 +141,14 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     }
 
     multi method do(PDF::Content $gfx, PDF::XObject::Image $img, |c) {
-        my @rect = $gfx.do($img, |c);
-        self!bbox($gfx, @rect);
-        @rect;
+        self!do-reference($gfx, $img, |c);
     }
 
-   multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, |c) {
+    multi method do(PDF::Content $gfx, PDF::XObject $xobj where .StructParent.defined, |c) {
+        self!do-reference($gfx, $xobj, |c);
+    }
+
+    multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, |c) {
         my @rect = $gfx.do($xobj, |c);
 
         my $owner = $gfx.owner;
@@ -168,21 +169,24 @@ class PDF::Tags::Elem is PDF::Tags::Node {
             }
         }
         else {
-            # build marked content tags from the xobject
-            self!finish-form: $xobj, :$owner, :parent(self);
+            # automatically create /StructParents or /StructParent entries
+            self!auto-parent($xobj, :$owner, :parent(self))
+                // self.reference($gfx, $xobj);
         }
 
         self!bbox($gfx, @rect);
         @rect;
     }
 
-    method !finish-form(PDF::XObject::Form $content, PDF::Content::Graphics :$owner!) {
+    # xobject form  has marked content but no /StructParent(s) entries. Allow
+    # this as shortcut. Automatically wrap with elements and create a ParentTree entry
+    method !auto-parent(PDF::XObject::Form $content, PDF::Content::Graphics :$owner!) {
         my PDF::Content::Tag @tags = $content.gfx.tags.descendants.grep(*.mcid.defined);
         if @tags {
             $content.StructParents //= do {
                 my PDF::Page $Pg = $owner
                     if $owner ~~ PDF::Page;
-               my UInt $idx := $.root.parent-tree.max-key + 1;
+                my UInt $idx := $.root.parent-tree.max-key + 1;
                 my @parents =  @tags.map: {
                     my PDF::Content::Tag $mark = .clone(:$owner, :$content);
                     my $name = $mark.name;
@@ -193,6 +197,9 @@ class PDF::Tags::Elem is PDF::Tags::Node {
                 $.root.parent-tree[$idx] = [ @parents.map(*.cos) ];
                 $idx;
             }
+        }
+        else {
+            Nil;
         }
     }
 
@@ -221,4 +228,51 @@ class PDF::Tags::Elem is PDF::Tags::Node {
 }
 
 =begin pod
+=head1 NAME
+
+PDF::Tags::Elem - Tagged PDF structural elements
+
+=head1 SYNOPSIS
+
+  use PDF::Content::Tag :IllustrationTags, :StructureTags, :ParagraphTags;
+  use PDF::Tags;
+  use PDF::Tags::Elem;
+  use PDF::Class;
+
+  # element creation
+  my PDF::Class $pdf .= new;
+  my PDF::Tags $tags .= create: :$pdf;
+  my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+
+  my $page = $pdf.add-page;
+  my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
+
+  $page.graphics: -> $gfx {
+      my PDF::Tags::Elem $header = $doc.add-kid(Header1);
+      my PDF::Tags::Mark $mark = $header.mark: $gfx, {
+        .say: 'This header is marked',
+              :$font,
+              :font-size(15),
+              :position[50, 120];
+        }
+
+      # add a figure with a caption
+      my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
+      $doc.add-kid(Figure).do: $gfx, $img, :position[50, 70];
+      $doc.add-kid(Caption).mark: $gfx, {
+          .say("Eureka!", :position[40, 60]),
+      }
+  }
+
+  $pdf.save-as: "/tmp/tagged.pdf";
+
+  # reading
+  $pdf .= open: "/tmp/tagged.pdf";
+  $tags .= read: :$pdf;
+  $doc = $tags[0]; # root element
+  say $doc.name; # Document
+  say $doc.kids>>.name.join(','); # H1,Figure,Caption
+
+=head1 DESCRIPTION
+
 =end pod

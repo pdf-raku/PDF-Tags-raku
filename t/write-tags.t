@@ -48,24 +48,13 @@ $page.graphics: -> $gfx {
     is $mark.name, 'P', 'inner tag name';
     is $mark.parent.name, 'P', 'outer tag name';
 
-    sub outer-rect(*@rects) {
-        [
-            @rects.map(*[0].round).min, @rects.map(*[1].round).min,
-            @rects.map(*[2].round).max, @rects.map(*[3].round).max,
-        ]
-    }
-
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
-    my @rect;
-    $mark = $doc.add-kid(Figure).mark: $gfx, {
-        @rect = outer-rect([
-            $gfx.do($img, :position[50, 70]),
-            $gfx.say("Eureka!", :tag<Caption>, :position[40, 60]),
-            ]);
+    $doc.add-kid(Figure).do: $gfx, $img, :position[50, 70];
+    is $img.struct-parent, 1, '$img.struct-parent';
+    $doc.add-kid(Caption).mark: $gfx, {
+        .say("Eureka!", :position[40, 60]),
     }
-    $mark.parent.set-bbox($gfx, @rect);
-    is-deeply $mark.parent.attributes<BBox>, [40, 60, 81, 89], 'image tag BBox';
 
     my Hash $annot = PDF::COS.coerce: :dict{
         :Type(:name<Annot>),
@@ -82,8 +71,8 @@ $page.graphics: -> $gfx {
     my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;
     isa-ok $cos-obj, "PDF::Annot::Link", '$obj-ref.object';
-    is $cos-obj.struct-parent, 1, '$obj-ref.object.struct-parent';
-    is-deeply $tags.parent-tree[1], $link.cos, 'parent-tree entry'; 
+    is $cos-obj.struct-parent, 2, '$obj-ref.object.struct-parent';
+    is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
 
     my  PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     $form.text: {
@@ -102,6 +91,6 @@ lives-ok { $pdf.save-as: "t/write-tags.pdf" }
 
 $pdf .= open: "t/write-tags.pdf";
 $tags .= read: :$pdf;
-is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Link,Form,H2,P,Form,H2,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
 
 done-testing;
