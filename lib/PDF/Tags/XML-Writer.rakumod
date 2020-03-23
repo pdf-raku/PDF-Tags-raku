@@ -14,7 +14,7 @@ use PDF::Class::StructItem;
 has UInt $.max-depth = 16;
 has Bool $.render = True;
 has Bool $.atts = True;
-has $.css = '<?xml-stylesheet type="text/css" href="https://raw.githubusercontent.com/p6-pdf/PDF-Tags-raku/master/resources/tagged-pdf.css"?>';
+has $.css = '<?xml-stylesheet type="text/css" href="https://p6-pdf.github.io/css/tagged-pdf.css"?>';
 has Bool $.debug = False;
 has Str  $.omit;
 
