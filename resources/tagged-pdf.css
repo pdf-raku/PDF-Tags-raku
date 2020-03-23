@@ -1,0 +1,45 @@
+Document, Part, Art, Sect, Div, 
+BlockQuote,
+Caption, TOC, Index,
+H, H1, H2, H3, H4,
+H5, H6, P, Index, L { display: block; unicode-bidi: embed }
+TOCI, Li         { display: list-item }
+NonStruct        { display: none }
+Table            { display: table }
+TR               { display: table-row }
+THead            { display: table-header-group }
+TBody            { display: table-row-group }
+TFoot            { display: table-footer-group }
+TD, TH           { display: table-cell; border: 1px solid; padding: 5px}
+Caption          { display: table-caption }
+TH               { font-weight: bolder; text-align: center }
+Caption          { text-align: center }
+TH               { font-weight: bolder; text-align: center }
+Document         { margin: 8px }
+H, H1            { font-size: 2em; margin: .67em 0 }
+H2               { font-size: 1.5em; margin: .75em 0 }
+H3               { font-size: 1.17em; margin: .83em 0 }
+H4, P,
+Blockquote, Form { margin: 1.12em 0 }
+H5               { font-size: .83em; margin: 1.5em 0 }
+H6               { font-size: .75em; margin: 1.67em 0 }
+H1, H2, H3, H4,
+H5, H6           { font-weight: bolder }
+BlockQuote       { margin-left: 40px; margin-right: 40px }
+Code             { font-family: monospace }
+Table            { }
+THead, TBody,
+TFoot            { vertical-align: middle }
+TD, TH, TR       { vertical-align: inherit }
+Li               { margin-left: 40px }
+L                { margin-top: 0; margin-bottom: 0 }
+Annot, Link      { text-decoration: underline }
+:link, :visited { text-decoration: underline }
+:focus          { outline: thin dotted invert }
+
+@media print {
+    H, H1        { page-break-before: always }
+    H1, H2, H3,
+    H4, H5, H6   { page-break-after: avoid }
+    L            { page-break-before: avoid }
+}

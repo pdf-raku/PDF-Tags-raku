@@ -14,6 +14,7 @@ use PDF::Class::StructItem;
 has UInt $.max-depth = 16;
 has Bool $.render = True;
 has Bool $.atts = True;
+has $.css = '<?xml-stylesheet type="text/css" href="https://raw.githubusercontent.com/p6-pdf/PDF-Tags-raku/master/resources/tagged-pdf.css"?>';
 has Bool $.debug = False;
 has Str  $.omit;
 
@@ -53,7 +54,16 @@ method say(IO::Handle $fh, PDF::Tags::Item $item) {
 }
 
 multi method stream-xml(PDF::Tags::Root $_, :$depth!) {
-    self.stream-xml($_, :$depth) for .kids;
+    take line(0, '<?xml version="1.0" encoding="UTF-8"?>');
+    take line(0, $!css) if $!css;
+
+    if .elems {
+        warn "Tagged PDF has multiple top-level tags" if .elems > 1;
+        self.stream-xml($_, :$depth) for .kids;
+    }
+    else {
+        warn "Tagged PDF has no content";
+    }
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
