@@ -87,7 +87,7 @@ $page.graphics: -> $gfx {
     }
 }
 
-lives-ok { $pdf.save-as: "t/write-tags.pdf" }
+lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info }
 
 $pdf .= open: "t/write-tags.pdf";
 $tags .= read: :$pdf;

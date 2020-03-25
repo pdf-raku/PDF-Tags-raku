@@ -134,4 +134,17 @@ Classes in this Distribution
 Scripts in this Distribution
 ------
 
-##### `pdf-tag-dump.p6 --include=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/render --/atts --debug t/pdf/tagged.pdf`
+##### `pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/render --/atts --/style --debug t/pdf/tagged.pdf`
+
+Todo
+---
+
+- Complete POD
+- Release (CPAN)
+
+Further Work
+----
+
+- Type-casting of PDF::StructElem.A to roles; as per 14.8.5. Possibly belongs in PDF::Class, however slightly complicated by the need to apply role-mapping.
+
+- Develop a tag/accessability checker. A low-level sanity checker that a tagged PDF is PDF/UA compliant `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf. Accessibility/UA compilance is probably the most common goal of tagging a PDF.

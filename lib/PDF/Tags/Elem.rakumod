@@ -19,36 +19,34 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::XObject::Form;
     use PDF::Class::StructItem;
 
-    method cos(--> PDF::StructElem) { callsame() }
+    method cos(--> PDF::StructElem) handles <ActualText Alt> { callsame() }
     has PDF::Tags::Node $.parent is rw = self.root;
-    has %!attributes;
-    has Bool $!atts-built;
+    has Hash $!attributes;
     has Str $.name is built;
     has Str $.class is built;
     has Bool $!hash-init;
 
     method attributes {
-        $!atts-built ||= do {
+        $!attributes //= do {
+            my %atts;
             for $.cos.attribute-dicts -> Hash $atts {
-                %!attributes{$_} = $atts{$_}
+                %atts{$_} = $atts{$_}
                     for $atts.keys
             }
 
-            unless %!attributes {
+            unless %atts {
                 for $.cos.class-map-keys {
                     with $.root.class-map{$_} -> $atts {
-                        %!attributes{$_} = $atts{$_}
+                        %atts{$_} = $atts{$_}
                             for $atts.keys
                     }
                 }
             }
 
-            %!attributes<class> = $_ with $!class;
+            %atts<class> = $_ with $!class;
 
-            True;
+            %atts;
         }
-
-        %!attributes;
     }
 
     method build-kid($) {
@@ -77,9 +75,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         self.attributes{.substr(1)};
     }
 
-    method actual-text { $.cos.ActualText }
-
-    method text { $.actual-text // $.kids.map(*.text).join }
+    method text { $.ActualText // $.kids.map(*.text).join }
 
     submethod TWEAK {
         self.Pg = $_ with self.cos.Pg;
@@ -203,13 +199,23 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         }
     }
 
+    has Bool $!atts-reset;
+    method set-attribute(Str() $key, $val) {
+        given self.cos<A> {
+            # could be an array of dicts + revisions
+            $_ = %(self.attributes)
+                unless $_ ~~ Hash:D;
+            .{$key} = self.attributes{$key} = $val;
+       }
+     }
+
     method !bbox($gfx, @rect) {
         self.set-bbox($gfx, @rect)
             if self.name ~~ 'Figure'|'Form'|'Table'|'Formula';
     }
 
     method set-bbox(PDF::Content $gfx, @rect) {
-        self.attributes<BBox> = $gfx.base-coords(@rect).Array;
+        self.set-attribute('BBox', $gfx.base-coords(@rect).Array);
     }
 
     method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
@@ -275,4 +281,71 @@ PDF::Tags::Elem - Tagged PDF structural elements
 
 =head1 DESCRIPTION
 
+PDF::Tags::Elem represents one node in the structure tree.
+
+=head1 METHODS
+
+This class inherits form PDF::Tags::Node and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find` and `first`)
+
+=begin item
+attributes
+
+  my %atts = $elem.attributes;
+
+return attributes as a Hash
+=end item
+
+=begin item
+set-attribute
+
+  $elem.set-attribute('BBox', [0, 0, 200, 50]);
+
+Set a single attribute by key and value.
+=end item
+
+=begin item
+ActualText
+
+   my $text = $elem.ActualText;
+
+Return predefined actual text for the structual node and any children. This is an optional property.
+=end item
+
+=begin item
+text
+
+   my Str $text = $elem.text();
+
+Return the text for the node and its children. Use `ActualText()` if present. Otherwise this is computed as concationated child text elements.
+=end item
+
+=begin item
+Alt
+
+   my Str $alt-text = $elem.Alt();
+
+Return an alternate description for the structual element and its children in human readable form.
+=end item
+
+=begin item
+do
+
+    my @rect = $elem.do($page.gfx, $img);
+
+Place an XObject Image or Form as a structural item.
+
+If the object is a Form that contains marked content, its structure is appended to the element. Any other form or image is referenced (see below).
+
+=end item
+
+=begin item
+reference
+
+    $elem.reference($page.gfx, $object);
+
+Create and place a reference to an XObject (type PDF::XObject) , Annotation (type PDF::Annot), or Form (type PDF::Form);
+
+=end item
+
 =end pod
+

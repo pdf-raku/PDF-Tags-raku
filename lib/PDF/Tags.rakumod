@@ -32,20 +32,21 @@ class PDF::Tags:ver<0.0.1>
             given $cos.ParentTree //= { :Nums[] };
     }
 
-    method read(PDF::Class :$pdf!, Bool :$create, Bool :$marks = False) {
+    method read(PDF::Class :$pdf!, Bool :$create, |c) {
         with $pdf.catalog.StructTreeRoot -> $cos {
-            self.new: :$cos, :root(self.WHAT), :$marks;
+            self.new: :$cos, :root(self.WHAT), |c;
         }
         else {
             $create
-                ?? self.create(:$pdf)
-                !! fail "document does not contain marked content";
+                ?? self.create(:$pdf, |c)
+                !! fail "PDF document does not contain marked content";
         }
     }
 
     method create(
         PDF::StructTreeRoot :$cos = PDF::COS.coerce({ :Type( :name<StructTreeRoot> )}),
         PDF::Class :$pdf,
+        |c
     ) {
         $cos.check;
 
@@ -58,8 +59,9 @@ class PDF::Tags:ver<0.0.1>
             }
             .<Marked> = True
                 given .Root<MarkInfo> //= {};
+            .creator.push: "PDF::Tags-{PDF::Tags.^ver}";
         }
-        self.new: :$cos, :root(self.WHAT), :marks;
+        self.new: :$cos, :root(self.WHAT), :marks, |c
     }
 
     class TextDecoder {

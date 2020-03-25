@@ -15,6 +15,7 @@ has UInt $.max-depth = 16;
 has Bool $.render = True;
 has Bool $.atts = True;
 has $.css = '<?xml-stylesheet type="text/css" href="https://p6-pdf.github.io/css/tagged-pdf.css"?>';
+has Bool $.style = True;
 has Bool $.debug = False;
 has Str  $.omit;
 
@@ -55,7 +56,7 @@ method say(IO::Handle $fh, PDF::Tags::Item $item) {
 
 multi method stream-xml(PDF::Tags::Root $_, :$depth!) {
     take line(0, '<?xml version="1.0" encoding="UTF-8"?>');
-    take line(0, $!css) if $!css;
+    take line(0, $!css) if $!style;
 
     if .elems {
         warn "Tagged PDF has multiple top-level tags" if .elems > 1;
@@ -88,7 +89,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         take line($depth, "<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->");
     }
     else {
-        with $node.actual-text {
+        with $node.ActualText {
             take line($depth, '<!-- actual text -->')
                 if $!debug;
             given html-escape(trim($_)) -> $text {
@@ -145,7 +146,7 @@ multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
 }
 
 method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
-    my $text = $node.actual-text // do {
+    my $text = $node.ActualText // do {
         my @text = $node.kids.map: {
             when PDF::Tags::Mark {
                 my $text = self!marked-content($_, :$depth);

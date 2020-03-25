@@ -52,18 +52,17 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     method attributes handles<AT-KEY> {
         $!atts-built ||= do {
             %!attributes = $!mark.attributes;
-            do with %!attributes<ActualText>:delete -> $cos {
-                $!actual-text = PDF::COS::TextString.new(:$cos);
-            }
+            $!actual-text = PDF::COS::TextString.new: :value($_)
+                with %!attributes<ActualText>;
             True;
         }
         %!attributes;
     }
-    method actual-text {
+    method ActualText {
         $.attributes unless $!atts-built;
         $!actual-text;
     }
-    method text { $.actual-text // $.kids.map(*.text).join }
+    method text { $.ActualText // $.kids.map(*.text).join }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         self.kids-raw[$i] //= self.build-kid($!mark.kids[$i]);

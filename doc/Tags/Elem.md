@@ -48,3 +48,54 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
+PDF::Tags::Elem represents one node in the structure tree.
+
+METHODS
+=======
+
+This class inherits form PDF::Tags::Node and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find` and `first`)
+
+  * attributes
+
+        my %atts = $elem.attributes;
+
+    return attributes as a Hash
+
+  * set-attribute
+
+        $elem.set-attribute('BBox', [0, 0, 200, 50]);
+
+    Set a single attribute by key and value.
+
+  * ActualText
+
+        my $text = $elem.ActualText;
+
+    Return predefined actual text for the structual node and any children. This is an optional property.
+
+  * text
+
+        my Str $text = $elem.text();
+
+    Return the text for the node and its children. Use `ActualText()` if present. Otherwise this is computed as concationated child text elements.
+
+  * Alt
+
+        my Str $alt-text = $elem.Alt();
+
+    Return an alternate description for the structual element and its children in human readable form.
+
+  * do
+
+        my @rect = $elem.do($page.gfx, $img);
+
+    Place an XObject Image or Form as a structural item.
+
+    If the object is a Form that contains marked content, its structure is appended to the element. Any other form or image is referenced (see below).
+
+  * reference
+
+        $elem.reference($page.gfx, $object);
+
+    Create and place a reference to an XObject (type PDF::XObject) , Annotation (type PDF::Annot), or Form (type PDF::Form);
+

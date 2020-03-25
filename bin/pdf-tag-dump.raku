@@ -5,6 +5,7 @@ use PDF::Class;
 use PDF::Catalog;
 use PDF::StructTreeRoot;
 use PDF::Tags::XML-Writer;
+use PDF::Tags::Node;
 use PDF::IO;
 
 subset Number of Int where { !.defined || $_ > 0 };
@@ -17,7 +18,8 @@ sub MAIN(Str $infile,              #= input PDF
          Bool   :$debug,           #= write extra debugging information
          Bool   :$marks,           #= also include content stream tags
          Bool   :$strict = True;   #= warn about unknown tags, etc
-         Str    :$include,         #= XPath of twigs to include (relative to root)
+         Bool   :$style = True;    #= include stylesheet
+         Str    :$select,          #= XPath of twigs to include (relative to root)
          Str    :$omit,            #= Tags to omit from output
         ) {
 
@@ -28,18 +30,14 @@ sub MAIN(Str $infile,              #= input PDF
     );
 
     my PDF::Class $pdf .= open( $input, :$password );
-    my PDF::Catalog $catalog = $pdf.catalog;
-    my PDF::StructTreeRoot:D $cos =  $pdf.catalog.StructTreeRoot
-        // die "PDF document does not contain marked content: $infile";
+    my PDF::Tags $tags .= read: :$pdf, :$strict, :$marks;
+    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit, :$style;
 
-    my PDF::Tags $dom .= new: :$cos, :$render, :$strict, :$marks, :root(PDF::Tags);
-    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit;
-
-    my @nodes = do with $include {
-        $dom.find($_);
+    my PDF::Tags::Node @nodes = do with $select {
+        $tags.find($_);
     }
     else {
-        $dom.root;
+        $tags.root;
     }
 
     $xml.say($*OUT, $_) for @nodes;
@@ -54,11 +52,14 @@ pdf-dom-dump.raku [options] file.pdf
 Options:
    --password          password for an encrypted PDF
    --max-depth=n       maximum tag-depth to descend
-   --xpath=expr        dump selected node(s)
-   --marks             dump content markersd
+   --select=XPath      nodes to be included
+   --omit=tag-name     nodes to be excluded
+   --marks             dump content markers
+   --debug             adding debugging to output
    --/render           omit rendering (avoid finding content-level tags)
    --/atts             omit attributes in tags
    --/strict           suppress warnings
+   --/style            omit stylesheet link
 
 =head1 DESCRIPTION
 
@@ -66,10 +67,10 @@ Locates and dumps structure elements from a tagged PDF.
 
 Produces raw tagged output in an XML/SGMLish format.
 
-Only some PDF files contain tagged PDF. pdf-info.p6 can be
+Only some PDF files contain tagged PDF. pdf-info.raku can be
 used to check this:
 
-    % pdf-info.p6 my-doc.pdf | grep Tagged:
+    % pdf-info.raku my-doc.pdf | grep Tagged:
     Tagged:     yes
 
 =head1 DEPENDENCIES
