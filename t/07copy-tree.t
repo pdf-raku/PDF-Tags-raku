@@ -37,9 +37,9 @@ $page.graphics: -> $gfx {
     my  PDF::XObject $Stm = $page.xobject-form: :BBox[0, 0, 200, 50];
 
     is $mark.xml.trim, '<Span/>';
-    is-deeply $header.xml.trim.lines, ('<H1>', '  <Span/>', '</H1>');
+    is $header.xml.trim, '<H1>Header text</H1>';
     my $copy = $header.copy-tree(:$Stm, :parent($doc));
-    is-deeply $copy.xml.trim.lines, ('<H1>', '  <Span/>', '</H1>');
+    is $copy.xml.trim, '<H1>Header text</H1>';
 }
 
 done-testing;

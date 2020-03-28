@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 14;
+plan 15;
 
 use PDF::Class;
 use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :StructureTags;
@@ -38,6 +38,7 @@ $page.graphics: -> $gfx {
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
     is $mark.parent.name, 'H1', 'parent elem name';
+    is $mark.parent.ActualText, "Header text\n", '$.ActualText()';
 
     is $page.struct-parent, 0, '$page.struct-parent';
     is-deeply $tags.parent-tree[0][0], $header.cos, 'parent-tree entry'; 

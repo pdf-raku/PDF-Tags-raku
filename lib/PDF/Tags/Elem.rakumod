@@ -10,7 +10,6 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::Tags::Item :&build-item;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
-    use PDF::Tags::XPath::Axis;
     # PDF:Class
     use PDF::OBJR;
     use PDF::MCR;
@@ -92,7 +91,9 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     }
 
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
-        my $kid = self.add-kid: $gfx.tag($name, &action, :mark, |c);
+        my $*ActualText = ''; # Populated by PDF::Content::Text::Block
+        my PDF::Tags::Mark $kid = self.add-kid( $gfx.tag($name, &action, :mark, |c) );
+        self.ActualText ~= $*ActualText;
 
         given $gfx.parent.StructParents -> $idx is rw {
             $idx //= $.root.parent-tree.max-key + 1
@@ -115,7 +116,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
             :$P,
             :$Stm,
         );
-        for <A C T Lang Alt E ActualTex Pg> -> $k {
+        for <A C T Lang Alt E ActualText Pg> -> $k {
             $to-cos{$k} = $_ with $from-cos{$k};
         }
         $to-cos<Pg> = $_ with $.Pg;

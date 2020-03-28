@@ -1,5 +1,7 @@
 use PDF::Tags::Node;
-class PDF::Tags::Mark is PDF::Tags::Node {
+
+class PDF::Tags::Mark
+    is PDF::Tags::Node {
 
     use PDF::Page;
     use PDF::COS;
