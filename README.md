@@ -83,17 +83,18 @@ $page.graphics: -> $gfx {
 
     $doc.add-kid(Link).reference($gfx, $link);
 
-    # create XObject form with unparented marked content
-    my  PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    # tagged XObject Form
+    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my $form-elem = $doc.add-kid(Form);
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        .mark: Header2, { .say: "Tagged XObject header", :font($header-font), :$font-size};
-        .mark: Paragraph, { .say: "Some sample tagged text", :font($body-font), :$font-size};
+        $form-elem.add-kid(Header2).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
+        $form-elem.add-kid(Paragraph).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
     }
 
-    # render the form. Inline its marked content.
-    $doc.add-kid(Form).do: $gfx, $form, :position[150, 70];
+    # render the form contained in $form-elem
+    $form-elem.do: $gfx, :position[150, 70];
 }
 
 $pdf.save-as: "/tmp/marked.pdf"
@@ -148,3 +149,6 @@ Further Work
 - Type-casting of PDF::StructElem.A to roles; as per 14.8.5. Possibly belongs in PDF::Class, however slightly complicated by the need to apply role-mapping.
 
 - Develop a tag/accessability checker. A low-level sanity checker that a tagged PDF is PDF/UA compliant `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf. Accessibility/UA compilance is probably the most common goal of tagging a PDF.
+
+- Editing. Currently the API primarily runs in `create` or `read` modes, but doesn't readily support editing tags into existing content. More work is also
+needed in the PDF::Content module to support content editing.

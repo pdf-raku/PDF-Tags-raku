@@ -5,8 +5,8 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     use PDF::COS;
     use PDF::COS::TextString;
     use PDF::Content::Tag;
-    use PDF::Content::Tag;
     use PDF::Content::Graphics;
+    use PDF::XObject::Form;
     use PDF::MCR;
 
     has PDF::Tags::Node $.parent is rw;
@@ -17,16 +17,22 @@ class PDF::Tags::Mark is PDF::Tags::Node {
     has PDF::Content::Tag $.mark is built handles<name mcid elems>;
 
     method set-cos($!mark) {
+        my PDF::Page $Pg = $.Pg;
+        given $!mark.owner {
+            when PDF::XObject::Form { $!Stm = $_ }
+            when PDF::Page { $Pg = $_; }
+            # unlikely
+            default { warn "can mark object of type {.WHAT.raku}"; }
+        }
         my PDF::MCR $mcr;
         with $.mcid -> $MCID {
             # only linked into the struct-tree if it has an MCID attribute
-            my PDF::Page $Pg = $!mark.owner ~~ PDF::Page ?? $!mark.owner !! $.Pg;
 
             $mcr = PDF::COS.coerce: %(
                 :Type( :name<MCR> ),
                 :$MCID,
-                :$Pg,
             );
+            $mcr<Pg> = $_ with $Pg;
             $mcr<Stm> = $_ with $!Stm;
         }
         callwith($mcr);

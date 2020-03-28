@@ -93,6 +93,21 @@ This class inherits form PDF::Tags::Node and has its method available, (includin
 
     If the object is a Form that contains marked content, its structure is appended to the element. Any other form or image is referenced (see below).
 
+    The image argument can be omitted, if the element sub-tree contains an xobject image:
+
+        my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+        my $form-elem = $doc.add-kid(Form);
+        $form.text: {
+            my $font-size = 12;
+            .text-position = [10, 38];
+            $form-elem.add-kid(Header2).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
+            $form-elem.add-kid(Paragraph).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
+        }
+
+        $form-elem.do($page.gfx, :position[150, 70]);
+
+    This is the recommended way of composing an XObject Form with marked content. It will ensure the logical structure is accurately captured, including any nested tags and object references to images, or annotations.
+
   * reference
 
         $elem.reference($page.gfx, $object);

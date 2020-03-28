@@ -10,8 +10,10 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::Tags::Item :&build-item;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
+    use PDF::Tags::XPath::Axis;
     # PDF:Class
     use PDF::OBJR;
+    use PDF::MCR;
     use PDF::Page;
     use PDF::StructElem;
     use PDF::XObject;
@@ -92,27 +94,31 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
         my $kid = self.add-kid: $gfx.tag($name, &action, :mark, |c);
 
-        my $idx = ($gfx.parent.StructParents //= $.root.parent-tree.max-key + 1);
-        $.root.parent-tree[$idx+0][$kid.mcid] //= self.cos;
+        given $gfx.parent.StructParents -> $idx is rw {
+            $idx //= $.root.parent-tree.max-key + 1
+                if $gfx.owner ~~ PDF::Page;
+            $.root.parent-tree[$_+0][$kid.mcid] //= self.cos
+                with $idx;
+        }
 
         $kid;
     }
 
     # build intermediate node
     multi method copy-tree(PDF::Tags::Elem $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
-         my PDF::StructElem $from-cos = $from-elem.cos;
+        my PDF::StructElem $from-cos = $from-elem.cos;
         my $S = $from-cos.S;
         my PDF::StructElem $P = $parent.cos;
         my PDF::StructElem $to-cos =  PDF::COS.coerce: %(
             :Type( :name<StructElem> ),
             :$S,
             :$P,
-            :$.Pg,
             :$Stm,
         );
-        for <A C T Lang Alt E ActualText> -> $k {
+        for <A C T Lang Alt E ActualTex Pg> -> $k {
             $to-cos{$k} = $_ with $from-cos{$k};
         }
+        $to-cos<Pg> = $_ with $.Pg;
         my PDF::Tags::Elem $to-elem = build-item($to-cos, :$.root, :$parent);
         for $from-elem.kids {
             my PDF::Tags::Item:D $kid = $.copy-tree($_, :$Stm, :parent($to-elem));
@@ -136,63 +142,108 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         @rect;
     }
 
-    multi method do(PDF::Content $gfx, PDF::XObject::Image $img, |c) {
-        self!do-reference($gfx, $img, |c);
+    multi method do(PDF::Content $gfx, PDF::XObject::Image $img, *%o) {
+        self!do-reference($gfx, $img, |%o);
     }
 
-    multi method do(PDF::Content $gfx, PDF::XObject $xobj where .StructParent.defined, |c) {
-        self!do-reference($gfx, $xobj, |c);
-    }
+    multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, *%o) {
 
-    multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, |c) {
-        my @rect = $gfx.do($xobj, |c);
-
-        my $owner = $gfx.owner;
-        my PDF::Page $Pg = $owner
+        if $xobj.StructParents.defined // self!setup-parents($xobj) {
+            my @rect = $gfx.do($xobj, %o);
+            my $owner = $gfx.owner;
+            my PDF::Page $Pg = $owner
             if $owner ~~ PDF::Page;
 
-        with $xobj.StructParents {
-            # avoid rendering the xobject, if possible; likely to
-            # work better with foreign xobjects
-            my Array $parents = self.root.parent-tree[$_+0];
+            given $xobj.StructParents {
+                # potentially lossy. parent-tree only includes
+                # marked content references
+                my Array $parents = self.root.parent-tree[$_+0];
 
-            for $parents.keys {
-                # copy sub-trees
-                my PDF::StructElem $cos = $parents[$_];
-                my PDF::Tags::Elem $elem = build-item($cos, :$.root, :$Pg, :parent(self));
-                self.add-kid: $elem.copy-tree(:Stm($xobj), :parent(self));
-                
+                for $parents.keys {
+                    # copy sub-trees
+                    my PDF::StructElem $cos = $parents[$_];
+                    my PDF::Tags::Elem $elem = build-item($cos, :$.root, :$Pg, :parent(self));
+                    self.add-kid: $elem.copy-tree(:Stm($xobj), :parent(self));
+                }
             }
+            self!bbox($gfx, @rect);
+            @rect;
         }
         else {
-            # automatically create /StructParents or /StructParent entries
-            self!auto-parent($xobj, :$owner, :parent(self))
-                // self.reference($gfx, $xobj);
+            self!do-reference($gfx, $xobj, |%o);
+        }
+    }
+
+    # depth first search for referenced xobject
+    multi sub find-xobjects([]) { [] }
+    multi sub find-xobjects(@elems) {
+        my subset XObjRef of PDF::Tags::ObjRef where .cos.object ~~ PDF::XObject;
+        my PDF::XObject @xobjects = @elems.map({
+            when PDF::Tags::Mark { .Stm }
+            when XObjRef { .cos.object }
+            default { Mu }
+        }).grep(*.defined);
+
+        @xobjects ||= do {
+            my @kids;
+            @kids.append: .kids for @elems;
+            find-xobjects(@kids);
+        }
+    }
+    # smart do on a subtree containing an x-object
+    multi method do(PDF::Content $gfx, *%o) {
+        my PDF::XObject @xobjects = find-xobjects([self]).unique
+            || die "no xobject found";
+        die "element cointains multiple xobjects" if @xobjects > 1;
+        my $xobj = @xobjects[0];
+
+        my @rect = $gfx.do($xobj, |%o);
+
+        given $xobj {
+            when PDF::XObject::Form && !.StructParent.defined {
+                if .StructParents.defined {
+                    my PDF::Tags::Elem:D $parent = self.parent;
+                    $parent.add-kid: self.copy-tree(:Stm($_), :$parent);
+                }
+                else {
+                    # automatically create /StructParents or /StructParent entries
+                    self!setup-parents($_)
+                        // self.reference($gfx, $_);
+                }
+            }
+            default {
+                self.reference($gfx, $_);
+            }
         }
 
         self!bbox($gfx, @rect);
         @rect;
     }
 
+    multi sub find-parents(PDF::Tags::Elem $_, $xobj) {
+        my PDF::Tags::Elem @parents;
+        if .kids.first({
+            $_ ~~ PDF::Tags::Mark && .cos.Stm === $xobj
+        }) {
+            @parents.push: $_;
+        }
+        else {
+            @parents.append: find-parents($_, $xobj)
+                for .kids;
+        }
+
+        @parents;
+    }
+    multi sub find-parents($, $) is default { [] }
+
     # xobject form  has marked content but no /StructParent(s) entries. Allow
     # this as shortcut. Automatically wrap with elements and create a ParentTree entry
-    method !auto-parent(PDF::XObject::Form $content, PDF::Content::Graphics :$owner!) {
-        my PDF::Content::Tag @tags = $content.gfx.tags.descendants.grep(*.mcid.defined);
-        if @tags {
-            $content.StructParents //= do {
-                my PDF::Page $Pg = $owner
-                    if $owner ~~ PDF::Page;
-                my UInt $idx := $.root.parent-tree.max-key + 1;
-                my @parents =  @tags.map: {
-                    my PDF::Content::Tag $mark = .clone(:$owner, :$content);
-                    my $name = $mark.name;
-                    my $kid = self.add-kid($name, :$Pg);
-                    $kid.add-kid: $mark;
-                    $kid;
-                }
-                $.root.parent-tree[$idx] = [ @parents.map(*.cos) ];
-                $idx;
-            }
+    method !setup-parents(PDF::XObject::Form $xobj) {
+        my @parents = find-parents(self, $xobj);
+        if @parents {
+            my UInt $idx := $.root.parent-tree.max-key + 1;
+            $.root.parent-tree[$idx] = [ @parents.map(*.cos) ];
+            $xobj.StructParents = $idx;
         }
         else {
             Nil;
@@ -219,12 +270,16 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     }
 
     method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
-        my PDF::Page $Pg = $gfx.owner;
-        self.add-kid: PDF::COS.coerce: %(
+        my PDF::OBJR $ref = PDF::COS.coerce: %(
             :Type( :name<OBJR> ),
             :$Obj,
-            :$Pg;
         );
+
+        given $gfx.owner {
+            when PDF::Page { $ref<Pg> = $_ }
+        }
+        self.add-kid: $ref;
+
         without $Obj.StructParent {
             $_ = $.root.parent-tree.max-key + 1;
             $.root.parent-tree[$_ + 0] = self.cos;
@@ -335,6 +390,21 @@ do
 Place an XObject Image or Form as a structural item.
 
 If the object is a Form that contains marked content, its structure is appended to the element. Any other form or image is referenced (see below).
+
+The image argument can be omitted, if the element sub-tree contains an xobject image:
+
+    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my $form-elem = $doc.add-kid(Form);
+    $form.text: {
+        my $font-size = 12;
+        .text-position = [10, 38];
+        $form-elem.add-kid(Header2).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
+        $form-elem.add-kid(Paragraph).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
+    }
+
+    $form-elem.do($page.gfx, :position[150, 70]);
+
+This is the recommended way of composing an XObject Form with marked content. It will ensure the logical structure is accurately captured, including any nested tags and object references to images, or annotations.
 
 =end item
 

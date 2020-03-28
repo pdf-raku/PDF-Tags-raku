@@ -43,7 +43,7 @@ $page.graphics: -> $gfx {
     is-deeply $tags.parent-tree[0][0], $header.cos, 'parent-tree entry'; 
 
     $mark = $doc.add-kid(Paragraph).mark: $gfx, {
-        .say('Some body text', :position[50, 100], :font($body-font), :font-size(12));
+        .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
     }
     is $mark.name, 'P', 'inner tag name';
     is $mark.parent.name, 'P', 'outer tag name';
@@ -53,7 +53,7 @@ $page.graphics: -> $gfx {
     $doc.add-kid(Figure).do: $gfx, $img, :position[50, 70];
     is $img.struct-parent, 1, '$img.struct-parent';
     $doc.add-kid(Caption).mark: $gfx, {
-        .say("Eureka!", :position[40, 60]),
+        .say: "Eureka!", :position[40, 60];
     }
 
     my Hash $annot = PDF::COS.coerce: :dict{
@@ -74,20 +74,20 @@ $page.graphics: -> $gfx {
     is $cos-obj.struct-parent, 2, '$obj-ref.object.struct-parent';
     is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
 
-    my  PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my $form-elem = $doc.add-kid(Form);
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        .mark: Header2, { .say: "Tagged XObject header", :font($header-font), :$font-size};
-        .mark: Paragraph, { .say: "Some sample tagged text", :font($body-font), :$font-size};
+        $form-elem.add-kid(Header2).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
+        $form-elem.add-kid(Paragraph).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
     }
 
-    for 1..2 {
-        $doc.add-kid(Form).do: $gfx, $form, :position[150, 70];
-    }
+    $form-elem.do($gfx, :position[150, 70]);
+    $form-elem.do($gfx, :position[150, 20]);
 }
 
-lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info }
+lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 
 $pdf .= open: "t/write-tags.pdf";
 $tags .= read: :$pdf;
