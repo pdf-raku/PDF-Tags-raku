@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 15;
+plan 16;
 
 use PDF::Class;
 use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :StructureTags;
@@ -51,8 +51,12 @@ $page.graphics: -> $gfx {
 
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
-    $doc.add-kid(Figure).do: $gfx, $img, :position[50, 70];
+    my $figure = $doc.add-kid: Figure, :Alt("A light-bulb");
+    $figure.do: $gfx, $img, :position[50, 70];
     is $img.struct-parent, 1, '$img.struct-parent';
+    my PDF::Tags::ObjRef $ref = $figure.kids[0];
+    ok $ref.object === $img, '$ref.object';
+
     $doc.add-kid(Caption).mark: $gfx, {
         .say: "Eureka!", :position[40, 60];
     }

@@ -69,7 +69,7 @@ $page.graphics: -> $gfx {
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $doc.add-kid(Figure).do($gfx, $img);
+    $doc.add-kid(Figure, :Alt('Incandescent apparatus').do($gfx, $img);
 
     # add a marked link annotation
     my PDF::Annot $link = PDF::COS.coerce: :dict{
@@ -148,7 +148,7 @@ Further Work
 
 - Type-casting of PDF::StructElem.A to roles; as per 14.8.5. Possibly belongs in PDF::Class, however slightly complicated by the need to apply role-mapping.
 
-- Develop a tag/accessability checker. A low-level sanity checker that a tagged PDF is PDF/UA compliant `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf. Accessibility/UA compilance is probably the most common goal of tagging a PDF.
+- Develop a tag/accessibility checker. A low-level sanity checker that a tagged PDF is PDF/UA compliant `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf. Accessibility/UA compliance is probably the most common goal of tagging a PDF.
 
 - Editing. Currently the API primarily runs in `create` or `read` modes, but doesn't readily support editing tags into existing content. More work is also
 needed in the PDF::Content module to support content editing.

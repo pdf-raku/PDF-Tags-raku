@@ -78,7 +78,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
 
     method text { $.ActualText // $.kids.map(*.text).join }
 
-    submethod TWEAK {
+    submethod TWEAK(Str :$Alt) {
         self.Pg = $_ with self.cos.Pg;
         my Str:D $tag = self.cos.tag;
         with self.root.role-map{$tag} {
@@ -88,6 +88,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
         else {
             $!name = $tag;
         }
+        self.cos.Alt = $_ with $Alt;
     }
 
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
@@ -320,7 +321,8 @@ PDF::Tags::Elem - Tagged PDF structural elements
 
       # add a figure with a caption
       my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-      $doc.add-kid(Figure).do: $gfx, $img, :position[50, 70];
+      $doc.add-kid(Figure, :Alt('Incandescent apparatus'))
+          .do: $gfx, $img, :position[50, 70];
       $doc.add-kid(Caption).mark: $gfx, {
           .say("Eureka!", :position[40, 60]),
       }
@@ -341,7 +343,7 @@ PDF::Tags::Elem represents one node in the structure tree.
 
 =head1 METHODS
 
-This class inherits form PDF::Tags::Node and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find` and `first`)
+This class inherits form PDF::Tags::Node and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
 =begin item
 attributes
@@ -365,6 +367,9 @@ ActualText
    my $text = $elem.ActualText;
 
 Return predefined actual text for the structual node and any children. This is an optional property.
+
+Note that ActualText is an optional field in the structure tree. The `text()` method (below) is recommended for generalised text extraction.
+
 =end item
 
 =begin item

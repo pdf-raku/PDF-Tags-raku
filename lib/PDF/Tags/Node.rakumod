@@ -21,7 +21,7 @@ class PDF::Tags::Node
         } // 0;
     }
 
-    method build-kid($cos, :$Pg = $.Pg) { build-item($cos, :parent(self), :$Pg, :$.root); }
+    method build-kid($cos, :$Pg = $.Pg, |c) { build-item($cos, :parent(self), :$Pg, :$.root, |c); }
     method !adopt-node($node) {
         # checks
         die "unable to add a node to itself"
