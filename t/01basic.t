@@ -1,5 +1,6 @@
 use Test;
 use PDF::Tags;
+use PDF::Tags::Elem;
 use PDF::Class;
 
 plan 9;
@@ -10,9 +11,9 @@ my PDF::Tags $tags;
 
 lives-ok {$tags .= read: :$pdf;};
 
-my $doc = $tags[0];
+my PDF::Tags::Elem $doc = $tags[0];
 is $doc.name, 'Document';
-my $node = $doc[2];
+my PDF::Tags::Elem $node = $doc[2];
 is $node.name, 'H1';
 is-deeply $doc[0].kids>>.name.join(' '), 'LI LI LI LI LI';
 is $node.parent.name, 'Document';

@@ -1,4 +1,4 @@
-role PDF::Tags::Root {
+role PDF::Tags::Node::Root {
     use PDF::StructTreeRoot;
     method cos(--> PDF::StructTreeRoot) { callsame() }
     method parent { fail "already at root" }

@@ -1,13 +1,14 @@
-use PDF::Tags::Node;
+use PDF::Tags::Node::Parent;
 
-class PDF::Tags::Elem is PDF::Tags::Node {
+class PDF::Tags::Elem
+    is PDF::Tags::Node::Parent {
 
     use PDF::COS;
     use PDF::COS::Dict;
     use PDF::COS::Stream;
     use PDF::Content;
     use PDF::Content::Graphics;
-    use PDF::Tags::Item :&build-item;
+    use PDF::Tags::Node :&build-node;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
     # PDF:Class
@@ -21,7 +22,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
     use PDF::Class::StructItem;
 
     method cos(--> PDF::StructElem) handles <ActualText Alt> { callsame() }
-    has PDF::Tags::Node $.parent is rw = self.root;
+    has PDF::Tags::Node::Parent $.parent is rw = self.root;
     has Hash $!attributes;
     has Str $.name is built;
     has Str $.class is built;
@@ -121,9 +122,9 @@ class PDF::Tags::Elem is PDF::Tags::Node {
             $to-cos{$k} = $_ with $from-cos{$k};
         }
         $to-cos<Pg> = $_ with $.Pg;
-        my PDF::Tags::Elem $to-elem = build-item($to-cos, :$.root, :$parent);
+        my PDF::Tags::Elem $to-elem = build-node($to-cos, :$.root, :$parent);
         for $from-elem.kids {
-            my PDF::Tags::Item:D $kid = $.copy-tree($_, :$Stm, :parent($to-elem));
+            my PDF::Tags::Node:D $kid = $.copy-tree($_, :$Stm, :parent($to-elem));
             $to-elem.add-kid: $kid;
         }
         $to-elem;
@@ -164,7 +165,7 @@ class PDF::Tags::Elem is PDF::Tags::Node {
                 for $parents.keys {
                     # copy sub-trees
                     my PDF::StructElem $cos = $parents[$_];
-                    my PDF::Tags::Elem $elem = build-item($cos, :$.root, :$Pg, :parent(self));
+                    my PDF::Tags::Elem $elem = build-node($cos, :$.root, :$Pg, :parent(self));
                     self.add-kid: $elem.copy-tree(:Stm($xobj), :parent(self));
                 }
             }
@@ -343,7 +344,7 @@ PDF::Tags::Elem represents one node in the structure tree.
 
 =head1 METHODS
 
-This class inherits form PDF::Tags::Node and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+This class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
 =begin item
 attributes

@@ -1,125 +1,42 @@
-use PDF::Tags::Item :&item-class, :&build-item;
+class PDF::Tags::Node {
 
-class PDF::Tags::Node
-    is PDF::Tags::Item {
-
-    use Method::Also;
     use PDF::COS;
+    use PDF::OBJR; # object reference
+    use PDF::MCR;  # marked content reference
+    use PDF::Page;
+    use PDF::StructTreeRoot;
     use PDF::StructElem;
-    my subset NCName of Str where { !.defined || $_ ~~ /^<ident>$/ }
+    use PDF::Content::Tag;
+    use PDF::Content::Graphics;
+    use PDF::Tags::Node::Root;
 
-    has PDF::Tags::Item @.kids;
-    method kids-raw { @!kids }
-    has Hash $!store;
-    has Bool $!reified;
-    has UInt $!elems;
+    has $.cos is required;
+    has PDF::Tags::Node::Root $.root is required;
+    method set-cos($!cos) {}
+    has PDF::Page $.Pg is rw; # current page scope
 
-    method elems is also<Numeric> {
-        $!elems //= do with $.cos.kids {
-            when Hash { 1 }
-            default { .elems }
-        } // 0;
-    }
+    proto sub node-class($) is export(:node-class) {*}
+    multi sub node-class(PDF::StructTreeRoot) { require ::('PDF::Tags') }
+    multi sub node-class(PDF::StructElem)     { require ::('PDF::Tags::Elem') }
+    multi sub node-class(PDF::OBJR)           { require ::('PDF::Tags::ObjRef') }
+    multi sub node-class(PDF::MCR)            { require ::('PDF::Tags::Mark') }
+    multi sub node-class(UInt)                { require ::('PDF::Tags::Mark') }
+    multi sub node-class(PDF::Content::Tag)   { require ::('PDF::Tags::Mark') }
+    multi sub node-class(Str)                 { require ::('PDF::Tags::Text') }
 
-    method build-kid($cos, :$Pg = $.Pg, |c) { build-item($cos, :parent(self), :$Pg, :$.root, |c); }
-    method !adopt-node($node) {
-        # checks
-        die "unable to add a node to itself"
-            if $node === self || $node.cos === self.cos;
-
-        with $node.parent {
-            die "node already parented"
-                unless $_ === self;
-        }
-
-        # reparent cos node
-        given self.cos.kids //= [] {
-            $_ = [$_] if $_ ~~ Hash;
-            $node.cos.P = self.cos
-                if $node.cos ~~ PDF::StructElem;
-            .push($node.cos);
-        }
-
-        # reparent dom node
-        $node.parent = self;
-        @!kids.push: $node;
-
-        # update caches
-        $!elems = Nil;
-        self.AT_POS($.elems-1) if $!reified;
-        .{$node.name}.push: $node with $!store;
-
-        $node;
+    proto sub build-node($, |c) is export(:build-node) {*}
+    multi sub build-node(PDF::MCR $item, PDF::Page :$Pg, |c) {
+        my PDF::Content::Graphics $Stm = $_ with $item.Stm;
+        my UInt:D $cos = $item.MCID;
+        node-class(PDF::MCR).new(:$cos, :Pg($item.Pg // $Pg), :$Stm, |c);
     }
-    multi method add-kid(PDF::Tags::Node:D $node) {
-        self!adopt-node($node);
+    multi sub build-node(PDF::OBJR $cos, PDF::Page:D :$Pg = $cos.Pg, |c) {
+        node-class(PDF::OBJR).new( :$cos, :$Pg, |c)
     }
-    multi method add-kid(Str:D $name, |c) {
-        my $P := self.cos;
-        my PDF::StructElem $cos = PDF::COS.coerce: %(
-            :Type( :name<StructElem> ),
-            :S( :$name ),
-            :$P,
-        );
-        self.add-kid($cos, |c)
+    multi sub build-node($_, |c) {
+        node-class($_).new: :cos($_), |c;
     }
-    multi method add-kid($cos, |c ) is default {
-        my $kid := self.build-kid($cos, |c);
-        self!adopt-node($kid);
-    }
-    method AT-POS(UInt $i) {
-        fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        @!kids[$i] //= self.build-kid($.cos.kids[$i]);
-    }
-    method Array {
-        $!reified ||= do {
-            self.AT-POS($_) for 0 ..^ $.elems;
-            True;
-        }
-        @!kids;
-    }
-    method Hash handles <keys pairs> {
-        $!store //= do {
-            my %h;
-            %h{.name}.push: $_ for self.Array;
-            %h;
-        }
-        $!store;
-    }
-    multi method AT-KEY(NCName:D $name) {
-        # special case to handle default namespaces without a prefix.
-        # https://stackoverflow.com/questions/16717211/
-        self.Hash{$name};
-    }
-    multi method AT-KEY(Str:D $xpath) is default {
-        $.xpath-context.AT-KEY($xpath);
-    }
-    method kids {
-        my class Kids does Iterable does Iterator does Positional {
-            has PDF::Tags::Item $.node is required handles<elems AT-POS Numeric>;
-            has int $!idx = 0;
-            method iterator { $!idx = 0; self}
-            method pull-one {
-                $!idx < $!node.elems ?? $!node.AT-POS($!idx++) !! IterationEnd;
-            }
-            method Array handles<List list values map grep> { $!node.Array }
-        }
-        Kids.new: :node(self);
-    }
-
-    method xpath-context {
-        (require ::('PDF::Tags::XPath')).new: :node(self);
-    }
-    method find($expr) { $.xpath-context.find($expr) }
-
-    method first($expr) {
-        self.find($expr)[0] // PDF::Tags::Node
-    }
-
-    multi method ACCEPTS(PDF::Tags::Node:D: Str $xpath) {
-        ? self.find($xpath);
-    }
-    multi method ACCEPTS(PDF::Tags::Node:D: Code $xpath) {
-        ? self.find($xpath);
-    }
+    
+    method xml(|c) { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
+    method text { '' }
 }

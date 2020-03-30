@@ -1,7 +1,6 @@
 use Test;
 use PDF::Tags;
 use PDF::Tags::Elem;
-use PDF::Tags::Root;
 use PDF::Class;
 
 plan 18;

@@ -3,9 +3,9 @@ unit class PDF::Tags::XML-Writer;
 use PDF::Annot;
 use PDF::Tags;
 use PDF::Tags::Elem;
-use PDF::Tags::Item;
+use PDF::Tags::Node;
 use PDF::Tags::ObjRef;
-use PDF::Tags::Root;
+use PDF::Tags::Node::Root;
 use PDF::Tags::Mark;
 use PDF::Tags::Text;
 use PDF::Tags::XPath;
@@ -39,22 +39,22 @@ sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{str-escape(.value)}\"" }).join;
 }
 
-method Str(PDF::Tags::Item $item) {
+method Str(PDF::Tags::Node $item) {
     my @chunks = gather { self.stream-xml($item, :depth(0)) };
     @chunks.join;
 }
 
-method print(IO::Handle $fh, PDF::Tags::Item $item) {
+method print(IO::Handle $fh, PDF::Tags::Node $item) {
     for gather self.stream-xml($item, :depth(0)) {
         $fh.print($_);
     }
 }
-method say(IO::Handle $fh, PDF::Tags::Item $item) {
+method say(IO::Handle $fh, PDF::Tags::Node $item) {
     self.print($fh, $item);
     $fh.say: '';
 }
 
-multi method stream-xml(PDF::Tags::Root $_, :$depth!) {
+multi method stream-xml(PDF::Tags::Node::Root $_, :$depth!) {
     take line(0, '<?xml version="1.0" encoding="UTF-8"?>');
     take line(0, $!css) if $!style;
 

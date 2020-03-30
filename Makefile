@@ -11,7 +11,7 @@ loudtest :
 clean :
 	@rm -f Makefile doc/Tags/*.md doc/Tags/*/*.md
 
-doc : doc/Tags.md doc/Tags/Elem.md doc/Tags/Mark.md doc/Tags/ObjRef.md doc/Tags/Root.md doc/Tags/Text.md doc/Tags/XML-Writer.md doc/Tags/XPath.md
+doc : doc/Tags.md doc/Tags/Elem.md doc/Tags/Mark.md doc/Tags/ObjRef.md doc/Tags/Node.md doc/Tags/Node/Parent.md doc/Tags/Text.md doc/Tags/XML-Writer.md doc/Tags/XPath.md
 
 doc/Tags.md : lib/PDF/Tags.rakumod
 	rakudo -I . --doc=Markdown lib/PDF/Tags.rakumod > doc/Tags.md
@@ -25,8 +25,11 @@ doc/Tags/Mark.md : lib/PDF/Tags/Mark.rakumod
 doc/Tags/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
 	rakudo -I . --doc=Markdown lib/PDF/Tags/ObjRef.rakumod > doc/Tags/ObjRef.md
 
-doc/Tags/Root.md : lib/PDF/Tags/Root.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Root.rakumod > doc/Tags/Root.md
+doc/Tags/Node.md : lib/PDF/Tags/Node.rakumod
+	rakudo -I . --doc=Markdown lib/PDF/Tags/Node.rakumod > doc/Tags/Node.md
+
+doc/Tags/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
+	rakudo -I . --doc=Markdown lib/PDF/Tags/Node/Parent.rakumod > doc/Tags/Node/Parent.md
 
 doc/Tags/Text.md : lib/PDF/Tags/Text.rakumod
 	rakudo -I . --doc=Markdown lib/PDF/Tags/Text.rakumod > doc/Tags/Text.md

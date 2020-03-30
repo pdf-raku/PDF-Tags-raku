@@ -1,9 +1,9 @@
-use PDF::Tags::Node;
-use PDF::Tags::Root;
+use PDF::Tags::Node::Parent;
+use PDF::Tags::Node::Root;
 
 class PDF::Tags:ver<0.0.1>
-    is PDF::Tags::Node
-    does PDF::Tags::Root {
+    is PDF::Tags::Node::Parent
+    does PDF::Tags::Node::Root {
 
     use PDF::Class:ver<0.4.1+>;
     use PDF::Page;

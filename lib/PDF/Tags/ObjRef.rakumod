@@ -1,17 +1,18 @@
-use PDF::Tags::Item :&build-item;
+use PDF::Tags::Node :&build-node;
 
-class PDF::Tags::ObjRef is PDF::Tags::Item {
+class PDF::Tags::ObjRef
+    is PDF::Tags::Node {
     use PDF::OBJR;
     use PDF::StructElem;
-    use PDF::Tags::Node;
+    use PDF::Tags::Node::Parent;
     submethod TWEAK {
         self.Pg = $_ with self.cos.Pg;
     }
-    has PDF::Tags::Node $.parent is rw;
-    has PDF::Tags::Item $!struct-parent;
+    has PDF::Tags::Node::Parent $.parent is rw;
+    has PDF::Tags::Node::Parent $!struct-parent;
     method struct-parent {
         $!struct-parent //= do with $.cos.object.struct-parent {
-            build-item($.root.parent-tree[$_+0], :$.Pg, :parent($.root));
+            build-node($.root.parent-tree[$_+0], :$.Pg, :parent($.root));
         }
         $!struct-parent;
     }

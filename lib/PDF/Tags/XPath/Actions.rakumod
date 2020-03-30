@@ -1,7 +1,6 @@
 class PDF::Tags::XPath::Actions {
 
     use PDF::Tags::Elem;
-    use PDF::Tags::Item;
     use PDF::Tags::Node;
     use PDF::Tags::Mark;
     use PDF::Tags::ObjRef;
@@ -11,14 +10,14 @@ class PDF::Tags::XPath::Actions {
     our constant Expression = Code;
     constant Elem      = PDF::Tags::Elem;
     constant Mark      = PDF::Tags::Mark;
-    constant Node      = PDF::Tags::Item;
+    constant Node      = PDF::Tags::Node;
     constant ObjectRef = PDF::Tags::ObjRef;
     constant Text      = PDF::Tags::Text;
 
     method TOP($/) {
         my @query = @<query>>>.ast;
 
-        make  -> PDF::Tags::Item:D $ref {
+        make  -> PDF::Tags::Node:D $ref {
             if @query == 1 {
                 (@query[0])($ref);
             }
@@ -32,7 +31,7 @@ class PDF::Tags::XPath::Actions {
     }
 
     method query($/) {
-        make -> PDF::Tags::Item:D $ref is copy {
+        make -> PDF::Tags::Node:D $ref is copy {
             $ref .= root() if $<abs>;
             my @set = ($ref,);
             @set = (.ast)(@set).unique

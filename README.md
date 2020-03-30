@@ -126,6 +126,8 @@ Classes in this Distribution
 
 - [PDF::Tags](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags.md) - Tagged PDF root node
 - [PDF::Tags::Elem](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Elem.md) - Structure Tree descendant node
+- [PDF::Tags::Node](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Node.md) - Abstract node
+- [PDF::Tags::Node::Parent](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Node/Parent.md) - Abstract parent node
 - [PDF::Tags::Mark](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Mark.md) - Leaf content marker node
 - [PDF::Tags::Text](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Text.md) - Text content node
 - [PDF::Tags::ObjRef](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/ObjRef.md) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)

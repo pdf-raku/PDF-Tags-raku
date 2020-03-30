@@ -2,7 +2,6 @@ use Test;
 use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::ObjRef;
-use PDF::Tags::Root;
 use PDF::Class;
 
 plan 11;

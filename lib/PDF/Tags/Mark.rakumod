@@ -1,7 +1,7 @@
-use PDF::Tags::Node;
+use PDF::Tags::Node::Parent;
 
 class PDF::Tags::Mark
-    is PDF::Tags::Node {
+    is PDF::Tags::Node::Parent {
 
     use PDF::Page;
     use PDF::COS;
@@ -11,7 +11,7 @@ class PDF::Tags::Mark
     use PDF::XObject::Form;
     use PDF::MCR;
 
-    has PDF::Tags::Node $.parent is rw;
+    has PDF::Tags::Node::Parent $.parent is rw;
     has %!attributes;
     has Bool $!atts-built;
     has Str $!actual-text;
@@ -57,7 +57,7 @@ class PDF::Tags::Mark
         }
     }
     method cos(--> PDF::MCR) { callsame() }
-    method attributes handles<AT-KEY> {
+    method attributes {
         $!atts-built ||= do {
             %!attributes = $!mark.attributes;
             $!actual-text = PDF::COS::TextString.new: :value($_)

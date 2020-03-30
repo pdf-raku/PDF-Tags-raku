@@ -30,8 +30,7 @@ SYNOPSIS
 
         # add a figure with a caption
         my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-        $doc
-            .add-kid(Figure, :Alt('Incandescent apparatus'))
+        $doc.add-kid(Figure, :Alt('Incandescent apparatus'))
             .do: $gfx, $img, :position[50, 70];
         $doc.add-kid(Caption).mark: $gfx, {
             .say("Eureka!", :position[40, 60]),
@@ -55,7 +54,7 @@ PDF::Tags::Elem represents one node in the structure tree.
 METHODS
 =======
 
-This class inherits form PDF::Tags::Node and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+This class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
   * attributes
 

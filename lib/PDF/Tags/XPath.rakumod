@@ -19,7 +19,7 @@ class PDF::Tags::XPath {
         self.find($expr);
     }
 
-    multi method find(Any $expr, PDF::Tags::Item:D $!node) {
+    multi method find(Any $expr, PDF::Tags::Node:D $!node) {
         self.find($expr);
     }
 
