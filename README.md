@@ -137,7 +137,7 @@ Classes in this Distribution
 Scripts in this Distribution
 ------
 
-##### `pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/render --/atts --/style --debug t/pdf/tagged.pdf`
+##### `pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
 
 Todo
 ---

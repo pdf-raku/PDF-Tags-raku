@@ -170,4 +170,13 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
 }
 
 =begin pod
+
+=head1 NAME
+
+PDF::Tags::XML-Writer - XML Serializer for tagged PDF structural items
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
 =end pod

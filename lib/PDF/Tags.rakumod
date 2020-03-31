@@ -15,7 +15,6 @@ class PDF::Tags:ver<0.0.1>
     has Hash $.class-map         is built;
     has Hash $.role-map          is built;
     has NumberTree $.parent-tree is built;
-    has Bool $.render = True;
     has Bool $.strict = True;
     has Bool $.marks;
     method root { self }
@@ -128,7 +127,6 @@ class PDF::Tags:ver<0.0.1>
     has Tags %!graphics-tags{PDF::Content::Graphics};
 
     method graphics-tags($obj) {
-        return unless $!render;
         %!graphics-tags{$obj} //= do {
             $*ERR.print: '.';
             my &callback = TextDecoder.new(:$!cache).callback;
@@ -200,5 +198,30 @@ and processing of the content stream.
 
 This module is under construction as an experimental tool for reading
 or creating tagged PDF content.
+
+=head1 METHODS
+
+this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+
+=begin item
+read
+
+   my PDF::Tags $tags .= read: :$pdf;
+
+Read tagged PDF structure from an existing file that has been previously tagged.
+
+=end item
+
+=begin item
+create
+
+   my PDF::Tags $tags .= create: :$pdf;
+
+Create an empty tagged PDF structure in a PDF object.
+
+The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the
+PDF object should be empty; content and tags should be co-created in read-order.
+
+=end item
 
 =end pod

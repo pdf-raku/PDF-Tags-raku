@@ -13,12 +13,11 @@ subset Number of Int where { !.defined || $_ > 0 };
 sub MAIN(Str $infile,              #= input PDF
 	 Str :$password = '',      #= password for the input PDF, if encrypted
          Number :$max-depth = 16,  #= depth to ascend/descend struct tree
-         Bool   :$render = True,   #= include rendered content
          Bool   :$atts = True,     #= include attributes in tags
          Bool   :$debug,           #= write extra debugging information
-         Bool   :$marks,           #= also include content stream tags
-         Bool   :$strict = True;   #= warn about unknown tags, etc
-         Bool   :$style = True;    #= include stylesheet
+         Bool   :$marks,           #= show raw markws content
+         Bool   :$strict = True,   #= warn about unknown tags, etc
+         Bool   :$style = True,    #= include stylesheet
          Str    :$select,          #= XPath of twigs to include (relative to root)
          Str    :$omit,            #= Tags to omit from output
         ) {
@@ -31,7 +30,7 @@ sub MAIN(Str $infile,              #= input PDF
 
     my PDF::Class $pdf .= open( $input, :$password );
     my PDF::Tags $tags .= read: :$pdf, :$strict, :$marks;
-    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$render, :$atts, :$debug, :$omit, :$style;
+    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$atts, :$debug, :$omit, :$style;
 
     my PDF::Tags::Node @nodes = do with $select {
         $tags.find($_);
@@ -56,7 +55,7 @@ Options:
    --omit=tag-name     nodes to be excluded
    --marks             dump content markers
    --debug             adding debugging to output
-   --/render           omit rendering (avoid finding content-level tags)
+   --marks             show raw marked content
    --/atts             omit attributes in tags
    --/strict           suppress warnings
    --/style            omit stylesheet link

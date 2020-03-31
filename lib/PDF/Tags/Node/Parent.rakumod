@@ -67,7 +67,7 @@ class PDF::Tags::Node::Parent
         self.add-kid($cos, |c)
     }
     multi method add-kid($cos, |c ) is default {
-        my $kid := self.build-kid($cos, |c);
+        my PDF::Tags::Node $kid := self.build-kid($cos, |c);
         self!adopt-node($kid);
     }
     method AT-POS(UInt $i) {

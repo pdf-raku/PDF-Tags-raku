@@ -94,7 +94,8 @@ class PDF::Tags::Elem
 
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
         my $*ActualText = ''; # Populated by PDF::Content::Text::Block
-        my PDF::Tags::Mark $kid = self.add-kid( $gfx.tag($name, &action, :mark, |c) );
+        my PDF::Content::Tag $tag = $gfx.tag($name, &action, :mark, |c);
+        my PDF::Tags::Mark $kid = self.add-kid: $tag;
         self.ActualText ~= $*ActualText;
 
         given $gfx.parent.StructParents -> $idx is rw {

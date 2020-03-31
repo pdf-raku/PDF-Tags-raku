@@ -54,3 +54,22 @@ In addition to the structure tree, PDF documents may contain additional page lev
 
 This module is under construction as an experimental tool for reading or creating tagged PDF content.
 
+METHODS
+=======
+
+this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+
+  * read
+
+        my PDF::Tags $tags .= read: :$pdf;
+
+    Read tagged PDF structure from an existing file that has been previously tagged.
+
+  * create
+
+        my PDF::Tags $tags .= create: :$pdf;
+
+    Create an empty tagged PDF structure in a PDF object.
+
+    The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the PDF object should be empty; content and tags should be co-created in read-order.
+
