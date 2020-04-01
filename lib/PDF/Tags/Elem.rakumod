@@ -8,7 +8,7 @@ class PDF::Tags::Elem
     use PDF::COS::Stream;
     use PDF::Content;
     use PDF::Content::Graphics;
-    use PDF::Tags::Node :&build-node;
+    use PDF::Tags::Node :&build-node, :TagName;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Mark;
     # PDF:Class
@@ -24,7 +24,7 @@ class PDF::Tags::Elem
     method cos(--> PDF::StructElem) handles <ActualText Alt> { callsame() }
     has PDF::Tags::Node::Parent $.parent is rw = self.root;
     has Hash $!attributes;
-    has Str $.name is built;
+    has TagName $.name is built;
     has Str $.class is built;
     has Bool $!hash-init;
 

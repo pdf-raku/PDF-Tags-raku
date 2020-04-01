@@ -12,12 +12,12 @@ use PDF::Tags::XPath;
 use PDF::Class::StructItem;
 
 has UInt $.max-depth = 16;
-has Bool $.render = True;
 has Bool $.atts = True;
 has $.css = '<?xml-stylesheet type="text/css" href="https://p6-pdf.github.io/css/tagged-pdf.css"?>';
 has Bool $.style = True;
 has Bool $.debug = False;
 has Str  $.omit;
+has Str  $.root-tag;
 
 sub line(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s ~ "\n" }
 
@@ -44,27 +44,34 @@ method Str(PDF::Tags::Node $item) {
     @chunks.join;
 }
 
-method print(IO::Handle $fh, PDF::Tags::Node $item) {
-    for gather self.stream-xml($item, :depth(0)) {
+method print(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
+    for gather self.stream-xml($item, :$depth) {
         $fh.print($_);
     }
 }
-method say(IO::Handle $fh, PDF::Tags::Node $item) {
-    self.print($fh, $item);
+method say(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
+    self.print($fh, $item, :$depth);
     $fh.say: '';
 }
 
-multi method stream-xml(PDF::Tags::Node::Root $_, :$depth!) {
-    take line(0, '<?xml version="1.0" encoding="UTF-8"?>');
-    take line(0, $!css) if $!style;
+multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
+    take line($depth, '<?xml version="1.0" encoding="UTF-8"?>');
+    take line($depth, $!css) if $!style;
+
+    take line($depth++, '<' ~ $_ ~ '>')
+        with $!root-tag;
 
     if .elems {
-        warn "Tagged PDF has multiple top-level tags" if .elems > 1;
+        die "Tagged PDF has multiple top-level tags; no :root-tag given"
+            if .elems > 1 && ! $!root-tag.defined;
         self.stream-xml($_, :$depth) for .kids;
     }
     else {
-        warn "Tagged PDF has no content";
+        warn "Tagged PDF has no content; no :root-tag given"
+            unless $!root-tag.defined;
     }
+    take line(--$depth, '</' ~ $_ ~ '>')
+        with $!root-tag;
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
@@ -136,9 +143,7 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
         take line($depth, "<!-- mark MCID:{.mcid} Pg:{.owner.obj-num} {.owner.gen-num} R-->")
             given $node.mark;
     }
-    if $!render {
-        take line($depth, trim(self!marked-content($node, :$depth)));
-    }
+    take line($depth, trim(self!marked-content($node, :$depth)));
 }
 
 multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
@@ -177,6 +182,32 @@ PDF::Tags::XML-Writer - XML Serializer for tagged PDF structural items
 
 =head1 SYNOPSIS
 
+    use PDF::Class;
+    use PDF::Tags;
+    use PDF::Tags::XML-Writer;
+    my PDF::Class $pdf .= open: "t/pdf/write-tags.pdf";
+    my PDF::Tags $tags .= read: :$pdf;
+    my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
+    # atomic write
+    say $xml-writer.Str($tags);
+    # streamed write
+    $xml-writer.say($*OUT, $tags);
+    # do our own streaming
+    for gather self.stream-xml($item) {
+        $*OUT.print($_);
+    }
+
 =head1 DESCRIPTION
+
+This class is used to dump nodes and their children in an XML format.
+
+The `xml` method can be called on individual elements in the tree to
+dump these as fragments:
+
+   say '<Document>';
+   say .xml(:depth(2)) for $tags.find('Document//Sect');
+   say '</Document>';
+
+Calling `$elem.xml(|c)`, is equivalant to: `PDF::Tags::XML-Writer.new(|c).Str`
 
 =end pod

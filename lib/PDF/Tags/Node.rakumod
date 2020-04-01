@@ -10,6 +10,9 @@ class PDF::Tags::Node {
     use PDF::Content::Graphics;
     use PDF::Tags::Node::Root;
 
+    my subset TagName of Str is export(:TagName)
+        where { !.defined || $_ ~~ /^<ident>$/ }
+
     has $.cos is required;
     has PDF::Tags::Node::Root $.root is required;
     method set-cos($!cos) {}

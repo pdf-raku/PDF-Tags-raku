@@ -1,4 +1,4 @@
-use PDF::Tags::Node :&node-class, :&build-node;
+use PDF::Tags::Node :&node-class, :&build-node, :TagName;
 
 class PDF::Tags::Node::Parent
     is PDF::Tags::Node {
@@ -6,7 +6,6 @@ class PDF::Tags::Node::Parent
     use Method::Also;
     use PDF::COS;
     use PDF::StructElem;
-    my subset NCName of Str where { !.defined || $_ ~~ /^<ident>$/ }
 
     has PDF::Tags::Node @.kids;
     method kids-raw { @!kids }
@@ -88,7 +87,7 @@ class PDF::Tags::Node::Parent
             %h;
         }
     }
-    multi method AT-KEY(NCName:D $name) {
+    multi method AT-KEY(TagName:D $name) {
         # tag name
         self.Hash{$name};
     }

@@ -5,21 +5,22 @@ use PDF::Class;
 use PDF::Catalog;
 use PDF::StructTreeRoot;
 use PDF::Tags::XML-Writer;
-use PDF::Tags::Node;
+use PDF::Tags::Node :TagName;
 use PDF::IO;
 
 subset Number of Int where { !.defined || $_ > 0 };
 
 sub MAIN(Str $infile,              #= input PDF
-	 Str :$password = '',      #= password for the input PDF, if encrypted
-         Number :$max-depth = 16,  #= depth to ascend/descend struct tree
-         Bool   :$atts = True,     #= include attributes in tags
-         Bool   :$debug,           #= write extra debugging information
-         Bool   :$marks,           #= show raw markws content
-         Bool   :$strict = True,   #= warn about unknown tags, etc
-         Bool   :$style = True,    #= include stylesheet
-         Str    :$select,          #= XPath of twigs to include (relative to root)
-         Str    :$omit,            #= Tags to omit from output
+	 Str     :$password = '',      #= password for the input PDF, if encrypted
+         Number  :$max-depth = 16,  #= depth to ascend/descend struct tree
+         Bool    :$atts = True,     #= include attributes in tags
+         Bool    :$debug,           #= write extra debugging information
+         Bool    :$marks,           #= show raw markws content
+         Bool    :$strict = True,   #= warn about unknown tags, etc
+         Bool    :$style = True,    #= include stylesheet
+         Str     :$select,          #= XPath of twigs to include (relative to root)
+         TagName :$omit,            #= Tags to omit from output
+         TagName :$root-tag,        #= Outer root tag name
         ) {
 
     my PDF::IO $input .= coerce(
@@ -30,7 +31,7 @@ sub MAIN(Str $infile,              #= input PDF
 
     my PDF::Class $pdf .= open( $input, :$password );
     my PDF::Tags $tags .= read: :$pdf, :$strict, :$marks;
-    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$atts, :$debug, :$omit, :$style;
+    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$atts, :$debug, :$omit, :$style, :$root-tag;
 
     my PDF::Tags::Node @nodes = do with $select {
         $tags.find($_);
@@ -39,7 +40,18 @@ sub MAIN(Str $infile,              #= input PDF
         $tags.root;
     }
 
-    $xml.say($*OUT, $_) for @nodes;
+    my UInt $depth = 0;
+
+    with $root-tag {
+        unless @nodes[0] ~~ PDF::Tags:D {
+            say '<' ~ $_ ~ '>';
+            $depth++;
+        }
+    }
+
+    $xml.say($*OUT, $_, :$depth) for @nodes;
+
+    say '</' ~ $root-tag ~ '>' if $depth;
 }
 
 =begin pod
