@@ -26,6 +26,7 @@ class PDF::Tags::Node {
     multi sub node-class(UInt)                { require ::('PDF::Tags::Mark') }
     multi sub node-class(PDF::Content::Tag)   { require ::('PDF::Tags::Mark') }
     multi sub node-class(Str)                 { require ::('PDF::Tags::Text') }
+    multi sub node-class(Pair)                { require ::('PDF::Tags::Attr') }
 
     proto sub build-node($, |c) is export(:build-node) {*}
     multi sub build-node(PDF::MCR $item, PDF::Page :$Pg, |c) {
@@ -43,3 +44,48 @@ class PDF::Tags::Node {
     method xml(|c) { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
     method text { '' }
 }
+
+=begin pod
+=head1 NAME
+
+PDF::Tags::Node - Abstract node class
+
+=head1 DESCRIPTION
+
+Abstract node ancestor class.
+
+=head1 METHODS
+
+=begin item
+cos
+
+Returns the underlying PDF::Class or PDF::Content object. The PDF::Tags::Node subclass and PDF::COS type are interdependant:
+
+=begin table
+PDF::Tags:Node object | PDF::Class object |Base class | Notes
+=================================================
+PDF::Tags | PDF::StructTreeRoot | PDF::Tags::Node::Parent | PDF structure tree root
+PDF::Tags::Elem | PDF::StructElem | PDF::Tags::Node::Parent | Intermediate structure element node
+PDF::Tags::Mark | PDF::MCR | PDF::Tags::Parent | Leaf marked content reference
+PDF::Tags::ObjRef | PDF::OBJR | PDF::Tags::Node | Leaf object reference
+PDF::Tags::Text | N/A | PDF::Tags::Node | Looking to eliminate this class?
+=end table
+
+=end item
+
+=begin item
+root
+
+Link to the structure tree root.
+=end item
+
+=begin item
+xml
+
+Serialize a node and any descendants as XML.
+
+Calling `$node.xml(|c)`, is equivalant to: `PDF::Tags::XML-Writer.new(|c).Str`
+
+=end item
+
+=end pod

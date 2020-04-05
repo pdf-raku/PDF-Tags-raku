@@ -208,6 +208,6 @@ dump these as fragments:
    say .xml(:depth(2)) for $tags.find('Document//Sect');
    say '</Document>';
 
-Calling `$elem.xml(|c)`, is equivalant to: `PDF::Tags::XML-Writer.new(|c).Str`
+Calling `$node.xml(|c)`, is equivalant to: `PDF::Tags::XML-Writer.new(|c).Str`
 
 =end pod

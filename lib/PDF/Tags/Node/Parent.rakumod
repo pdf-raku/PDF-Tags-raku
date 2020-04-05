@@ -84,12 +84,21 @@ class PDF::Tags::Node::Parent
         $!store //= do {
             my %h;
             %h{.name}.push: $_ for self.Array;
+            if self.can('attributes') {
+                %h{'@' ~ .key} = .value
+                   for self.attributes.pairs;
+            }
             %h;
         }
     }
+    method set-attribute(Str $key, $val) {
+        fail "attributes not applicable to objects of type {self.WHAT.raku}"
+            unless self.can('attributes');
+        .{$key} = $val with $!store;
+    }
     multi method AT-KEY(TagName:D $name) {
         # tag name
-        self.Hash{$name};
+        @(self.Hash{$name} // []);
     }
     multi method AT-KEY(Str:D $xpath) is default {
         $.xpath-context.AT-KEY($xpath);
@@ -123,3 +132,59 @@ class PDF::Tags::Node::Parent
         ? self.find($xpath);
     }
 }
+
+=begin pod
+=head1 NAME
+
+PDF::Tags::Node::Parent - Abstract non-leaf node
+
+=head1 DESCRIPTION
+
+Abstract base class for PDF::Tags, PDF::Tags::Elem and PDF::Tags::Mark
+
+=head1 METHODS
+
+
+=begin item
+AT-POS
+
+Blah.
+=end item
+
+=begin item
+AT-KEY
+
+Blah.
+=end item
+
+=begin item
+Array
+
+Blah.
+=end item
+
+=begin item
+Hash
+
+Blah.
+=end item
+
+=begin item
+find
+
+Blah.
+=end item
+
+=begin item
+first
+
+Blah.
+=end item
+
+=begin item
+xml
+
+Blah.
+=end item
+
+=end pod

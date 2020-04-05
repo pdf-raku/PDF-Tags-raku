@@ -60,15 +60,18 @@ class PDF::Tags::Mark
     method attributes {
         $!atts-built ||= do {
             %!attributes = $!mark.attributes;
-            $!actual-text = PDF::COS::TextString.new: :value($_)
-                with %!attributes<ActualText>;
             True;
         }
         %!attributes;
     }
+    method set-attribute(Str() $key, $val) {
+        fail "todo: update marked content attributes";
+        callsame();
+     }
     method ActualText {
         $.attributes unless $!atts-built;
-        $!actual-text;
+        $!actual-text //= PDF::COS::TextString.new: :value($_)
+            with %!attributes<ActualText>;
     }
     method text { $.ActualText // $.kids.map(*.text).join }
     method AT-POS(UInt $i) {

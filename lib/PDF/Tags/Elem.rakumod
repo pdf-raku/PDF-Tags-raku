@@ -26,7 +26,6 @@ class PDF::Tags::Elem
     has Hash $!attributes;
     has TagName $.name is built;
     has Str $.class is built;
-    has Bool $!hash-init;
 
     method attributes {
         $!attributes //= do {
@@ -61,20 +60,6 @@ class PDF::Tags::Elem
                 $_;
             }
         }
-    }
-
-    method Hash {
-       my $store := callsame();
-       $!hash-init //= do {
-           $store{'@' ~ .key} = .value
-               for self.attributes.pairs;
-           True;
-       }
-       $store;
-    }
-
-    multi method AT-KEY(Str $_ where .starts-with('@')) {
-        self.attributes{.substr(1)};
     }
 
     method text { $.ActualText // $.kids.map(*.text).join }
@@ -262,6 +247,7 @@ class PDF::Tags::Elem
                 unless $_ ~~ Hash:D;
             .{$key} = self.attributes{$key} = $val;
        }
+       callsame();
      }
 
     method !bbox($gfx, @rect) {

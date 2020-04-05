@@ -10,8 +10,8 @@ use PDF::IO;
 
 subset Number of Int where { !.defined || $_ > 0 };
 
-sub MAIN(Str $infile,              #= input PDF
-	 Str     :$password = '',      #= password for the input PDF, if encrypted
+sub MAIN(Str $infile,               #= input PDF
+	 Str     :$password = '',   #= password for the input PDF, if encrypted
          Number  :$max-depth = 16,  #= depth to ascend/descend struct tree
          Bool    :$atts = True,     #= include attributes in tags
          Bool    :$debug,           #= write extra debugging information
@@ -65,18 +65,18 @@ Options:
    --max-depth=n       maximum tag-depth to descend
    --select=XPath      nodes to be included
    --omit=tag-name     nodes to be excluded
-   --marks             dump content markers
+   --root-tag=tag-name define outer root tag
+   --marks             descend into marked content
    --debug             adding debugging to output
-   --marks             show raw marked content
    --/atts             omit attributes in tags
    --/strict           suppress warnings
-   --/style            omit stylesheet link
+   --/style            omit root stylesheet link
 
 =head1 DESCRIPTION
 
-Locates and dumps structure elements from a tagged PDF.
+Dumps structure elements from a tagged PDF.
 
-Produces raw tagged output in an XML/SGMLish format.
+Produces raw tagged output in an XML format.
 
 Only some PDF files contain tagged PDF. pdf-info.raku can be
 used to check this:

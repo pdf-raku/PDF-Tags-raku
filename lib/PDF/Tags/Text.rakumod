@@ -2,8 +2,6 @@ use PDF::Tags::Node;
 class PDF::Tags::Text
     is PDF::Tags::Node {
     use PDF::Tags::Node::Parent;
-    use PDF::Page;
-    use PDF::Content::Tag;
     use Method::Also;
 
     has PDF::Tags::Node::Parent $.parent is rw;

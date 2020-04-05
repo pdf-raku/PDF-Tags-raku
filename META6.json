@@ -11,6 +11,7 @@
     "source-url"  : "git://github.com/p6-pdf/PDF-Tags-raku.git",
     "provides"    : {
         "PDF::Tags" : "lib/PDF/Tags.rakumod",
+        "PDF::Tags::Attr"           : "lib/PDF/Tags/Attr.rakumod",
         "PDF::Tags::Elem"           : "lib/PDF/Tags/Elem.rakumod",
         "PDF::Tags::Node"           : "lib/PDF/Tags/Node.rakumod",
         "PDF::Tags::Node::Parent"   : "lib/PDF/Tags/Node/Parent.rakumod",
@@ -21,7 +22,7 @@
         "PDF::Tags::XML-Writer"     : "lib/PDF/Tags/XML-Writer.rakumod",
         "PDF::Tags::XPath"          : "lib/PDF/Tags/XPath.rakumod",
         "PDF::Tags::XPath::Actions" : "lib/PDF/Tags/XPath/Actions.rakumod",
-        "PDF::Tags::XPath::Axis"    : "lib/PDF/Tags/XPath/Axis.rakumod",
+        "PDF::Tags::XPath::Axes"    : "lib/PDF/Tags/XPath/Axes.rakumod",
         "PDF::Tags::XPath::Grammar" : "lib/PDF/Tags/XPath/Grammar.rakumod"
     },
     "version": "0.0.1"

@@ -1,6 +1,6 @@
 grammar PDF::Tags::XPath::Grammar {
-    # small neophytic XPath like expression evaluator
-
+    # small neophytic XPath like expression evaluator loosley
+    # based on https://www.w3.org/TR/1999/REC-xpath-19991116/
     rule TOP { <query>+ % '|' }
 
     rule query { [$<abs>='/']? <step>+ % '/' }
@@ -11,7 +11,7 @@ grammar PDF::Tags::XPath::Grammar {
     rule step:sym<regular>   { <axis> <node-test> <predicate>? }
 
     proto rule node-test {*}
-    rule node-test:sym<tag>    { <tag=.ident> }
+    rule node-test:sym<tag>        { <tag=.ident> }
     rule node-test:sym<elem>       { '*' }
     rule node-test:sym<node>       { <sym> '(' ')' }
     rule node-test:sym<text>       { <sym> '(' ')' }
@@ -39,8 +39,9 @@ grammar PDF::Tags::XPath::Grammar {
     proto rule axis {*}
     rule axis:sym<ancestor>           { <sym> '::' }
     rule axis:sym<ancestor-or-self>   { <sym> '::' }
+    rule axis:sym<attribute>          { '@' | <sym> '::' }
     rule axis:sym<child>              {[ <sym> '::' ]?}
-    rule axis:sym<descendant>         {[ '/' | <sym> '::' ]}
+    rule axis:sym<descendant>         { '/' | <sym> '::' }
     rule axis:sym<descendant-or-self> { <sym> '::' }
     rule axis:sym<following>          { <sym> '::' }
     rule axis:sym<following-sibling>  { <sym> '::' }

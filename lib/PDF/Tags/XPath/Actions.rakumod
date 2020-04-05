@@ -1,11 +1,12 @@
 class PDF::Tags::XPath::Actions {
 
+    use PDF::Tags::Attr;
     use PDF::Tags::Elem;
     use PDF::Tags::Node;
     use PDF::Tags::Mark;
     use PDF::Tags::ObjRef;
     use PDF::Tags::Text;
-    use PDF::Tags::XPath::Axis;
+    use PDF::Tags::XPath::Axes;
 
     our constant Expression = Code;
     constant Elem      = PDF::Tags::Elem;
@@ -92,6 +93,7 @@ class PDF::Tags::XPath::Actions {
 
     method axis:sym<ancestor>($/)           { make &ancestor }
     method axis:sym<ancestor-or-self>($/)   { make &ancestor-or-self }
+    method axis:sym<attribute>($/)          { make &attribute }
     method axis:sym<child>($/)              { make &child }
     method axis:sym<descendant>($/)         { make &descendant }
     method axis:sym<descendant-or-self>($/) { make &descendant-or-self }

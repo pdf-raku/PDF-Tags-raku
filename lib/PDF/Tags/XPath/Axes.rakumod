@@ -1,5 +1,6 @@
-unit module PDF::Tags::XPath::Axis;
+unit module PDF::Tags::XPath::Axes;
 
+use PDF::Tags::Attr;
 use PDF::Tags::Node;
 
 sub child(PDF::Tags::Node:D $_) is export { .?kids // [] }
@@ -88,4 +89,14 @@ sub parent(PDF::Tags::Node:D $_) is export {
 
 sub self(PDF::Tags::Node:D $_) is export {
     [ $_ ];
+}
+
+sub attribute(PDF::Tags::Node:D $_) is export {
+    if .can('attributes') {
+        my $root := .root;
+        [ .attributes.sort.map: -> $cos {PDF::Tags::Attr.new: :$cos, :parent($_), :$root} ]
+    }
+    else {
+        [];
+    }
 }

@@ -11,10 +11,13 @@ loudtest :
 clean :
 	@rm -f Makefile doc/Tags/*.md doc/Tags/*/*.md
 
-doc : doc/Tags.md doc/Tags/Elem.md doc/Tags/Mark.md doc/Tags/ObjRef.md doc/Tags/Node.md doc/Tags/Node/Parent.md doc/Tags/Text.md doc/Tags/XML-Writer.md doc/Tags/XPath.md
+doc : doc/Tags.md doc/Tags/Attr.md doc/Tags/Elem.md doc/Tags/Mark.md doc/Tags/ObjRef.md doc/Tags/Node.md doc/Tags/Node/Parent.md doc/Tags/Text.md doc/Tags/XML-Writer.md doc/Tags/XPath.md
 
 doc/Tags.md : lib/PDF/Tags.rakumod
 	rakudo -I . --doc=Markdown lib/PDF/Tags.rakumod > doc/Tags.md
+
+doc/Tags/Attr.md : lib/PDF/Tags/Attr.rakumod
+	rakudo -I . --doc=Markdown lib/PDF/Tags/Attr.rakumod > doc/Tags/Attr.md
 
 doc/Tags/Elem.md : lib/PDF/Tags/Elem.rakumod
 	rakudo -I . --doc=Markdown lib/PDF/Tags/Elem.rakumod > doc/Tags/Elem.md

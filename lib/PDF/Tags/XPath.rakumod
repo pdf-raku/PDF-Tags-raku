@@ -4,6 +4,7 @@ class PDF::Tags::XPath {
     use PDF::Tags::Node;
     use PDF::Tags::XPath::Grammar;
     use PDF::Tags::XPath::Actions;
+    use Method::Also;
 
     has PDF::Tags::Node $.node;
 
@@ -23,17 +24,14 @@ class PDF::Tags::XPath {
         self.find($expr);
     }
 
-    multi method find(Str:D $xpath) {
+    multi method find(Str:D $xpath) is also<AT-KEY> {
         my PDF::Tags::XPath::Actions::Expression $expr := self.compile($xpath);
         self.find($expr);
     }
 
-    multi method find(&expr) {
+    my subset Listy where List|Seq;
+    multi method find(&expr --> Listy) {
         &expr($!node);
-    }
-
-    method AT-KEY($k, |c) {
-        my % = classify *.tag, self.find($k, |c);
     }
 
 }
