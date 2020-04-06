@@ -125,6 +125,7 @@ Classes in this Distribution
 ----------
 
 - [PDF::Tags](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags.md) - Tagged PDF root node
+- [PDF::Tags::Attr](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Attr.md) - A single node attribute
 - [PDF::Tags::Elem](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Elem.md) - Structure Tree descendant node
 - [PDF::Tags::Node](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Node.md) - Abstract node
 - [PDF::Tags::Node::Parent](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Node/Parent.md) - Abstract parent node
