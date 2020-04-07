@@ -28,6 +28,21 @@ METHODS
 
     Link to the structure tree root.
 
+  * find / AT-KEY
+
+        say $tags.find('Document/L[1]/@O')[0].name'
+        say $tags<Document/L[1]/@O>[0].name'
+
+    This method evaluates an XPath like expression (see PDF::Tags::XPath) and returns a list of matching nodes.
+
+    With the exception that `$node.AT-KEY($node-name)` routes to `$node.Hash{$node-name}`, rather than using the XPath engine.
+
+  * first
+
+        say $tags.first('Document/L[1]/@O').name;
+
+    Like find, except the first matching node is returned.
+
   * xml
 
     Serialize a node and any descendants as XML.

@@ -27,7 +27,7 @@ is names([$link]), 'Link';
 is names($link.find('text()')), '#text';
 is names($link.find('node()')), '#ref #text';
 
-my PDF::Tags::ObjRef $ref = $link.first('//object-ref()');
-isa-ok $ref.object, 'PDF::Annot', 'object()';
+my PDF::Tags::ObjRef $ref = $link.first('//object()');
+isa-ok $ref.value, 'PDF::Annot', 'object()';
 
 done-testing;

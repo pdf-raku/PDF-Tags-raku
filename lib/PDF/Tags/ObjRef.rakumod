@@ -16,9 +16,10 @@ class PDF::Tags::ObjRef
         }
         $!struct-parent;
     }
-    method cos(--> PDF::OBJR) handles<object> { callsame() }
+    method cos(--> PDF::OBJR) { callsame() }
 
     method name { '#ref' }
+    method value { $.cos.object }
 }
 
 =begin pod
@@ -51,7 +52,7 @@ PDF::Tags::ObjRef - Tagged object reference
       my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
       $figure.do: $gfx, $img, :position[50, 70];
       my PDF::Tags::ObjRef $ref = $figure.kids[0];
-      say $ref.object === $img; # True
+      say $ref.value === $img; # True
   }
 
 =head1 DESCRIPTION
@@ -68,5 +69,13 @@ different ways:
     =item as multiple PDF::Tag::Mark references to marked content within the form's stream.
 
 Depending on whether the form can be treated as an atomic image, or if contains significant sub-structure.
+
+=head1 METHODS
+
+=begin item
+value
+
+The referenced COS object; of type PDF::XObject, PDF::Annot or PDF::Form.
+=end item
 
 =end pod

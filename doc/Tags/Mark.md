@@ -31,7 +31,7 @@ SYNOPSIS
         note $mark.name.Str;         # 'P'
         note $mark.attributes<MCID>; # 0
         note $mark.mcid;             # 0
-        note $mark.mark.gist;        # <P MCID="0"/>
+        note $mark.value.gist;       # <P MCID="0"/>
         note $mark.parent.text;      # 'Marked paragraph text'
         note $mark.parent.xml;       # '<P>Marked paragraph text</P>'
     }
@@ -68,13 +68,13 @@ METHODS
 
     The Marked Content ID within the content stream. These are usually number in sequence, within a stream, starting at zero.
 
-  * mark
+  * value
 
     The low-level PDF::Content::Tag object, which contains futher details on the tag:
 
       * `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 
-      * `start`- The position of the start of the marked content sequence ('BDC' operator).
+      * `start` - The position of the start of the marked content sequence ('BDC' operator).
 
       * `end` - The position of the end of the marked content sequence ('EMC' operator).
 

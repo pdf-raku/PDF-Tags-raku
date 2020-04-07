@@ -55,7 +55,7 @@ $page.graphics: -> $gfx {
     $figure.do: $gfx, $img, :position[50, 70];
     is $img.struct-parent, 1, '$img.struct-parent';
     my PDF::Tags::ObjRef $ref = $figure.kids[0];
-    ok $ref.object === $img, '$ref.object';
+    ok $ref.value === $img, '$ref.value';
 
     $doc.add-kid(Caption).mark: $gfx, {
         .say: "Eureka!", :position[40, 60];

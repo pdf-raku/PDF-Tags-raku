@@ -88,7 +88,7 @@ class PDF::Tags::XPath::Actions {
     method node-test:sym<elem>($/)   { make -> Node $_ { $_ ~~ Elem} }
     method node-test:sym<node>($/)   { make -> Node $_ { True } }
     method node-test:sym<text>($/)   { make -> Node $_ { $_ ~~ Text} }
-    method node-test:sym<object-ref>($/) { make -> Node $_ { $_ ~~ ObjectRef} }
+    method node-test:sym<object>($/) { make -> Node $_ { $_ ~~ ObjectRef} }
     method node-test:sym<mark>($/)   { make -> Node $_ { $_ ~~ Mark} }
 
     method axis:sym<ancestor>($/)           { make &ancestor }

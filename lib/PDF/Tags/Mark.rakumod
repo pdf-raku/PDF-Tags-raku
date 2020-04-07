@@ -16,11 +16,11 @@ class PDF::Tags::Mark
     has Bool $!atts-built;
     has Str $!actual-text;
     has PDF::Content::Graphics $.Stm;
-    has PDF::Content::Tag $.mark is built handles<name mcid elems>;
+    has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
-    method set-cos($!mark) {
+    method set-cos($!value) {
         my PDF::Page $Pg = $.Pg;
-        given $!mark.owner {
+        given $!value.owner {
             when PDF::XObject::Form { $!Stm = $_ }
             when PDF::Page { $Pg = $_; }
             # unlikely
@@ -59,7 +59,7 @@ class PDF::Tags::Mark
     method cos(--> PDF::MCR) { callsame() }
     method attributes {
         $!atts-built ||= do {
-            %!attributes = $!mark.attributes;
+            %!attributes = $!value.attributes;
             True;
         }
         %!attributes;
@@ -76,7 +76,7 @@ class PDF::Tags::Mark
     method text { $.ActualText // $.kids.map(*.text).join }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        self.kids-raw[$i] //= self.build-kid($!mark.kids[$i]);
+        self.kids-raw[$i] //= self.build-kid($!value.kids[$i]);
     }
 }
 
@@ -112,7 +112,7 @@ PDF::Tags::Mark - Marked content reference
       note $mark.name.Str;         # 'P'
       note $mark.attributes<MCID>; # 0
       note $mark.mcid;             # 0
-      note $mark.mark.gist;        # <P MCID="0"/>
+      note $mark.value.gist;       # <P MCID="0"/>
       note $mark.parent.text;      # 'Marked paragraph text'
       note $mark.parent.xml;       # '<P>Marked paragraph text</P>'
   }
@@ -163,13 +163,13 @@ The Marked Content ID within the content stream. These are usually number in seq
 =end item
 
 =begin item
-mark
+value
 
 The low-level PDF::Content::Tag object, which contains futher details on the tag:
 
     =item `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 
-    =item `start`- The position of the start of the marked content sequence ('BDC' operator).
+    =item `start` - The position of the start of the marked content sequence ('BDC' operator).
 
     =item `end` - The position of the end of the marked content sequence ('EMC' operator).
 

@@ -43,6 +43,22 @@ class PDF::Tags::Node {
     
     method xml(|c) { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
     method text { '' }
+
+    method xpath-context {
+        (require ::('PDF::Tags::XPath')).new: :node(self);
+    }
+    method find($expr) { $.xpath-context.find($expr) }
+
+    method first($expr) {
+        self.find($expr)[0] // PDF::Tags::Node
+    }
+
+    multi method ACCEPTS(PDF::Tags::Node:D: Str $xpath) {
+        ? self.find($xpath);
+    }
+    multi method ACCEPTS(PDF::Tags::Node:D: Code $xpath) {
+        ? self.find($xpath);
+    }
 }
 
 =begin pod
@@ -77,6 +93,27 @@ PDF::Tags::Text | N/A | PDF::Tags::Node | Looking to eliminate this class?
 root
 
 Link to the structure tree root.
+=end item
+
+=begin item
+find / AT-KEY
+
+    say $tags.find('Document/L[1]/@O')[0].name'
+    say $tags<Document/L[1]/@O>[0].name'
+
+This method evaluates an XPath like expression (see PDF::Tags::XPath) and returns a
+list of matching nodes.
+
+With the exception that `$node.AT-KEY($node-name)` routes to `$node.Hash{$node-name}`, rather than
+using the XPath engine.
+=end item
+
+=begin item
+first
+
+    say $tags.first('Document/L[1]/@O').name;
+
+Like find, except the first matching node is returned.
 =end item
 
 =begin item

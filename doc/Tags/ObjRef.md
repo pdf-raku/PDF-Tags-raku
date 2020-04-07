@@ -29,7 +29,7 @@ SYNOPSIS
         my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
         $figure.do: $gfx, $img, :position[50, 70];
         my PDF::Tags::ObjRef $ref = $figure.kids[0];
-        say $ref.object === $img; # True
+        say $ref.value === $img; # True
     }
 
 DESCRIPTION
@@ -46,4 +46,11 @@ Note that xobject forms (type PDF::XObject::Form) can be referenced in two diffe
   * as multiple PDF::Tag::Mark references to marked content within the form's stream.
 
 Depending on whether the form can be treated as an atomic image, or if contains significant sub-structure.
+
+METHODS
+=======
+
+  * value
+
+    The referenced COS object; of type PDF::XObject, PDF::Annot or PDF::Form.
 

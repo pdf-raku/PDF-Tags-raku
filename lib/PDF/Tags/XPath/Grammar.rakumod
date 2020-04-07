@@ -15,7 +15,7 @@ grammar PDF::Tags::XPath::Grammar {
     rule node-test:sym<elem>       { '*' }
     rule node-test:sym<node>       { <sym> '(' ')' }
     rule node-test:sym<text>       { <sym> '(' ')' }
-    rule node-test:sym<object-ref> { <sym> '(' ')' }
+    rule node-test:sym<object>     { <sym> '(' ')' }
     rule node-test:sym<mark>       { <sym> '(' ')' }
 
     rule predicate           { '[' ~ ']' <expr(4)> }
@@ -30,7 +30,7 @@ grammar PDF::Tags::XPath::Grammar {
 
     token int { < + - >? \d+ }
     proto rule term {*}
-    rule term:sym<int> { <int> }
+    rule term:sym<int>      { <int> }
     rule term:sym<first>    { <sym> '(' ')' }
     rule term:sym<last>     { <sym> '(' ')' }
     rule term:sym<position> { <sym> '(' ')' }

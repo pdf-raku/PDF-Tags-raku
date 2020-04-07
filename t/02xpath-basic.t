@@ -3,7 +3,7 @@ use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Class;
 
-plan 11;
+plan 14;
 
 sub tags(@elems) {
     @elems>>.name.join(' ');
@@ -30,5 +30,8 @@ my $li = $dom.first('Document/L/LI[1]');
 is tags($li.find('*')), 'Lbl LBody', 'relative search';
 is tags($li.find('/*')), 'Document', 'absolute search';
 is $li.text, '• NAME ';
+is tags($li.find('LBody/Reference/Link/@TextDecorationType')),'TextDecorationType';
+is $li.first('LBody/Reference/Link/@TextDecorationType'), 'Underline';
+is-deeply [$li.find('LBody/Reference/Link/@TextDecorationType/*')], [], 'attribute child elements (nonsense)';
 
 done-testing;
