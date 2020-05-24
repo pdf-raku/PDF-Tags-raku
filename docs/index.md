@@ -1,4 +1,4 @@
-PDF-Tags-raku (under construction)
+DF-Tags-raku (under construction)
 ============
 
 A small DOM-like API for the navigation of tagged PDF files;
@@ -124,16 +124,16 @@ Tagged:       yes
 Classes in this Distribution
 ----------
 
-- [PDF::Tags](https://github.com/pdf-raku/PDF-Tags-raku/Tags.md) - Tagged PDF root node
-- [PDF::Tags::Attr](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Attr.md) - A single node attribute
-- [PDF::Tags::Elem](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Elem.md) - Structure Tree descendant node
-- [PDF::Tags::Node](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Node.md) - Abstract node
-- [PDF::Tags::Node::Parent](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Node/Parent.md) - Abstract parent node
-- [PDF::Tags::Mark](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Mark.md) - Leaf content marker node
-- [PDF::Tags::Text](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Text.md) - Text content node
-- [PDF::Tags::ObjRef](https://github.com/pdf-raku/PDF-Tags-raku/Tags/ObjRef.md) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
-- [PDF::Tags::XML-Writer](https://github.com/pdf-raku/PDF-Tags-raku/Tags/XML-Writer.md) - XML Serializer
-- [PDF::Tags::XPath](https://github.com/pdf-raku/PDF-Tags-raku/Tags/XPath.md) - XPath evaluation context
+- [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/Tags) - Tagged PDF root node
+- [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Attr) - A single node attribute
+- [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Elem) - Structure Tree descendant node
+- [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Node) - Abstract node
+- [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Node/Parent) - Abstract parent node
+- [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Mark) - Leaf content marker node
+- [PDF::Tags::Text](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Text) - Text content node
+- [PDF::Tags::ObjRef](https://pdf-raku.github.io/PDF-Tags-raku/Tags/ObjRef) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
+- [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/Tags/XML-Writer) - XML Serializer
+- [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/Tags/XPath) - XPath evaluation context
 
 Scripts in this Distribution
 ------
