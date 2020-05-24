@@ -165,7 +165,7 @@ The Marked Content ID within the content stream. These are usually number in seq
 =begin item
 value
 
-The low-level PDF::Content::Tag object, which contains futher details on the tag:
+The low-level PDF::Content::Tag object, which contains further details on the tag:
 
     =item `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 

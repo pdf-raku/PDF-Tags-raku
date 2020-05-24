@@ -13,7 +13,7 @@ use PDF::Class::StructItem;
 
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
-has $.css = '<?xml-stylesheet type="text/css" href="https://p6-pdf.github.io/css/tagged-pdf.css"?>';
+has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
 has Bool $.style = True;
 has Bool $.debug = False;
 has Str  $.omit;
@@ -157,7 +157,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
                 my $text = self!marked-content($_, :$depth);
             }
             when PDF::Tags::Text { html-escape(.Str) }
-            default { die "unhandled tagged content: {.WHAT.perl}"; }
+            default { die "un-handled tagged content: {.WHAT.perl}"; }
         }
         @text.join;
     }
@@ -208,6 +208,6 @@ dump these as fragments:
    say .xml(:depth(2)) for $tags.find('Document//Sect');
    say '</Document>';
 
-Calling `$node.xml(|c)`, is equivalant to: `PDF::Tags::XML-Writer.new(|c).Str`
+Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str`
 
 =end pod

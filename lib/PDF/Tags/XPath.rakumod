@@ -62,7 +62,7 @@ handle the `find` and `first` method available on all nodes and the `AT-KEY` met
 available on parent nodes (objects of type PDF::Tags, PDF::Tags::Element  and PDF::Tags::Mark).
 
 It implements a subset of the XPath axes, functions and data-types and includes some
-extensions to accomodate specifics of the Tagged PDF format.
+extensions to accommodate specifics of the Tagged PDF format.
 
 =head2 Axes
 
@@ -104,7 +104,7 @@ Examples:
 Examples:
 
     for $elem.find('L/LI[first() or last()]') {...}; # first and last list items 
-    for $elem.find('L/LI[position() >= 3]') {... };  # third list item onwards
+    for $elem.find('L/LI[position() >= 3]') {... };  # third list item onward
 
 =item `position()` - current position in parent list, numbered from `1`
 =item `first()` - true if this is the first item in its parent list

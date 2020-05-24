@@ -23,7 +23,7 @@ DESCRIPTION
 
 PDF::Tags::XPath is an XPath like evaluator used to search for or to navigate between nodes. It is used to handle the `find` and `first` method available on all nodes and the `AT-KEY` method available on parent nodes (objects of type PDF::Tags, PDF::Tags::Element and PDF::Tags::Mark).
 
-It implements a subset of the XPath axes, functions and data-types and includes some extensions to accomodate specifics of the Tagged PDF format.
+It implements a subset of the XPath axes, functions and data-types and includes some extensions to accommodate specifics of the Tagged PDF format.
 
 Axes
 ----
@@ -83,7 +83,7 @@ Predicate Functions:
 Examples:
 
     for $elem.find('L/LI[first() or last()]') {...}; # first and last list items 
-    for $elem.find('L/LI[position() >= 3]') {... };  # third list item onwards
+    for $elem.find('L/LI[position() >= 3]') {... };  # third list item onward
 
   * `position()` - current position in parent list, numbered from `1`
 

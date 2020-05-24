@@ -70,7 +70,7 @@ METHODS
 
   * value
 
-    The low-level PDF::Content::Tag object, which contains futher details on the tag:
+    The low-level PDF::Content::Tag object, which contains further details on the tag:
 
       * `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 

@@ -32,7 +32,7 @@ METHODS
 
   * Str / text
 
-    The value as a text string. In the case of an array, the values are space seperated.
+    The value as a text string. In the case of an array, the values are space separated.
 
   * gist
 

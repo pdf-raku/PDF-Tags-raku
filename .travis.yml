@@ -4,6 +4,7 @@ os:
   - linux
 perl6:
   - latest
+  - '2019.03'
 install:
   - rakudobrew build zef
   - git clone https://github.com/p6-pdf/PDF-Class-p6.git

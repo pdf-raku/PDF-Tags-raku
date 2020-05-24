@@ -72,7 +72,7 @@ This class inherits from PDF::Tags::Node::Parent and has its method available, (
 
         my $text = $elem.ActualText;
 
-    Return predefined actual text for the structual node and any children. This is an optional property.
+    Return predefined actual text for the structural node and any children. This is an optional property.
 
     Note that ActualText is an optional field in the structure tree. The `text()` method (below) is recommended for generalised text extraction.
 
@@ -80,13 +80,13 @@ This class inherits from PDF::Tags::Node::Parent and has its method available, (
 
         my Str $text = $elem.text();
 
-    Return the text for the node and its children. Use `ActualText()` if present. Otherwise this is computed as concationated child text elements.
+    Return the text for the node and its children. Use `ActualText()` if present. Otherwise this is computed as concatenated child text elements.
 
   * Alt
 
         my Str $alt-text = $elem.Alt();
 
-    Return an alternate description for the structual element and its children in human readable form.
+    Return an alternate description for the structural element and its children in human readable form.
 
   * do
 

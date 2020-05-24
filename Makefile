@@ -3,44 +3,42 @@ SRC=src
 all : doc
 
 test :
-	@prove -e"perl6 -I ." t
+	@prove -e"raku -I ." t
 
 loudtest :
-	@prove -e"perl6 -I ." -v t
+	@prove -e"raku -I ." -v t
 
 clean :
-	@rm -f Makefile doc/Tags/*.md doc/Tags/*/*.md
+	@rm -f docs/Tags.md docs/Tags/*.md docs/Tags/*/*.md
 
-doc : doc/Tags.md doc/Tags/Attr.md doc/Tags/Elem.md doc/Tags/Mark.md doc/Tags/ObjRef.md doc/Tags/Node.md doc/Tags/Node/Parent.md doc/Tags/Text.md doc/Tags/XML-Writer.md doc/Tags/XPath.md
+doc : docs/Tags.md docs/Tags/Attr.md docs/Tags/Elem.md docs/Tags/Mark.md docs/Tags/ObjRef.md docs/Tags/Node.md docs/Tags/Node/Parent.md docs/Tags/Text.md docs/Tags/XML-Writer.md docs/Tags/XPath.md
 
-doc/Tags.md : lib/PDF/Tags.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags.rakumod > doc/Tags.md
+docs/Tags%.md : lib/PDF/Tags%.rakumod
+	raku -I . --doc=Markdown $< \
+	| raku -p -n etc/resolve-links.raku \
+        > $@
 
-doc/Tags/Attr.md : lib/PDF/Tags/Attr.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Attr.rakumod > doc/Tags/Attr.md
+docs/Tags.md : lib/PDF/Tags.rakumod
+	rakudo -I . --doc=Markdown $< \
+	| raku -p -n etc/resolve-links.raku \
+         > $@
 
-doc/Tags/Elem.md : lib/PDF/Tags/Elem.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Elem.rakumod > doc/Tags/Elem.md
+docs/Tags/Attr.md : lib/PDF/Tags/Attr.rakumod
 
-doc/Tags/Mark.md : lib/PDF/Tags/Mark.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Mark.rakumod > doc/Tags/Mark.md
+docs/Tags/Elem.md : lib/PDF/Tags/Elem.rakumod
 
-doc/Tags/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/ObjRef.rakumod > doc/Tags/ObjRef.md
+docs/Tags/Mark.md : lib/PDF/Tags/Mark.rakumod
 
-doc/Tags/Node.md : lib/PDF/Tags/Node.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Node.rakumod > doc/Tags/Node.md
+docs/Tags/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
 
-doc/Tags/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Node/Parent.rakumod > doc/Tags/Node/Parent.md
+docs/Tags/Node.md : lib/PDF/Tags/Node.rakumod
 
-doc/Tags/Text.md : lib/PDF/Tags/Text.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/Text.rakumod > doc/Tags/Text.md
+docs/Tags/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
 
-doc/Tags/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/XML-Writer.rakumod > doc/Tags/XML-Writer.md
+docs/Tags/Text.md : lib/PDF/Tags/Text.rakumod
 
-doc/Tags/XPath.md : lib/PDF/Tags/XPath.rakumod
-	rakudo -I . --doc=Markdown lib/PDF/Tags/XPath.rakumod > doc/Tags/XPath.md
+docs/Tags/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
+
+docs/Tags/XPath.md : lib/PDF/Tags/XPath.rakumod
 
 

@@ -1,7 +1,7 @@
 PDF-Tags-raku (under construction)
 ============
 
-A small DOM-like API for the navigation of PDF tagged content;
+A small DOM-like API for the navigation of tagged PDF files;
 read and creation of tagged content with simple XPath queries and basic XML serialization.
 
 SYNOPSIS
@@ -124,16 +124,16 @@ Tagged:       yes
 Classes in this Distribution
 ----------
 
-- [PDF::Tags](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags.md) - Tagged PDF root node
-- [PDF::Tags::Attr](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Attr.md) - A single node attribute
-- [PDF::Tags::Elem](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Elem.md) - Structure Tree descendant node
-- [PDF::Tags::Node](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Node.md) - Abstract node
-- [PDF::Tags::Node::Parent](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Node/Parent.md) - Abstract parent node
-- [PDF::Tags::Mark](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Mark.md) - Leaf content marker node
-- [PDF::Tags::Text](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/Text.md) - Text content node
-- [PDF::Tags::ObjRef](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/ObjRef.md) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
-- [PDF::Tags::XML-Writer](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/XML-Writer.md) - XML Serializer
-- [PDF::Tags::XPath](https://github.com/p6-pdf/PDF-Tags-raku/blob/master/doc/Tags/XPath.md) - XPath evaluation context
+- [PDF::Tags](https://github.com/pdf-raku/PDF-Tags-raku/Tags.md) - Tagged PDF root node
+- [PDF::Tags::Attr](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Attr.md) - A single node attribute
+- [PDF::Tags::Elem](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Elem.md) - Structure Tree descendant node
+- [PDF::Tags::Node](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Node.md) - Abstract node
+- [PDF::Tags::Node::Parent](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Node/Parent.md) - Abstract parent node
+- [PDF::Tags::Mark](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Mark.md) - Leaf content marker node
+- [PDF::Tags::Text](https://github.com/pdf-raku/PDF-Tags-raku/Tags/Text.md) - Text content node
+- [PDF::Tags::ObjRef](https://github.com/pdf-raku/PDF-Tags-raku/Tags/ObjRef.md) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
+- [PDF::Tags::XML-Writer](https://github.com/pdf-raku/PDF-Tags-raku/Tags/XML-Writer.md) - XML Serializer
+- [PDF::Tags::XPath](https://github.com/pdf-raku/PDF-Tags-raku/Tags/XPath.md) - XPath evaluation context
 
 Scripts in this Distribution
 ------
@@ -151,7 +151,14 @@ Further Work
 
 - Type-casting of PDF::StructElem.A to roles; as per 14.8.5. Possibly belongs in PDF::Class, however slightly complicated by the need to apply role-mapping.
 
-- Develop a tag/accessibility checker. A low-level sanity checker that a tagged PDF is PDF/UA compliant `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf. Accessibility/UA compliance is probably the most common goal of tagging a PDF.
+- Develop a tag/accessibility checker. A low-level sanity checker that a tagged PDF meets PDF association recommendations `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf and Wikipedia Clause 7 guidelines:
+
+  - Complete tagging of "real content" in logical reading order
+  - Tags must correctly represent the document's semantic structures (headings, lists, tables, etc.)
+  - Problematic content is prohibited, including illogical headings, the use of color/contrast to convey information, inaccessible JavaScript, and more
+  - Meaningful graphics must include alternative text descriptions
+  - Security settings must allow assistive technology access to the content
+  - Fonts must be embedded, and text mapped to Unicode
 
 - Editing. Currently the API primarily runs in `create` or `read` modes, but doesn't readily support editing tags into existing content. More work is also
 needed in the PDF::Content module to support content editing.

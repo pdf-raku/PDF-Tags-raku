@@ -75,7 +75,7 @@ Abstract node ancestor class.
 =begin item
 cos
 
-Returns the underlying PDF::Class or PDF::Content object. The PDF::Tags::Node subclass and PDF::COS type are interdependant:
+Returns the underlying PDF::Class or PDF::Content object. The PDF::Tags::Node subclass and PDF::COS type are interdependent:
 
 =begin table
 PDF::Tags:Node object | PDF::Class object |Base class | Notes
@@ -121,7 +121,7 @@ xml
 
 Serialize a node and any descendants as XML.
 
-Calling `$node.xml(|c)`, is equivalant to: `PDF::Tags::XML-Writer.new(|c).Str`
+Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str`
 
 =end item
 

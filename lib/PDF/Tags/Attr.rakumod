@@ -54,7 +54,7 @@ The value of the attribute either a string, a number, or an array of numbers.
 =begin item
 Str / text
 
-The value as a text string. In the case of an array, the values are space seperated.
+The value as a text string. In the case of an array, the values are space separated.
 =end item
 
 =begin item
