@@ -1,5 +1,6 @@
 use PDF::Tags::Node::Parent;
 
+#| Marked content reference
 class PDF::Tags::Mark
     is PDF::Tags::Node::Parent {
 
@@ -43,13 +44,13 @@ class PDF::Tags::Mark
     multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!) {
         self.set-cos($_);
     }
-    multi submethod TWEAK(UInt:D :$cos!) {
+    multi submethod TWEAK(UInt:D :cos($mcid)!) {
         with self.Stm // self.Pg -> PDF::Content::Graphics $_ {
-            with self.root.graphics-tags($_){$cos} {
+            with self.root.graphics-tags($_){$mcid} {
                 self.set-cos($_);
             }
             else {
-                die "unable to resolve MCID: $cos";
+                die "unable to resolve MCID: $mcid";
             }
         }
         else {
@@ -81,11 +82,8 @@ class PDF::Tags::Mark
 }
 
 =begin pod
-=head1 NAME
 
-PDF::Tags::Mark - Marked content reference
-
-=head1 SYNOPSIS
+=head2 Synopsis
 
   use PDF::Content::Tag :StructureTags, :ParagraphTags;
   use PDF::Tags;
@@ -117,11 +115,11 @@ PDF::Tags::Mark - Marked content reference
       note $mark.parent.xml;       # '<P>Marked paragraph text</P>'
   }
 
-=head1 DESCRIPTION
+=head2 Description
 
 A mark is a reference to an area of marked content within a page or xobject form's content stream. A mark is a leaf node of a tagged PDF's logical structure and is usually parented by a PDF::Tags::Elem object.
 
-=head2 Notes:
+=head3 Notes:
 
   =begin item
   The default action when reading PDF files is to omit PDF::Tags::Mark objects, replacing them with
@@ -140,30 +138,30 @@ A mark is a reference to an area of marked content within a page or xobject form
   pages.
   =end item
 
-=head1 METHODS
+=head2 Methods
 
-=begin item
-name
+=head3 method name
+
+    use PDF::Tags::Node :TagName;
+    method name () returns TagName;
 
 The tag, as it appears in the marked content stream.
 
-=end item
+=head3 method attributes
 
-=begin item
-attributes
+    method attributes() returns Hash;
 
 The raw dictionary, as it appears in the marked content stream.
-=end item
 
-=begin item
-mcid
+=head3 method mcid
 
-The Marked Content ID within the content stream. These are usually number in sequence, within a stream, starting at zero.
+    method mcid() returns UInt
 
-=end item
+The Marked Content ID within the content stream. These are usually numbered in sequence, within a stream, starting at zero.
 
-=begin item
-value
+=head3 method value
+
+    method value() returns PDF::Content::Tag
 
 The low-level PDF::Content::Tag object, which contains further details on the tag:
 
@@ -172,7 +170,5 @@ The low-level PDF::Content::Tag object, which contains further details on the ta
     =item `start` - The position of the start of the marked content sequence ('BDC' operator).
 
     =item `end` - The position of the end of the marked content sequence ('EMC' operator).
-
-=end item
 
 =end pod

@@ -1,21 +1,35 @@
-NAME
-====
+class PDF::Tags::Text
+---------------------
 
-PDF::Tags::Text - Derived Text node
+Derived Text node
 
-DESCRIPTION
-===========
+Description
+-----------
 
 Objects of this class hold derived text.
 
-METHODS
-=======
+Attributes and Methods
+----------------------
 
-  * Str / gist / text
+### has PDF::Tags::Node::Parent $.parent
 
-    The text content
+The parent node
 
-  * parent
+of type PDF::Tags::Elem, or PDF::Tags::Mark
 
-    The parent node; of type PDF::Tags::Elem, or PDF::Tags::Mark
+### method name
+
+```perl6
+method name() returns Mu
+```
+
+Node name (always '#text')
+
+### method cos
+
+```perl6
+method cos() returns Str
+```
+
+Text content
 

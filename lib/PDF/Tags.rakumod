@@ -1,6 +1,7 @@
 use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 
+#| Tagged PDF root node
 class PDF::Tags:ver<0.0.1>
     is PDF::Tags::Node::Parent
     does PDF::Tags::Node::Root {
@@ -31,7 +32,7 @@ class PDF::Tags:ver<0.0.1>
             given $cos.ParentTree //= { :Nums[] };
     }
 
-    method read(PDF::Class :$pdf!, Bool :$create, |c) {
+    method read(PDF::Class :$pdf!, Bool :$create, |c --> PDF::Tags:D) {
         with $pdf.catalog.StructTreeRoot -> $cos {
             self.new: :$cos, :root(self.WHAT), |c;
         }
@@ -46,6 +47,7 @@ class PDF::Tags:ver<0.0.1>
         PDF::StructTreeRoot :$cos = PDF::COS.coerce({ :Type( :name<StructTreeRoot> )}),
         PDF::Class :$pdf,
         |c
+        --> PDF::Tags:D
     ) {
         $cos.check;
 
@@ -126,7 +128,7 @@ class PDF::Tags:ver<0.0.1>
     constant Tags = Hash[PDF::Content::Tag];
     has Tags %!graphics-tags{PDF::Content::Graphics};
 
-    method graphics-tags($obj) {
+    method graphics-tags($obj --> Hash) {
         %!graphics-tags{$obj} //= do {
             $*ERR.print: '.';
             my &callback = TextDecoder.new(:$!cache).callback;
@@ -139,11 +141,8 @@ class PDF::Tags:ver<0.0.1>
 }
 
 =begin pod
-=head1 NAME
 
-PDF::Tags - Tagged PDF root node
-
-=head1 SYNOPSIS
+=head2 Synopsis
 
   use PDF::Content::Tag :ParagraphTags;
   use PDF::Class;
@@ -180,7 +179,7 @@ PDF::Tags - Tagged PDF root node
   # search tags
   my PDF::Tags @elems = $tags.find('Document//*');
 
-=head1 DESCRIPTION
+=head2 Description
 
 A tagged PDF contains additional logical document structure. For example
 in terms of Table of Contents, Sections, Paragraphs or Indexes.
@@ -199,29 +198,32 @@ and processing of the content stream.
 This module is under construction as an experimental tool for reading
 or creating tagged PDF content.
 
-=head1 METHODS
+=head2 Methods
 
 this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
-=begin item
-read
+=head3 method read
 
-   my PDF::Tags $tags .= read: :$pdf;
+   method read(PDF::Class :$pdf!, Bool :$create) returns PDF::Tags
 
 Read tagged PDF structure from an existing file that has been previously tagged.
 
-=end item
+The `:create` option creates a new struct-tree root, if one does not already exist.
 
-=begin item
-create
+=head3 method create
 
-   my PDF::Tags $tags .= create: :$pdf;
+   method create(PDF::Class :$pdf!) returns PDF::Tags
 
-Create an empty tagged PDF structure in a PDF object.
+Create an empty tagged PDF structure in a PDF.
 
 The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the
 PDF object should be empty; content and tags should be co-created in read-order.
 
-=end item
+=head3 method graphics-tags
 
+   method graphics-tags(PDF::Content::Graphics) returns Hash
+
+Renders a graphics object (Page or XObject form) and caches
+marked content as a hash of L<PDF::Content::Tag> objects,
+indexed by `MCID` (Marked Content ID).
 =end pod

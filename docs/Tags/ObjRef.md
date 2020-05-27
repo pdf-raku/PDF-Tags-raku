@@ -1,10 +1,10 @@
-NAME
-====
+class PDF::Tags::ObjRef
+-----------------------
 
-PDF::Tags::ObjRef - Tagged object reference
+Tagged object reference
 
-SYNOPSIS
-========
+Synopsis
+--------
 
     use PDF::Content::Tag :StructureTags, :IllustrationTags;
     use PDF::Tags;
@@ -24,33 +24,34 @@ SYNOPSIS
     my PDF::Page $page = $pdf.add-page;
 
     $page.graphics: -> $gfx {
-
-        my $figure = $doc.add-kid(Figure);
+        my PDF::Tags::Elem $figure = $doc.add-kid(Figure);
         my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
         $figure.do: $gfx, $img, :position[50, 70];
         my PDF::Tags::ObjRef $ref = $figure.kids[0];
         say $ref.value === $img; # True
     }
 
-DESCRIPTION
-===========
+Description
+-----------
 
-A PDF::Tags::ObjRef contains a reference to an object of type PDF::Annot (annotation), PDF::Form (Acrobat form), or PDF::XObject (image).
+A PDF::Tags::ObjRef contains a reference to an object of type PDF::Annot (annotation), PDF::Form (Acrobat form), or PDF::XObject (image). These all perform the PDF::Class::StructItem role.
 
 These appear as leaf nodes in a tagged PDF's usually along-side PDF::Tags::Mark objects to indicate the objects logical positioning in document reading-order.
 
 Note that xobject forms (type PDF::XObject::Form) can be referenced in two different ways:
 
-  * as a single PDF::Tag::ObjRef reference
-
   * as multiple PDF::Tag::Mark references to marked content within the form's stream.
 
-Depending on whether the form can be treated as an atomic image, or if contains significant sub-structure.
+  * as a single PDF::Tag::ObjRef reference
 
-METHODS
-=======
+Depending on whether or not the form contains significant sub-structure.
 
-  * value
+Methods
+-------
 
-    The referenced COS object; of type PDF::XObject, PDF::Annot or PDF::Form.
+### method value
+
+    method value returns PDF::Class::StructItem
+
+The referenced COS object; of type PDF::XObject, PDF::Annot or PDF::Form (PDF::Class::StructItem role).
 

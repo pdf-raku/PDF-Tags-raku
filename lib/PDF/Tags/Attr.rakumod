@@ -1,4 +1,5 @@
 use PDF::Tags::Node;
+#| Attribute node
 class PDF::Tags::Attr
     is PDF::Tags::Node {
     use PDF::Tags::Node::Parent;
@@ -19,11 +20,8 @@ class PDF::Tags::Attr
 }
 
 =begin pod
-=head1 NAME
 
-PDF::Tags::Attr - Attribute node
-
-=head1 DESCRIPTION
+=head2 Description
 
 Objects of this class hold a single attribute value.
 
@@ -37,38 +35,36 @@ number | Height=258
 array | BBox=34 474 564 738
 =end table
 
-=head1 METHODS
+=head2 Methods
+=head3 name
 
-=begin item
-name
+    method name() returns Str
 
 The attribute name, e.g. `BBox`.
-=end item
 
-=begin item
-value
+=head3 value
+
+    method value() returns Any
 
 The value of the attribute either a string, a number, or an array of numbers.
-=end item
 
-=begin item
-Str / text
+=head3 method Str (alias text)
+
+    method Str() returns Str
 
 The value as a text string. In the case of an array, the values are space separated.
-=end item
 
-=begin item
-gist
+=head3 method gist
 
+    method gist returns Str
     say $table-elem<@BBox>.gist; # BBox=34 474 564 738
 
 `$elem.gist` is equivalent to `$elem.name ~ '=' ~ $elem.text`
-=end item
 
-=begin item
-parent
+=head3 method parent
 
-The parent node; of type PDF::Tags::Elem, or PDF::Tags::Mark
-=end item
+    method parent returns PDF::Tags::Node::Parent
+
+The parent node; of type PDF::Tags, PDF::Tags::Elem, or PDF::Tags::Mark
 
 =end pod

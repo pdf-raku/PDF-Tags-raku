@@ -1,5 +1,6 @@
 use PDF::Tags::Node::Parent;
 
+#| represents one node in the structure tree.
 class PDF::Tags::Elem
     is PDF::Tags::Node::Parent {
 
@@ -77,12 +78,13 @@ class PDF::Tags::Elem
         self.cos.Alt = $_ with $Alt;
     }
 
-    method mark(PDF::Content $gfx, &action, :$name = self.name, |c) {
+    method mark(PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark) {
         my $*ActualText = ''; # Populated by PDF::Content::Text::Block
         my PDF::Content::Tag $tag = $gfx.tag($name, &action, :mark, |c);
         my PDF::Tags::Mark $kid = self.add-kid: $tag;
         self.ActualText ~= $*ActualText;
 
+        # Register this mark in the parent tree
         given $gfx.parent.StructParents -> $idx is rw {
             $idx //= $.root.parent-tree.max-key + 1
                 if $gfx.owner ~~ PDF::Page;
@@ -93,7 +95,7 @@ class PDF::Tags::Elem
         $kid;
     }
 
-    # build intermediate node
+    # copy intermediate node and decendants
     multi method copy-tree(PDF::Tags::Elem $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
         my PDF::StructElem $from-cos = $from-elem.cos;
         my $S = $from-cos.S;
@@ -104,10 +106,10 @@ class PDF::Tags::Elem
             :$P,
             :$Stm,
         );
-        for <A C T Lang Alt E ActualText Pg> -> $k {
+        for <A C T Lang Alt E ActualText> -> $k {
             $to-cos{$k} = $_ with $from-cos{$k};
         }
-        $to-cos<Pg> = $_ with $.Pg;
+        $to-cos<Pg> = $_ with $.Pg // $from-cos<Pg>;
         my PDF::Tags::Elem $to-elem = build-node($to-cos, :$.root, :$parent);
         for $from-elem.kids {
             my PDF::Tags::Node:D $kid = $.copy-tree($_, :$Stm, :parent($to-elem));
@@ -116,12 +118,14 @@ class PDF::Tags::Elem
         $to-elem;
     }
 
-    # build leaf nodes
+    # copy leaf node
     multi method copy-tree(PDF::Tags::Mark $item, PDF::COS::Stream :$Stm!, PDF::Tags::Elem :$parent!) {
         $item.clone: :$Stm, :$parent;
     }
-    multi method copy-tree(PDF::Tags::ObjRef $ref) {
-        $ref.cos;
+
+    # copy reference
+    multi method copy-tree(PDF::Tags::ObjRef $ref, PDF::Tags::Elem :$parent!) {
+        $ref.clone: :$parent;
     }
 
     method !do-reference(PDF::Content $gfx, PDF::XObject $xobj, |c) {
@@ -240,7 +244,7 @@ class PDF::Tags::Elem
     }
 
     has Bool $!atts-reset;
-    method set-attribute(Str() $key, $val) {
+    method set-attribute(Str() $key, Any:D $val) {
         given self.cos<A> {
             # could be an array of dicts + revisions
             $_ = %(self.attributes)
@@ -279,11 +283,8 @@ class PDF::Tags::Elem
 }
 
 =begin pod
-=head1 NAME
 
-PDF::Tags::Elem - Tagged PDF structural elements
-
-=head1 SYNOPSIS
+=head2 Synopsis
 
   use PDF::Content::Tag :IllustrationTags, :StructureTags, :ParagraphTags;
   use PDF::Tags;
@@ -325,61 +326,50 @@ PDF::Tags::Elem - Tagged PDF structural elements
   say $doc.name; # Document
   say $doc.kids>>.name.join(','); # H1,Figure,Caption
 
-=head1 DESCRIPTION
-
-PDF::Tags::Elem represents one node in the structure tree.
-
-=head1 METHODS
+=head2 Methods
 
 This class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
-=begin item
-attributes
+=head3 method attributes
 
+  method attributes() returns Hash
   my %atts = $elem.attributes;
 
-return attributes as a Hash
-=end item
+Returns Attributes as a Hash. Attributes may be of various types. For example a `BBox` attribute is generally an array of fuyr numeric values.
 
-=begin item
-set-attribute
+=head3 method set-attribute
 
+  method setattribute(Str $name, Any:D $value) returns Any:D;
   $elem.set-attribute('BBox', [0, 0, 200, 50]);
 
-Set a single attribute by key and value.
-=end item
+Set a single attribute by name and value.
 
-=begin item
-ActualText
+=head3 method ActualText
 
-   my $text = $elem.ActualText;
+  method ActualText() returns Str
 
-Return predefined actual text for the structural node and any children. This is an optional property.
+Return predefined actual text for the structural node and any children.
 
 Note that ActualText is an optional field in the structure tree. The `text()` method (below) is recommended for generalised text extraction.
 
-=end item
+=head3 method text
 
-=begin item
-text
+  method text() returns Str
 
-   my Str $text = $elem.text();
+Return the text for the node and its children. Uses `ActualText()` if present. Otherwise this is computed as concatenated child text elements.
 
-Return the text for the node and its children. Use `ActualText()` if present. Otherwise this is computed as concatenated child text elements.
-=end item
+=head3 method Alt
 
-=begin item
-Alt
-
-   my Str $alt-text = $elem.Alt();
+  method Alt() returns Str
 
 Return an alternate description for the structural element and its children in human readable form.
-=end item
 
-=begin item
-do
+=head3 method do
 
-    my @rect = $elem.do($page.gfx, $img);
+  method do(
+       PDF::Content $gfx, PDF::XObject $image?, *%o
+  ) returns Array
+  my @rect[4] = $elem.do($page.gfx, $image);
 
 Place an XObject Image or Form as a structural item.
 
@@ -388,28 +378,29 @@ If the object is a Form that contains marked content, its structure is appended 
 The image argument can be omitted, if the element sub-tree contains an xobject image:
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $doc.add-kid(Form);
+    my PDF::Tags::Elem $form-elem = $doc.add-kid(Form);
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.add-kid(Header2).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
-        $form-elem.add-kid(Paragraph).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
-    }
+        $form-elem.add-kid(Header2).mark: $_, {
+            .say: "Tagged XObject header", :font($header-font), :$font-size
+        };
+        $form-elem.add-kid(Paragraph).mark: $_, {
+            .say: "Some sample tagged text", :font($body-font), :$font-size};
+        }
 
     $form-elem.do($page.gfx, :position[150, 70]);
 
 This is the recommended way of composing an XObject Form with marked content. It will ensure the logical structure is accurately captured, including any nested tags and object references to images, or annotations.
 
-=end item
 
-=begin item
-reference
+=head3 method reference
 
-    $elem.reference($page.gfx, $object);
+    method reference(
+        PDF::Content $gfx, PDF::Class::StructItem $Obj
+    ) returns PDF::Tags::Elem
 
 Create and place a reference to an XObject (type PDF::XObject) , Annotation (type PDF::Annot), or Form (type PDF::Form);
-
-=end item
 
 =end pod
 

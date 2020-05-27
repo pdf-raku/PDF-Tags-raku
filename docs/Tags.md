@@ -1,10 +1,10 @@
-NAME
-====
+class PDF::Tags
+---------------
 
-PDF::Tags - Tagged PDF root node
+Tagged PDF root node
 
-SYNOPSIS
-========
+Synopsis
+--------
 
     use PDF::Content::Tag :ParagraphTags;
     use PDF::Class;
@@ -41,8 +41,8 @@ SYNOPSIS
     # search tags
     my PDF::Tags @elems = $tags.find('Document//*');
 
-DESCRIPTION
-===========
+Description
+-----------
 
 A tagged PDF contains additional logical document structure. For example in terms of Table of Contents, Sections, Paragraphs or Indexes.
 
@@ -54,22 +54,30 @@ In addition to the structure tree, PDF documents may contain additional page lev
 
 This module is under construction as an experimental tool for reading or creating tagged PDF content.
 
-METHODS
-=======
+Methods
+-------
 
 this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
-  * read
+### method read
 
-        my PDF::Tags $tags .= read: :$pdf;
+    method read(PDF::Class :$pdf!, Bool :$create) returns PDF::Tags
 
-    Read tagged PDF structure from an existing file that has been previously tagged.
+Read tagged PDF structure from an existing file that has been previously tagged.
 
-  * create
+The `:create` option creates a new struct-tree root, if one does not already exist.
 
-        my PDF::Tags $tags .= create: :$pdf;
+### method create
 
-    Create an empty tagged PDF structure in a PDF object.
+    method create(PDF::Class :$pdf!) returns PDF::Tags
 
-    The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the PDF object should be empty; content and tags should be co-created in read-order.
+Create an empty tagged PDF structure in a PDF.
+
+The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the PDF object should be empty; content and tags should be co-created in read-order.
+
+### method graphics-tags
+
+    method graphics-tags(PDF::Content::Graphics) returns Hash
+
+Renders a graphics object (Page or XObject form) and caches marked content as a hash of [PDF::Content::Tag](https://libxml-raku.github.io/PDF-raku/Content/Tag) objects, indexed by `MCID` (Marked Content ID).
 

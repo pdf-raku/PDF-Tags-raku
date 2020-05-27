@@ -1,5 +1,6 @@
 use PDF::Tags::Node :&node-class, :&build-node, :TagName;
 
+#| Abstract non-leaf node
 class PDF::Tags::Node::Parent
     is PDF::Tags::Node {
 
@@ -95,6 +96,7 @@ class PDF::Tags::Node::Parent
         fail "attributes not applicable to objects of type {self.WHAT.raku}"
             unless self.can('attributes');
         .{$key} = $val with $!store;
+        $val;
     }
     multi method AT-KEY(TagName:D $name) {
         # tag name
@@ -119,33 +121,26 @@ class PDF::Tags::Node::Parent
 }
 
 =begin pod
-=head1 NAME
 
-PDF::Tags::Node::Parent - Abstract non-leaf node
-
-=head1 DESCRIPTION
+=head2 Description
 
 This is a base class for nodes that may contain child elements (objects of type:
 PDF::Tags, PDF::Tags::Elem and PDF::Tags::Mark).
 
-=head1 METHODS
+=head2 Methods
 
-=begin item
-AT-POS
+=head3 method AT-POS
 
-   my $third-child = $node[2];
+    method AT-POS(UInt $index) returns PDF::Tags::Node
+    my $third-child = $node[2];
 
 `node[$n]` is equivalent to `node.kids[$n]`.
-=end item
 
-=begin item
-Array
+=head3 method Array
 
 Returns all child nodes as an array.
-=end item
 
-=begin item
-kids
+=head3 method kids
 
 Returns an iterator for the child elements:
 
@@ -154,23 +149,18 @@ Returns an iterator for the child elements:
 
 Unlike the `Array` and `Hash` methods `kids` does not cache child elements
 and may be ore efficient for one-off traversal of larger DOMs.    
-=end item
 
-=begin item
-keys
+=head3 method keys
 
    say $tags.first('Document/L[1]').keys.sort.join; # e.g.: '@ListNumbering,@O,LI'
 
 returns the names of the nodes immediate children and attributes (prefixed by '@');
-=end item
 
-=begin item
-Hash
+=head3 method Hash
 
 Returns a Hash of child nodes (arrays of lists) and attrbiutes (prefixed by '@')
 
    say $tags.first('<Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
    say $tags.first('<Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
-=end item
 
 =end pod

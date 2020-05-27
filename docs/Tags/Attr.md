@@ -1,10 +1,10 @@
-NAME
-====
+class PDF::Tags::Attr
+---------------------
 
-PDF::Tags::Attr - Attribute node
+Attribute node
 
-DESCRIPTION
-===========
+Description
+-----------
 
 Objects of this class hold a single attribute value.
 
@@ -19,28 +19,37 @@ Note that attributes values may contain numbers, strings or arrays as below:
 </tbody>
 </table>
 
-METHODS
-=======
+Methods
+-------
 
-  * name
+### name
 
-    The attribute name, e.g. `BBox`.
+    method name() returns Str
 
-  * value
+The attribute name, e.g. `BBox`.
 
-    The value of the attribute either a string, a number, or an array of numbers.
+### value
 
-  * Str / text
+    method value() returns Any
 
-    The value as a text string. In the case of an array, the values are space separated.
+The value of the attribute either a string, a number, or an array of numbers.
 
-  * gist
+### method Str (alias text)
 
-        say $table-elem<@BBox>.gist; # BBox=34 474 564 738
+    method Str() returns Str
 
-    `$elem.gist` is equivalent to `$elem.name ~ '=' ~ $elem.text`
+The value as a text string. In the case of an array, the values are space separated.
 
-  * parent
+### method gist
 
-    The parent node; of type PDF::Tags::Elem, or PDF::Tags::Mark
+    method gist returns Str
+    say $table-elem<@BBox>.gist; # BBox=34 474 564 738
+
+`$elem.gist` is equivalent to `$elem.name ~ '=' ~ $elem.text`
+
+### method parent
+
+    method parent returns PDF::Tags::Node::Parent
+
+The parent node; of type PDF::Tags, PDF::Tags::Elem, or PDF::Tags::Mark
 

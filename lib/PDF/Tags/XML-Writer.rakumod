@@ -1,3 +1,4 @@
+#| XML Serializer for tagged PDF structural items
 unit class PDF::Tags::XML-Writer;
 
 use PDF::Annot;
@@ -176,11 +177,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
 
 =begin pod
 
-=head1 NAME
-
-PDF::Tags::XML-Writer - XML Serializer for tagged PDF structural items
-
-=head1 SYNOPSIS
+=head2 Synopsis
 
     use PDF::Class;
     use PDF::Tags;
@@ -197,7 +194,7 @@ PDF::Tags::XML-Writer - XML Serializer for tagged PDF structural items
         $*OUT.print($_);
     }
 
-=head1 DESCRIPTION
+=head2 Description
 
 This class is used to dump nodes and their children in an XML format.
 

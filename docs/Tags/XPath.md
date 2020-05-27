@@ -1,10 +1,10 @@
-NAME
-====
+class PDF::Tags::XPath
+----------------------
 
-PDF::Tags::XPath - Tiny XPath like search/navigation evaluator
+Tiny XPath like search/navigation evaluator
 
-SYNOPSIS
-========
+Synopsis
+--------
 
     use PDF::Class;
     use PDF::Tags;
@@ -18,15 +18,14 @@ SYNOPSIS
     # -OR-
     say .name for $tags<Document/L/LI[1]/*>;
 
-DESCRIPTION
-===========
+Description
+-----------
 
 PDF::Tags::XPath is an XPath like evaluator used to search for or to navigate between nodes. It is used to handle the `find` and `first` method available on all nodes and the `AT-KEY` method available on parent nodes (objects of type PDF::Tags, PDF::Tags::Element and PDF::Tags::Mark).
 
 It implements a subset of the XPath axes, functions and data-types and includes some extensions to accommodate specifics of the Tagged PDF format.
 
-Axes
-----
+### Axes
 
 Examples:
 
@@ -60,8 +59,7 @@ The following XPath Axes are supported:
 
   * `parent::` (or `..`) - the current node's parent
 
-Node Tests
-----------
+### Node Tests
 
 Examples:
 
@@ -77,8 +75,7 @@ Examples:
 
   * `object()` - (Extension) Match object references
 
-Predicate Functions:
---------------------
+### Predicate Functions:
 
 Examples:
 
@@ -91,8 +88,7 @@ Examples:
 
   * `last()` - true if this is the first item in its parent list
 
-Predicate Operators
--------------------
+### Predicate Operators
 
 Loosest to tightest:
 

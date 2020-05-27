@@ -1,10 +1,10 @@
-NAME
-====
+class PDF::Tags::XML-Writer
+---------------------------
 
-PDF::Tags::XML-Writer - XML Serializer for tagged PDF structural items
+XML Serializer for tagged PDF structural items
 
-SYNOPSIS
-========
+Synopsis
+--------
 
     use PDF::Class;
     use PDF::Tags;
@@ -21,8 +21,8 @@ SYNOPSIS
         $*OUT.print($_);
     }
 
-DESCRIPTION
-===========
+Description
+-----------
 
 This class is used to dump nodes and their children in an XML format.
 

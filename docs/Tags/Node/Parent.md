@@ -1,45 +1,46 @@
-NAME
-====
+class PDF::Tags::Node::Parent
+-----------------------------
 
-PDF::Tags::Node::Parent - Abstract non-leaf node
+Abstract non-leaf node
 
-DESCRIPTION
-===========
+Description
+-----------
 
 This is a base class for nodes that may contain child elements (objects of type: PDF::Tags, PDF::Tags::Elem and PDF::Tags::Mark).
 
-METHODS
-=======
+Methods
+-------
 
-  * AT-POS
+### method AT-POS
 
-        my $third-child = $node[2];
+    method AT-POS(UInt $index) returns PDF::Tags::Node
+    my $third-child = $node[2];
 
-    `node[$n]` is equivalent to `node.kids[$n]`.
+`node[$n]` is equivalent to `node.kids[$n]`.
 
-  * Array
+### method Array
 
-    Returns all child nodes as an array.
+Returns all child nodes as an array.
 
-  * kids
+### method kids
 
-    Returns an iterator for the child elements:
+Returns an iterator for the child elements:
 
-        for $node.kids -> PDF::Tags::Node $kid { ... }
-        my @kids = $node.kids;  # consume all at once
+    for $node.kids -> PDF::Tags::Node $kid { ... }
+    my @kids = $node.kids;  # consume all at once
 
-    Unlike the `Array` and `Hash` methods `kids` does not cache child elements and may be ore efficient for one-off traversal of larger DOMs. 
+Unlike the `Array` and `Hash` methods `kids` does not cache child elements and may be ore efficient for one-off traversal of larger DOMs. 
 
-  * keys
+### method keys
 
-        say $tags.first('Document/L[1]').keys.sort.join; # e.g.: '@ListNumbering,@O,LI'
+    say $tags.first('Document/L[1]').keys.sort.join; # e.g.: '@ListNumbering,@O,LI'
 
-    returns the names of the nodes immediate children and attributes (prefixed by '@');
+returns the names of the nodes immediate children and attributes (prefixed by '@');
 
-  * Hash
+### method Hash
 
-    Returns a Hash of child nodes (arrays of lists) and attrbiutes (prefixed by '@')
+Returns a Hash of child nodes (arrays of lists) and attrbiutes (prefixed by '@')
 
-        say $tags.first('<Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
-        say $tags.first('<Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
+    say $tags.first('<Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
+    say $tags.first('<Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
 

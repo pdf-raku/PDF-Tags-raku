@@ -1,3 +1,4 @@
+#| Tiny XPath like search/navigation evaluator
 class PDF::Tags::XPath {
 
     use PDF::Tags;
@@ -29,19 +30,15 @@ class PDF::Tags::XPath {
         self.find($expr);
     }
 
-    my subset Listy where List|Seq;
-    multi method find(&expr --> Listy) {
-        &expr($!node);
+    multi method find(&expr --> Seq) {
+        &expr($!node).Seq;
     }
 
 }
 
 =begin pod
-=head1 NAME
 
-PDF::Tags::XPath - Tiny XPath like search/navigation evaluator
-
-=head1 SYNOPSIS
+=head2 Synopsis
 
     use PDF::Class;
     use PDF::Tags;
@@ -55,7 +52,7 @@ PDF::Tags::XPath - Tiny XPath like search/navigation evaluator
     # -OR-
     say .name for $tags<Document/L/LI[1]/*>;
 
-=head1 DESCRIPTION
+=head2 Description
 
 PDF::Tags::XPath is an XPath like evaluator used to search for or to navigate between nodes. It is used to
 handle the `find` and `first` method available on all nodes and the `AT-KEY` method
@@ -64,7 +61,7 @@ available on parent nodes (objects of type PDF::Tags, PDF::Tags::Element  and PD
 It implements a subset of the XPath axes, functions and data-types and includes some
 extensions to accommodate specifics of the Tagged PDF format.
 
-=head2 Axes
+=head3 Axes
 
 Examples:
 
@@ -87,7 +84,7 @@ The following XPath Axes are supported:
 =item `self::` (or `.`) - the current node
 =item `parent::` (or `..`) - the current node's parent
 
-=head2 Node Tests
+=head3 Node Tests
 
 Examples:
 
@@ -99,7 +96,7 @@ Examples:
 =item `mark()` - (Extension) Match marked content references
 =item `object()` - (Extension) Match object references
 
-=head2 Predicate Functions:
+=head3 Predicate Functions:
 
 Examples:
 
@@ -110,7 +107,7 @@ Examples:
 =item `first()` - true if this is the first item in its parent list
 =item `last()` - true if this is the first item in its parent list
 
-=head2 Predicate Operators
+=head3 Predicate Operators
 
 Loosest to tightest:
 
