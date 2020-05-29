@@ -21,13 +21,13 @@ my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
 
 my PDF::Tags $tags .= create: :$pdf;
-my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
 
 $page.graphics: -> $gfx {
     my PDF::Tags::Elem $header;
     my PDF::Tags::Mark $mark;
 
-    $header = $doc.add-kid(Header1);
+    $header = $doc.add-kid: :name(Header1);
     $mark = $header.mark: $gfx, :name(Span), {
         .say('Header text',
              :font($header-font),

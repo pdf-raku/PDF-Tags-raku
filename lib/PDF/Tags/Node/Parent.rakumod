@@ -54,20 +54,20 @@ class PDF::Tags::Node::Parent
 
         $node;
     }
-    multi method add-kid(PDF::Tags::Node:D $node) {
+    multi method add-kid(PDF::Tags::Node:D :$node!) {
         self!adopt-node($node);
     }
-    multi method add-kid(Str:D $name, |c) {
+    multi method add-kid(Str:D :$name!, *%o) {
         my $P := self.cos;
         my PDF::StructElem $cos = PDF::COS.coerce: %(
             :Type( :name<StructElem> ),
             :S( :$name ),
             :$P,
         );
-        self.add-kid($cos, |c)
+        self.add-kid(:$cos, |%o)
     }
-    multi method add-kid($cos, |c ) is default {
-        my PDF::Tags::Node $kid := self.build-kid($cos, |c);
+    multi method add-kid(:$cos!, *%o) is default {
+        my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
         self!adopt-node($kid);
     }
     method AT-POS(UInt $i) {

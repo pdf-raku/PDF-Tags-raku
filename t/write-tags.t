@@ -21,13 +21,13 @@ my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
 
 my PDF::Tags $tags .= create: :$pdf;
-my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
 
 $page.graphics: -> $gfx {
     my PDF::Tags::Elem $header;
     my PDF::Tags::Mark $mark;
 
-    $header = $doc.add-kid(Header1);
+    $header = $doc.add-kid: :name(Header1);
     $mark = $header.mark: $gfx, {
         .say('Header text',
              :font($header-font),
@@ -43,7 +43,7 @@ $page.graphics: -> $gfx {
     is $page.struct-parent, 0, '$page.struct-parent';
     is-deeply $tags.parent-tree[0][0], $header.cos, 'parent-tree entry'; 
 
-    $mark = $doc.add-kid(Paragraph).mark: $gfx, {
+    $mark = $doc.add-kid(:name(Paragraph)).mark: $gfx, {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
     }
     is $mark.name, 'P', 'inner tag name';
@@ -51,13 +51,13 @@ $page.graphics: -> $gfx {
 
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
-    my $figure = $doc.add-kid: Figure, :Alt("A light-bulb");
+    my $figure = $doc.add-kid: :name(Figure), :Alt("A light-bulb");
     $figure.do: $gfx, $img, :position[50, 70];
     is $img.struct-parent, 1, '$img.struct-parent';
     my PDF::Tags::ObjRef $ref = $figure.kids[0];
     ok $ref.value === $img, '$ref.value';
 
-    $doc.add-kid(Caption).mark: $gfx, {
+    $doc.add-kid(:name(Caption)).mark: $gfx, {
         .say: "Eureka!", :position[40, 60];
     }
 
@@ -71,7 +71,7 @@ $page.graphics: -> $gfx {
     };
 
     my PDF::Tags::Elem $link;
-    lives-ok { $link = $doc.add-kid(Link).reference($gfx, $annot); }, 'add reference';
+    lives-ok { $link = $doc.add-kid(:name(Link)).reference($gfx, $annot); }, 'add reference';
     # inspect COS objects
     my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;
@@ -80,12 +80,16 @@ $page.graphics: -> $gfx {
     is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $doc.add-kid(Form);
+    my $form-elem = $doc.add-kid: :name(Form);
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.add-kid(Header2).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
-        $form-elem.add-kid(Paragraph).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
+        $form-elem.add-kid(:name(Header2)).mark: $_, {
+            .say: "Tagged XObject header", :font($header-font), :$font-size;
+        }
+        $form-elem.add-kid(:name(Paragraph)).mark: $_, {
+            .say: "Some sample tagged text", :font($body-font), :$font-size;
+        }
     }
 
     $form-elem.do($gfx, :position[150, 70]);

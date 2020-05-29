@@ -80,8 +80,8 @@ class PDF::Tags::Elem
 
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark) {
         my $*ActualText = ''; # Populated by PDF::Content::Text::Block
-        my PDF::Content::Tag $tag = $gfx.tag($name, &action, :mark, |c);
-        my PDF::Tags::Mark $kid = self.add-kid: $tag;
+        my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
+        my PDF::Tags::Mark $kid = self.add-kid: :$cos;
         self.ActualText ~= $*ActualText;
 
         # Register this mark in the parent tree
@@ -113,7 +113,7 @@ class PDF::Tags::Elem
         my PDF::Tags::Elem $to-elem = build-node($to-cos, :$.root, :$parent);
         for $from-elem.kids {
             my PDF::Tags::Node:D $kid = $.copy-tree($_, :$Stm, :parent($to-elem));
-            $to-elem.add-kid: $kid;
+            $to-elem.add-kid: :node($kid);
         }
         $to-elem;
     }
@@ -156,7 +156,8 @@ class PDF::Tags::Elem
                     # copy sub-trees
                     my PDF::StructElem $cos = $parents[$_];
                     my PDF::Tags::Elem $elem = build-node($cos, :$.root, :$Pg, :parent(self));
-                    self.add-kid: $elem.copy-tree(:Stm($xobj), :parent(self));
+                    my PDF::Tags::Node $node = $elem.copy-tree(:Stm($xobj), :parent(self));
+                    self.add-kid: :$node;
                 }
             }
             self!bbox($gfx, @rect);
@@ -196,7 +197,8 @@ class PDF::Tags::Elem
             when PDF::XObject::Form && !.StructParent.defined {
                 if .StructParents.defined {
                     my PDF::Tags::Elem:D $parent = self.parent;
-                    $parent.add-kid: self.copy-tree(:Stm($_), :$parent);
+                    my PDF::Tags::Node $node = self.copy-tree(:Stm($_), :$parent);
+                    $parent.add-kid: :$node;
                 }
                 else {
                     # automatically create /StructParents or /StructParent entries
@@ -264,15 +266,15 @@ class PDF::Tags::Elem
     }
 
     method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
-        my PDF::OBJR $ref = PDF::COS.coerce: %(
+        my PDF::OBJR $cos = PDF::COS.coerce: %(
             :Type( :name<OBJR> ),
             :$Obj,
         );
 
         given $gfx.owner {
-            when PDF::Page { $ref<Pg> = $_ }
+            when PDF::Page { $cos<Pg> = $_ }
         }
-        self.add-kid: $ref;
+        self.add-kid: :$cos;
 
         without $Obj.StructParent {
             $_ = $.root.parent-tree.max-key + 1;
@@ -294,13 +296,13 @@ class PDF::Tags::Elem
   # element creation
   my PDF::Class $pdf .= new;
   my PDF::Tags $tags .= create: :$pdf;
-  my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+  my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
 
   my $page = $pdf.add-page;
   my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
 
   $page.graphics: -> $gfx {
-      my PDF::Tags::Elem $header = $doc.add-kid(Header1);
+      my PDF::Tags::Elem $header = $doc.add-kid: :name(Header1);
       my PDF::Tags::Mark $mark = $header.mark: $gfx, {
         .say: 'This header is marked',
               :$font,
@@ -310,9 +312,9 @@ class PDF::Tags::Elem
 
       # add a figure with a caption
       my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-      $doc.add-kid(Figure, :Alt('Incandescent apparatus'))
+      $doc.add-kid(:name(Figure), :Alt('Incandescent apparatus'))
           .do: $gfx, $img, :position[50, 70];
-      $doc.add-kid(Caption).mark: $gfx, {
+      $doc.add-kid(:name(Caption)).mark: $gfx, {
           .say("Eureka!", :position[40, 60]),
       }
   }
@@ -378,14 +380,14 @@ If the object is a Form that contains marked content, its structure is appended 
 The image argument can be omitted, if the element sub-tree contains an xobject image:
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-elem = $doc.add-kid(Form);
+    my PDF::Tags::Elem $form-elem = $doc.add-kid: :name(Form);
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.add-kid(Header2).mark: $_, {
+        $form-elem.add-kid(:name(Header2)).mark: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size
         };
-        $form-elem.add-kid(Paragraph).mark: $_, {
+        $form-elem.add-kid(:name(Paragraph)).mark: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size};
         }
 
