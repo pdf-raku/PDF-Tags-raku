@@ -67,42 +67,37 @@ class PDF::Tags:ver<0.0.1>
 
     class TextDecoder {
         use PDF::Content::Ops :OpCode;
+        use Method::Also;
         has Hash @!save;
+        has Hash $!font;
         has $.current-font;
         has Cache $.cache is required;
-        method !load-font(Hash $dict) {
-            $!cache.font{$dict} //= (require ::('PDF::Font::Loader')).load-font: :$dict;
+        method current-font {
+            $!cache.font{$!font} //= (require ::('PDF::Font::Loader')).load-font: :dict($!font);
         }
 
-        method current-font { $!current-font[0] }
         method callback {
             sub ($op, *@args) {
                 my $method = OpCode($op).key;
                 self."$method"(|@args)
-                    if $method ~~ 'Save'|'Restore'|'SetFont'|'ShowText'|'ShowSpaceText'|'Do';
+                    if self.can($method);
             }
         }
         method Save()      {
-            @!save.push: %( :$!current-font );
+            @!save.push: %( :$!font );
         }
         method Restore()   {
             if @!save {
-                with @!save.pop {
-                    $!current-font = .<current-font>;
+                given @!save.pop {
+                    $!font = .<font>;
                 }
             }
         }
-        method SetFont(Str $font-key, Numeric $font-size) {
-            with $*gfx.resource-entry('Font', $font-key) -> $dict {
-                $!current-font = self!load-font($dict);
-            }
-            else {
-                warn "unable to locate Font in resource dictionary: $font-key";
-                $!current-font = PDF::Content::Util::Font.core-font('courier');
-            }
+        method SetFont($,$?) is also<SetGraphicsState> {
+            $!font = $_ with $*gfx.font-face;
         }
         method ShowText($text-encoded) {
-            .children.push: $!current-font.decode($text-encoded, :str)
+            .children.push: $.current-font.decode($text-encoded, :str)
                 with $*gfx.open-tags.tail;
         }
         method ShowSpaceText(List $text) {
@@ -110,7 +105,7 @@ class PDF::Tags:ver<0.0.1>
                 my Str $last := ' ';
                 my @chunks = $text.map: {
                     when Str {
-                        $last := $!current-font.decode($_, :str);
+                        $last := $.current-font.decode($_, :str);
                     }
                     when $_ <= -120 && !($last ~~ /\s$/) {
                         # assume implicit space

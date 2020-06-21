@@ -29,7 +29,7 @@ my @tags = $doc.find('Document/L/LI[1]/LBody//*')>>.name;
 say @tags.join(','); # Reference,P,Code
 
 # XML Serialization
-say $doc.xml;w
+say $doc.xml;
 
 ```
 
@@ -89,8 +89,14 @@ $page.graphics: -> $gfx {
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.add-kid(:name(Header2)).mark: $_, { .say: "Tagged XObject header", :font($header-font), :$font-size};
-        $form-elem.add-kid(:name(Paragraph)).mark: $_, { .say: "Some sample tagged text", :font($body-font), :$font-size};
+
+        $form-elem.add-kid(:name(Header2)).mark: $_, {
+            .say: "Tagged XObject header", :font($header-font), :$font-size;
+        }
+
+        $form-elem.add-kid(:name(Paragraph)).mark: $_, {
+            .say: "Some sample tagged text", :font($body-font), :$font-size;
+        }
     }
 
     # render the form contained in $form-elem
