@@ -1,7 +1,7 @@
-constant DocRoot = "https://libxml-raku.github.io";
+constant DocRoot = "https://pdf-raku.github.io";
 
 sub resolve-class(Str() $class) {
-    my @path = $class.split('::');
+    my @path = map-class($class.split('::'));
     @path[0] ~= '-raku';
     @path.unshift: DocRoot;
     @path.join: '/';

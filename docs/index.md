@@ -1,170 +1,111 @@
-PDF-Tags-raku (under construction)
-============
+class PDF::Tags
+---------------
 
-A small DOM-like API for the navigation of tagged PDF files;
-read and creation of tagged content with simple XPath queries and basic XML serialization.
+Tagged PDF root node
 
 Synopsis
 --------
 
-### Reading
+    use PDF::Content::Tag :ParagraphTags;
+    use PDF::Class;
+    use PDF::Tags;
+    use PDF::Tags::Elem;
 
-```
-use PDF::Class;
-use PDF::Tags;
-use PDF::Tags::Elem;
+    # create tags
+    my PDF::Class $pdf .= new;
 
-my PDF::Class $pdf .= open: "t/pdf/tagged.pdf";
-my PDF::Tags $tags .= read: :$pdf;
-my PDF::Tags::Elem $doc = $tags[0];
-say $doc.name; # Document
+    my $page = $pdf.add-page;
+    my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
+    my $body-font = $page.core-font: :family<Helvetica>;
 
-# DOM traversal
-for $doc.kids {
-    say .name; # L, P, H1, P ...
-}
+    my PDF::Tags $tags .= create: :$pdf;
+    my PDF::Tags::Elem $doc = $tags.add-kid(Document);
 
-# XPath navigation
-my @tags = $doc.find('Document/L/LI[1]/LBody//*')>>.name;
-say @tags.join(','); # Reference,P,Code
-
-# XML Serialization
-say $doc.xml;
-
-```
-
-### Writing
-```
-use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags;
-use PDF::Tags;
-use PDF::Tags::Elem;
-
-# PDF::Class
-use PDF::Class;
-use PDF::Annot;
-use PDF::XObject::Image;
-use PDF::XObject::Form;
-
-my PDF::Class $pdf .= new;
-my PDF::Tags $tags .= create: :$pdf;
-# create the document root
-my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
-
-my $page = $pdf.add-page;
-my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
-my $body-font = $page.core-font: :family<Helvetica>;
-
-$page.graphics: -> $gfx {
-
-    $doc.add-kid(:name(Header1)).mark: $gfx, {
-        .say('Marked Level 1 Header',
-             :font($header-font),
-             :font-size(15),
-             :position[50, 120]);
-    }
-
-    $doc.add-kid(:name(Paragraph)).mark: $gfx, {
-        .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
-    }
-
-    # add a marked image
-    my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $doc.add-kid(:name(Figure), :Alt('Incandescent apparatus').do($gfx, $img);
-
-    # add a marked link annotation
-    my PDF::Annot $link = PDF::COS.coerce: :dict{
-        :Type(:name<Annot>),
-        :Subtype(:name<Link>),
-        :Rect[71, 717, 190, 734],
-        :Border[16, 16, 1, [3, 2]],
-        :Dest[ $page, :name<FitR>, -4, 399, 199, 533 ],
-        :P($page),
-    };
-
-    $doc.add-kid(:name(Link)).reference($gfx, $link);
-
-    # tagged XObject Form
-    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $doc.add-kid(:name(Form));
-    $form.text: {
-        my $font-size = 12;
-        .text-position = [10, 38];
-
-        $form-elem.add-kid(:name(Header2)).mark: $_, {
-            .say: "Tagged XObject header", :font($header-font), :$font-size;
-        }
-
-        $form-elem.add-kid(:name(Paragraph)).mark: $_, {
-            .say: "Some sample tagged text", :font($body-font), :$font-size;
+    $page.graphics: -> $gfx {
+        $doc.add-kid(Paragraph).mark: $gfx, {
+            .say('Hello tagged world!',
+                 :$font,
+                 :font-size(15),
+                 :position[50, 120]);
         }
     }
+    $pdf.save-as: "t/pdf/tagged.pdf";
 
-    # render the form contained in $form-elem
-    $form-elem.do: $gfx, :position[150, 70];
-}
+    # read tags
+    my PDF::Class $pdf .= open: "t/pdf/tagged.pdf");
+    my PDF::Tags $tags .= read: :$pdf;
+    my PDF::Tags::Elem $doc = $tags[0];
+    say "document root {$doc.name}";
+    say " - child {.name}" for $doc.kids;
 
-$pdf.save-as: "/tmp/marked.pdf"
-
-```
+    # search tags
+    my PDF::Tags @elems = $tags.find('Document//*');
 
 Description
 -----------
 
-A tagged PDF contains additional markup information describing the logical
-document structure of PDF documents.
+A tagged PDF contains additional logical document structure. For example in terms of Table of Contents, Sections, Paragraphs or Indexes.
 
-PDF tagging may also assist PDF readers and other automated tools in reading PDF
-documents and locating content such as text and images.
+The logical structure follows a layout model that is similar to (and is designed to map to) other layouts such as XML, HTML, TeX and DocBook.
 
-This module provides a DOM  like interface for traversing PDF structure and content
-via tags. It also an XPath like search capability. It is designed for use in
-conjunction with PDF::Class or PDF::API6.
+The leaves of the structure tree are usually references to: - sections Page or XObject Form content, - images, annotations or Acrobat forms
 
-Some, but not all PDF files have PDF tagging.  The `pdf-info.raku` script
-(PDF::Class module) can be used to verify this:
-```
-% pdf-info.raku my.pdf |grep Tagged
-Tagged:       yes
-```
+In addition to the structure tree, PDF documents may contain additional page level mark-up that further assist with accessibility and organization and processing of the content stream.
+
+This module is under construction as an experimental tool for reading or creating tagged PDF content.
+
+Methods
+-------
+
+this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+
+### method read
+
+    method read(PDF::Class :$pdf!, Bool :$create) returns PDF::Tags
+
+Read tagged PDF structure from an existing file that has been previously tagged.
+
+The `:create` option creates a new struct-tree root, if one does not already exist.
+
+### method create
+
+    method create(PDF::Class :$pdf!) returns PDF::Tags
+
+Create an empty tagged PDF structure in a PDF.
+
+The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the PDF object should be empty; content and tags should be co-created in read-order.
+
+### method graphics-tags
+
+    method graphics-tags(PDF::Content::Graphics) returns Hash
+
+Renders a graphics object (Page or XObject form) and caches marked content as a hash of [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) objects, indexed by `MCID` (Marked Content ID).
 
 Classes in this Distribution
-----------
+----------------------------
 
-- [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/Tags) - Tagged PDF root node
-- [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Attr) - A single node attribute
-- [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Elem) - Structure Tree descendant node
-- [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Node) - Abstract node
-- [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Node/Parent) - Abstract parent node
-- [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Mark) - Leaf content marker node
-- [PDF::Tags::Text](https://pdf-raku.github.io/PDF-Tags-raku/Tags/Text) - Text content node
-- [PDF::Tags::ObjRef](https://pdf-raku.github.io/PDF-Tags-raku/Tags/ObjRef) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
-- [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/Tags/XML-Writer) - XML Serializer
-- [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/Tags/XPath) - XPath evaluation context
+  * [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/Tags) - Tagged PDF root node
+
+  * [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/Attr) - A single node attribute
+
+  * [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/Elem) - Structure Tree descendant node
+
+  * [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/Node) - Abstract node
+
+  * [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/Node/Parent) - Abstract parent node
+
+  * [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/Mark) - Leaf content marker node
+
+  * [PDF::Tags::Text](https://pdf-raku.github.io/PDF-Tags-raku/Text) - Text content node
+
+  * [PDF::Tags::ObjRef](https://pdf-raku.github.io/PDF-Tags-raku/ObjRef) - A reference to a PDF object 
+
+  * [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/XML-Writer) - XML Serializer
+
+  * [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/XPath) - XPath evaluation context
 
 Scripts in this Distribution
-------
+----------------------------
 
-##### `pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
+    pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
 
-Todo
----
-
-- Complete POD
-- Release (CPAN)
-
-Further Work
-----
-
-- Type-casting of PDF::StructElem.A to roles; as per 14.8.5. Possibly belongs in PDF::Class, however slightly complicated by the need to apply role-mapping.
-
-- Develop a tag/accessibility checker. A low-level sanity checker that a tagged PDF meets PDF association recommendations `pdf-tag-checker.raku --ua`. See https://www.pdfa.org/wp-content/uploads/2014/06/MatterhornProtocol_1-02.pdf and Wikipedia Clause 7 guidelines:
-
-  - Complete tagging of "real content" in logical reading order
-  - Tags must correctly represent the document's semantic structures (headings, lists, tables, etc.)
-  - Problematic content is prohibited, including illogical headings, the use of color/contrast to convey information, inaccessible JavaScript, and more
-  - Meaningful graphics must include alternative text descriptions
-  - Security settings must allow assistive technology access to the content
-  - Fonts must be embedded, and text mapped to Unicode
-
-- Editing. Currently the API primarily runs in `create` or `read` modes, but doesn't readily support editing tags into existing content. More work is also
-needed in the PDF::Content module to support content editing.

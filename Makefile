@@ -1,4 +1,6 @@
-SRC=src
+DocProj=pdf-raku.github.io
+DocRepo=https://github.com/pdf-raku/$(DocProj)
+DocLinker=../$(DocProj)/etc/resolve-links.raku
 
 all : doc
 
@@ -11,34 +13,37 @@ loudtest :
 clean :
 	@rm -f docs/Tags.md docs/Tags/*.md docs/Tags/*/*.md
 
-doc : docs/Tags.md docs/Tags/Attr.md docs/Tags/Elem.md docs/Tags/Mark.md docs/Tags/ObjRef.md docs/Tags/Node.md docs/Tags/Node/Parent.md docs/Tags/Text.md docs/Tags/XML-Writer.md docs/Tags/XPath.md
+$(DocLinker) :
+	(cd .. && git clone $(DocRepo) $(DocProj))
 
-docs/Tags%.md : lib/PDF/Tags%.rakumod
-	raku -I . --doc=Markdown $< \
-	| raku -p -n etc/resolve-links.raku \
-        > $@
-
-docs/Tags.md : lib/PDF/Tags.rakumod
+docs/index.md : lib/PDF/Tags.rakumod
 	rakudo -I . --doc=Markdown $< \
-	| raku -p -n etc/resolve-links.raku \
+	| raku -p -n $(DocLinker) \
          > $@
 
-docs/Tags/Attr.md : lib/PDF/Tags/Attr.rakumod
+docs/%.md : lib/PDF/Tags/%.rakumod
+	raku -I . --doc=Markdown $< \
+	| raku -p -n $(DocLinker) \
+        > $@
 
-docs/Tags/Elem.md : lib/PDF/Tags/Elem.rakumod
+doc : $(DocLinker) docs/index.md docs/Attr.md docs/Elem.md docs/Mark.md docs/ObjRef.md docs/Node.md docs/Node/Parent.md docs/Text.md docs/XML-Writer.md docs/XPath.md
 
-docs/Tags/Mark.md : lib/PDF/Tags/Mark.rakumod
+docs/Attr.md : lib/PDF/Tags/Attr.rakumod
 
-docs/Tags/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
+docs/Elem.md : lib/PDF/Tags/Elem.rakumod
 
-docs/Tags/Node.md : lib/PDF/Tags/Node.rakumod
+docs/Mark.md : lib/PDF/Tags/Mark.rakumod
 
-docs/Tags/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
+docs/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
 
-docs/Tags/Text.md : lib/PDF/Tags/Text.rakumod
+docs/Node.md : lib/PDF/Tags/Node.rakumod
 
-docs/Tags/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
+docs/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
 
-docs/Tags/XPath.md : lib/PDF/Tags/XPath.rakumod
+docs/Text.md : lib/PDF/Tags/Text.rakumod
+
+docs/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
+
+docs/XPath.md : lib/PDF/Tags/XPath.rakumod
 
 
