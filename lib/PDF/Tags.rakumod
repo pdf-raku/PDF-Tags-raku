@@ -222,22 +222,4 @@ Renders a graphics object (Page or XObject form) and caches
 marked content as a hash of L<PDF::Content::Tag> objects,
 indexed by `MCID` (Marked Content ID).
 
-=head2 Classes in this Distribution
-
-=item [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/Tags) - Tagged PDF root node
-=item L<PDF::Tags::Attr> - A single node attribute
-=item L<PDF::Tags::Elem> - Structure Tree descendant node
-=item L<PDF::Tags::Node> - Abstract node
-=item L<PDF::Tags::Node::Parent> - Abstract parent node
-=item L<PDF::Tags::Mark> - Leaf content marker node
-=item L<PDF::Tags::Text> - Text content node
-=item L<PDF::Tags::ObjRef> - A reference to a PDF object 
-=item L<PDF::Tags::XML-Writer> - XML Serializer
-=item L<PDF::Tags::XPath> - XPath evaluation context
-
-=head2 Scripts in this Distribution
-
-
-    pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
-
 =end pod

@@ -81,31 +81,3 @@ The PDF::Tags API currently only supports writing of tagged content in read-orde
 
 Renders a graphics object (Page or XObject form) and caches marked content as a hash of [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) objects, indexed by `MCID` (Marked Content ID).
 
-Classes in this Distribution
-----------------------------
-
-  * [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/Tags) - Tagged PDF root node
-
-  * [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/Attr) - A single node attribute
-
-  * [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/Elem) - Structure Tree descendant node
-
-  * [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/Node) - Abstract node
-
-  * [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/Node/Parent) - Abstract parent node
-
-  * [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/Mark) - Leaf content marker node
-
-  * [PDF::Tags::Text](https://pdf-raku.github.io/PDF-Tags-raku/Text) - Text content node
-
-  * [PDF::Tags::ObjRef](https://pdf-raku.github.io/PDF-Tags-raku/ObjRef) - A reference to a PDF object 
-
-  * [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/XML-Writer) - XML Serializer
-
-  * [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/XPath) - XPath evaluation context
-
-Scripts in this Distribution
-----------------------------
-
-    pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
-
