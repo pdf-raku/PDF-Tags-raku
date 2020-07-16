@@ -130,16 +130,16 @@ Tagged:       yes
 Classes in this Distribution
 ----------
 
-- [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/) - Tagged PDF root node
-- [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/Attr) - A single node attribute
-- [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/Elem) - Structure Tree descendant node
-- [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/Node) - Abstract node
-- [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/Node/Parent) - Abstract parent node
-- [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/Mark) - Leaf content marker node
-- [PDF::Tags::Text](https://pdf-raku.github.io/PDF-Tags-raku/Text) - Text content node
-- [PDF::Tags::ObjRef](https://pdf-raku.github.io/PDF-Tags-raku/ObjRef) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
-- [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/XML-Writer) - XML Serializer
-- [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/XPath) - XPath evaluation context
+- [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/) - Tagged PDF root node
+- [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Attr) - A single node attribute
+- [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Elem) - Structure Tree descendant node
+- [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node) - Abstract node
+- [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node/Parent) - Abstract parent node
+- [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Mark) - Leaf content marker node
+- [PDF::Tags::Text](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Text) - Text content node
+- [PDF::Tags::ObjRef](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/ObjRef) - A reference to a PDF object (PDF::Annot, PDF::Field or PDF::XObject)
+- [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer) - XML Serializer
+- [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XPath) - XPath evaluation context
 
 Scripts in this Distribution
 ------

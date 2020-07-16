@@ -1,3 +1,8 @@
+[[Raku PDF Project]](https://pdf-raku.github.io)
+ / [[PDF-Tags Module]](https://pdf-raku.github.io/PDF-Tags-raku)
+ / [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags)
+ :: [XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer)
+
 class PDF::Tags::XML-Writer
 ---------------------------
 

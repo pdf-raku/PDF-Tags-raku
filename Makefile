@@ -16,34 +16,34 @@ clean :
 $(DocLinker) :
 	(cd .. && git clone $(DocRepo) $(DocProj))
 
-docs/index.md : lib/PDF/Tags.rakumod
-	rakudo -I . --doc=Markdown $< \
-	| raku -p -n $(DocLinker) \
-         > $@
-
-docs/%.md : lib/PDF/Tags/%.rakumod
+docs/%.md : lib/%.rakumod
 	raku -I . --doc=Markdown $< \
-	| raku -p -n $(DocLinker) \
+	|  TRAIL=$* raku -p -n $(DocLinker) \
         > $@
 
-doc : $(DocLinker) docs/index.md docs/Attr.md docs/Elem.md docs/Mark.md docs/ObjRef.md docs/Node.md docs/Node/Parent.md docs/Text.md docs/XML-Writer.md docs/XPath.md
+doc : $(DocLinker) docs/index.md docs/PDF/Tags.md docs/PDF/Tags/Attr.md docs/PDF/Tags/Elem.md docs/PDF/Tags/Mark.md docs/PDF/Tags/ObjRef.md docs/PDF/Tags/Node.md docs/PDF/Tags/Node/Parent.md docs/PDF/Tags/Text.md docs/PDF/Tags/XML-Writer.md docs/PDF/Tags/XPath.md
 
-docs/Attr.md : lib/PDF/Tags/Attr.rakumod
+docs/index.md : README.md
+	cp $< $@
 
-docs/Elem.md : lib/PDF/Tags/Elem.rakumod
+docs/PDF/Tags.md : lib/PDF/Tags.rakumod
 
-docs/Mark.md : lib/PDF/Tags/Mark.rakumod
+docs/PDF/Tags/Attr.md : lib/PDF/Tags/Attr.rakumod
 
-docs/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
+docs/PDF/Tags/Elem.md : lib/PDF/Tags/Elem.rakumod
 
-docs/Node.md : lib/PDF/Tags/Node.rakumod
+docs/PDF/Tags/Mark.md : lib/PDF/Tags/Mark.rakumod
 
-docs/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
+docs/PDF/Tags/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
 
-docs/Text.md : lib/PDF/Tags/Text.rakumod
+docs/PDF/Tags/Node.md : lib/PDF/Tags/Node.rakumod
 
-docs/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
+docs/PDF/Tags/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
 
-docs/XPath.md : lib/PDF/Tags/XPath.rakumod
+docs/PDF/Tags/Text.md : lib/PDF/Tags/Text.rakumod
+
+docs/PDF/Tags/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
+
+docs/PDF/Tags/XPath.md : lib/PDF/Tags/XPath.rakumod
 
 

@@ -1,3 +1,9 @@
+[[Raku PDF Project]](https://pdf-raku.github.io)
+ / [[PDF-Tags Module]](https://pdf-raku.github.io/PDF-Tags-raku)
+ / [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags)
+ :: [Node](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node)
+ :: [Parent](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node/Parent)
+
 class PDF::Tags::Node::Parent
 -----------------------------
 
