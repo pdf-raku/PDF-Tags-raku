@@ -2,3 +2,5 @@
 .*
 Makefile
 blib/
+PDF-Tags-*
+

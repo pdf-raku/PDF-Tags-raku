@@ -1,8 +1,12 @@
-PDF-Tags-raku (under construction)
+[[Raku PDF Project]](https://pdf-raku.github.io)
+ / [PDF::Tags](https://pdf-raku.github.io/PDF-ATags-raku)
+
+PDF-Tags-raku (**EXPERIMENTAL**))
 ============
 
-A small DOM-like API for the navigation of tagged PDF files;
-read and creation of tagged content with simple XPath queries and basic XML serialization.
+A small DOM-like API for the navigation of tagged PDF files.
+
+This module enables reading and creation of tagged content with simple XPath queries and basic XML serialization.
 
 Synopsis
 --------
@@ -144,13 +148,7 @@ Classes in this Distribution
 Scripts in this Distribution
 ------
 
-##### `pdf-tag-dump.p6 --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
-
-Todo
----
-
-- Complete POD
-- Release (CPAN)
+##### `pdf-tag-dump.raku --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
 
 Further Work
 ----
@@ -165,6 +163,8 @@ Further Work
   - Meaningful graphics must include alternative text descriptions
   - Security settings must allow assistive technology access to the content
   - Fonts must be embedded, and text mapped to Unicode
+
+The PDF accessability standard ISO 14289-1 cannot be distributed and needs to be [purchased from ISO](https://www.iso.org/standard/64599.html).
 
 - Editing. Currently the API primarily runs in `create` or `read` modes, but doesn't readily support editing tags into existing content. More work is also
 needed in the PDF::Content module to support content editing.
