@@ -1,7 +1,7 @@
 use Test;
 use PDF::Tags;
 use PDF::Class;
-use  PDF::Tags::XML-Writer;
+use PDF::Tags::XML-Writer;
 
 plan 3;
 

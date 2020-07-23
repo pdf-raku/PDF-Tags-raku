@@ -15,7 +15,7 @@ sub MAIN(Str $infile,               #= input PDF
          Number  :$max-depth = 16,  #= depth to ascend/descend struct tree
          Bool    :$atts = True,     #= include attributes in tags
          Bool    :$debug,           #= write extra debugging information
-         Bool    :$marks,           #= show raw markws content
+         Bool    :$marks,           #= show raw marks content
          Bool    :$strict = True,   #= warn about unknown tags, etc
          Bool    :$style = True,    #= include stylesheet
          Str     :$select,          #= XPath of twigs to include (relative to root)

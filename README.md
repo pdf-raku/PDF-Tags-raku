@@ -1,5 +1,5 @@
 [[Raku PDF Project]](https://pdf-raku.github.io)
- / [PDF::Tags](https://pdf-raku.github.io/PDF-ATags-raku)
+ / [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku)
 
 PDF-Tags-raku (**EXPERIMENTAL**))
 ============
