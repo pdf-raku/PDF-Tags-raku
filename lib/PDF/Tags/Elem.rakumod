@@ -95,7 +95,7 @@ class PDF::Tags::Elem
         $kid;
     }
 
-    # copy intermediate node and decendants
+    # copy intermediate node and descendants
     multi method copy-tree(PDF::Tags::Elem $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
         my PDF::StructElem $from-cos = $from-elem.cos;
         my $S = $from-cos.S;
@@ -337,7 +337,7 @@ This class inherits from PDF::Tags::Node::Parent and has its method available, (
   method attributes() returns Hash
   my %atts = $elem.attributes;
 
-Returns Attributes as a Hash. Attributes may be of various types. For example a `BBox` attribute is generally an array of fuyr numeric values.
+Returns Attributes as a Hash. Attributes may be of various types. For example a `BBox` attribute is generally an array of four numeric values.
 
 =head3 method set-attribute
 

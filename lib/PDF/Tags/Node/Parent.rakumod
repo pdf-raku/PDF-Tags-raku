@@ -35,7 +35,7 @@ class PDF::Tags::Node::Parent
                 unless $_ === self;
         }
 
-        # reparent cos node
+        # re-parent cos node
         given self.cos.kids //= [] {
             $_ = [$_] if $_ ~~ Hash;
             $node.cos.P = self.cos
@@ -43,7 +43,7 @@ class PDF::Tags::Node::Parent
             .push($node.cos);
         }
 
-        # reparent dom node
+        # re-parent dom node
         $node.parent = self;
         @!kids.push: $node;
 

@@ -1,5 +1,5 @@
 grammar PDF::Tags::XPath::Grammar {
-    # small neophytic XPath like expression evaluator loosley
+    # small neophytic XPath like expression evaluator loosely
     # based on https://www.w3.org/TR/1999/REC-xpath-19991116/
     rule TOP { <query>+ % '|' }
 
