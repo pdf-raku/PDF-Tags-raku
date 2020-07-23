@@ -105,15 +105,26 @@ class PDF::Tags::Node::Parent
     multi method AT-KEY(Str:D $xpath) is default {
         $.xpath-context.AT-KEY($xpath);
     }
+
     method kids {
-        my class Kids does Iterable does Iterator does Positional {
+        my class Kids does Iterable does Positional {
             has PDF::Tags::Node $.node is required handles<elems AT-POS Numeric>;
-            has int $!idx = 0;
-            method iterator { $!idx = 0; self}
-            method pull-one {
-                $!idx < $!node.elems ?? $!node.AT-POS($!idx++) !! IterationEnd;
-            }
             method Array handles<List list values map grep> { $!node.Array }
+            method iterator {
+                class Iteration does Iterator {
+                    has UInt $!idx = 0;
+                    has PDF::Tags::Node::Parent $.node is required;
+                    method pull-one {
+                        if $!idx < $!node.elems {
+                            $!node.AT-POS($!idx++);
+                        }
+                        else {
+                            IterationEnd;
+                        }
+                    }
+                }
+                Iteration.new: :$.node;
+            }
         }
         Kids.new: :node(self);
     }
@@ -148,7 +159,7 @@ Returns an iterator for the child elements:
     my @kids = $node.kids;  # consume all at once
 
 Unlike the `Array` and `Hash` methods `kids` does not cache child elements
-and may be ore efficient for one-off traversal of larger DOMs.    
+and may be more efficient for one-off traversal of larger DOMs.    
 
 =head3 method keys
 
@@ -158,7 +169,7 @@ returns the names of the nodes immediate children and attributes (prefixed by '@
 
 =head3 method Hash
 
-Returns a Hash of child nodes (arrays of lists) and attrbiutes (prefixed by '@')
+Returns a Hash of child nodes (arrays of lists) and attributes (prefixed by '@')
 
    say $tags.first('<Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
    say $tags.first('<Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
