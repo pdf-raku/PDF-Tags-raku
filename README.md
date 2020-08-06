@@ -1,7 +1,7 @@
 [[Raku PDF Project]](https://pdf-raku.github.io)
  / [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku)
 
-PDF-Tags-raku (**EXPERIMENTAL**))
+PDF-Tags-raku (**EXPERIMENTAL**)
 ============
 
 A small DOM-like API for the navigation of tagged PDF files.
@@ -43,13 +43,13 @@ use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags;
 use PDF::Tags;
 use PDF::Tags::Elem;
 
-# PDF::Class
-use PDF::Class;
+# PDF::API6
+use PDF::API6;
 use PDF::Annot;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
 
-my PDF::Class $pdf .= new;
+my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
 my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
@@ -76,14 +76,8 @@ $page.graphics: -> $gfx {
     $doc.add-kid(:name(Figure), :Alt('Incandescent apparatus').do($gfx, $img);
 
     # add a marked link annotation
-    my PDF::Annot $link = PDF::COS.coerce: :dict{
-        :Type(:name<Annot>),
-        :Subtype(:name<Link>),
-        :Rect[71, 717, 190, 734],
-        :Border[16, 16, 1, [3, 2]],
-        :Dest[ $page, :name<FitR>, -4, 399, 199, 533 ],
-        :P($page),
-    };
+    my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
+    my PDF::Annot $link = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
     $doc.add-kid(:name(Link)).reference($gfx, $link);
 
