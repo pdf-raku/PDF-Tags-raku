@@ -128,7 +128,7 @@ Tagged:       yes
 Classes in this Distribution
 ----------
 
-- [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/) - Tagged PDF root node
+- [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags) - Tagged PDF root node
 - [PDF::Tags::Attr](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Attr) - A single node attribute
 - [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Elem) - Structure Tree descendant node
 - [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node) - Abstract node
