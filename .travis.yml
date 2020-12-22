@@ -4,12 +4,10 @@ os:
   - linux
 perl6:
   - latest
-  - '2019.03'
+  - '2020.01'
 install:
   - rakudobrew build zef
-  - git clone https://github.com/p6-pdf/PDF-Class-p6.git
-  - (cd PDF-Class-p6/ && zef install .)
   - zef --depsonly install .
 script:
-  - prove -ve "perl6 -I."
+  - prove -ve "raku -I."
   - zef install .
