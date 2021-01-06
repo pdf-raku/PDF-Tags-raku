@@ -8,7 +8,7 @@ use PDF::Tags::XML-Writer;
 use PDF::Tags::Node :TagName;
 use PDF::IO;
 
-subset Number of Int where { !.defined || $_ > 0 };
+subset Number of Int where * > 0;
 
 sub MAIN(Str $infile,               #= input PDF
 	 Str     :$password = '',   #= password for the input PDF, if encrypted
@@ -30,14 +30,14 @@ sub MAIN(Str $infile,               #= input PDF
     );
 
     my PDF::Class $pdf .= open( $input, :$password );
-    my PDF::Tags $tags .= read: :$pdf, :$strict, :$marks;
+    my PDF::Tags $dom .= read: :$pdf, :$strict, :$marks;
     my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$atts, :$debug, :$omit, :$style, :$root-tag;
 
     my PDF::Tags::Node @nodes = do with $select {
-        $tags.find($_);
+        $dom.find($_);
     }
     else {
-        $tags.root;
+        $dom.root;
     }
 
     my UInt $depth = 0;

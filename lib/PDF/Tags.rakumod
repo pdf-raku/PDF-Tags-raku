@@ -2,11 +2,11 @@ use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 
 #| Tagged PDF root node
-class PDF::Tags:ver<0.0.3>
+class PDF::Tags:ver<0.0.4>
     is PDF::Tags::Node::Parent
     does PDF::Tags::Node::Root {
 
-    use PDF::Class:ver<0.4.1+>;
+    use PDF::Class:ver<0.4.10+>;
     use PDF::Page;
     use PDF::NumberTree :NumberTree;
     use PDF::COS;
