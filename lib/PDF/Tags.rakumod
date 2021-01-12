@@ -12,6 +12,7 @@ class PDF::Tags:ver<0.0.4>
     use PDF::COS;
     use PDF::StructElem;
     use PDF::StructTreeRoot;
+    use PDF::Font::Loader;
 
     has Hash $.class-map         is built;
     has Hash $.role-map          is built;
@@ -44,7 +45,7 @@ class PDF::Tags:ver<0.0.4>
     }
 
     method create(
-        PDF::StructTreeRoot :$cos = PDF::COS.coerce({ :Type( :name<StructTreeRoot> )}),
+        PDF::StructTreeRoot :$cos = PDF::StructTreeRoot.COERCE({ :Type( :name<StructTreeRoot> )}),
         PDF::Class :$pdf,
         |c
         --> PDF::Tags:D
@@ -73,7 +74,7 @@ class PDF::Tags:ver<0.0.4>
         has $.current-font;
         has Cache $.cache is required;
         method current-font {
-            $!cache.font{$!font} //= (require ::('PDF::Font::Loader')).load-font: :dict($!font);
+            $!cache.font{$!font} //= PDF::Font::Loader.load-font: :dict($!font);
         }
 
         method callback {

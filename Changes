@@ -1,3 +1,8 @@
+{{$NEXT}}
+  - Adjust to PDF 0.4.10+ coercian semantics
+  - Implement shorthand form of kid constructor .e.g
+    allow `$doc.Paragraph` rather than `$doc-add-kid: :name(Paragraph);`
+
 0.0.4 - Bump dependencies.
 0.0.3 - More Doco
 0.0.2 - Add license (Artistic)

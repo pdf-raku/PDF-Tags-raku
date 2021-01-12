@@ -7,6 +7,7 @@ class PDF::Tags::Node::Parent
     use Method::Also;
     use PDF::COS;
     use PDF::StructElem;
+    use PDF::Content::Tag :TagSet, :%TagAliases;
 
     has PDF::Tags::Node @.kids;
     method kids-raw { @!kids }
@@ -59,16 +60,23 @@ class PDF::Tags::Node::Parent
     }
     multi method add-kid(Str:D :$name!, *%o) {
         my $P := self.cos;
-        my PDF::StructElem $cos = PDF::COS.coerce: %(
+        my PDF::StructElem $cos .= COERCE: %(
             :Type( :name<StructElem> ),
             :S( :$name ),
             :$P,
         );
         self.add-kid(:$cos, |%o)
     }
-    multi method add-kid(:$cos!, *%o) is default {
+    multi method add-kid(:$cos!, *%o) {
         my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
         self!adopt-node($kid);
+    }
+    multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
+        self.add-kid(:$name, |c)
+    }
+    multi method FALLBACK(Str:D $_ where (%TagAliases{$_}:exists), |c) {
+        my Str:D $name = %TagAliases{$_};
+        self.add-kid(:$name, |c)
     }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;

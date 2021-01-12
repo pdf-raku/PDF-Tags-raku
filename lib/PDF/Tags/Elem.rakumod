@@ -9,18 +9,18 @@ class PDF::Tags::Elem
     use PDF::COS::Stream;
     use PDF::Content;
     use PDF::Content::Graphics;
+    use PDF::Tags::Mark;
     use PDF::Tags::Node :&build-node, :TagName;
     use PDF::Tags::ObjRef;
-    use PDF::Tags::Mark;
     # PDF:Class
-    use PDF::OBJR;
+    use PDF::Class::StructItem;
     use PDF::MCR;
+    use PDF::OBJR;
     use PDF::Page;
     use PDF::StructElem;
-    use PDF::XObject;
-    use PDF::XObject::Image;
     use PDF::XObject::Form;
-    use PDF::Class::StructItem;
+    use PDF::XObject::Image;
+    use PDF::XObject;
 
     method cos(--> PDF::StructElem) handles <ActualText Alt> { callsame() }
     has PDF::Tags::Node::Parent $.parent is rw = self.root;
@@ -100,7 +100,7 @@ class PDF::Tags::Elem
         my PDF::StructElem $from-cos = $from-elem.cos;
         my $S = $from-cos.S;
         my PDF::StructElem $P = $parent.cos;
-        my PDF::StructElem $to-cos =  PDF::COS.coerce: %(
+        my PDF::StructElem $to-cos .= COERCE: %(
             :Type( :name<StructElem> ),
             :$S,
             :$P,
@@ -266,7 +266,7 @@ class PDF::Tags::Elem
     }
 
     method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
-        my PDF::OBJR $cos = PDF::COS.coerce: %(
+        my PDF::OBJR $cos .= COERCE: %(
             :Type( :name<OBJR> ),
             :$Obj,
         );

@@ -31,7 +31,7 @@ class PDF::Tags::Mark
         with $.mcid -> $MCID {
             # only linked into the struct-tree if it has an MCID attribute
 
-            $mcr = PDF::COS.coerce: %(
+            $mcr .= COERCE: %(
                 :Type( :name<MCR> ),
                 :$MCID,
             );
