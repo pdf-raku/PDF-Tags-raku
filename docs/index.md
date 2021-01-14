@@ -20,20 +20,20 @@ use PDF::Tags::Elem;
 
 my PDF::Class $pdf .= open: "t/pdf/tagged.pdf";
 my PDF::Tags $tags .= read: :$pdf;
-my PDF::Tags::Elem $doc = $tags[0];
-say $doc.name; # Document
+my PDF::Tags::Elem $dom = $tags[0];
+say $dom.name; # Document
 
 # DOM traversal
-for $doc.kids {
+for $dom.kids {
     say .name; # L, P, H1, P ...
 }
 
 # XPath navigation
-my @tags = $doc.find('Document/L/LI[1]/LBody//*')>>.name;
+my @tags = $dom.find('Document/L/LI[1]/LBody//*')>>.name;
 say @tags.join(','); # Reference,P,Code
 
 # XML Serialization
-say $doc.xml;
+say $dom.xml;
 
 ```
 
@@ -52,7 +52,7 @@ use PDF::XObject::Form;
 my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
-my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
+my PDF::Tags::Elem $dom = $tags.add-kid: :name(Document);
 
 my $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
@@ -60,39 +60,39 @@ my $body-font = $page.core-font: :family<Helvetica>;
 
 $page.graphics: -> $gfx {
 
-    $doc.add-kid(:name(Header1)).mark: $gfx, {
+    $dom.Header1.mark: $gfx, {
         .say('Marked Level 1 Header',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
     }
 
-    $doc.add-kid(:name(Paragraph)).mark: $gfx, {
+    $dom.Paragraph.mark: $gfx, {
         .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
     }
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $doc.add-kid(:name(Figure), :Alt('Incandescent apparatus').do($gfx, $img);
+    $dom.Figure(:Alt('Incandescent apparatus')).do($gfx, $img);
 
     # add a marked link annotation
     my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
     my PDF::Annot $link = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
-    $doc.add-kid(:name(Link)).reference($gfx, $link);
+    $dom.Link.reference($gfx, $link);
 
     # tagged XObject Form
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $doc.add-kid(:name(Form));
+    my $form-elem = $dom.Form;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
 
-        $form-elem.add-kid(:name(Header2)).mark: $_, {
+        $form-elem.Header2.mark: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
         }
 
-        $form-elem.add-kid(:name(Paragraph)).mark: $_, {
+        $form-elem.Paragraph.mark: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         }
     }

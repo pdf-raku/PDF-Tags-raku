@@ -55,10 +55,10 @@ class PDF::Tags::Node::Parent
 
         $node;
     }
-    multi method add-kid(PDF::Tags::Node:D :$node!) {
+    multi method add-kid(PDF::Tags::Node:D :$node! --> PDF::Tags::Node:D) {
         self!adopt-node($node);
     }
-    multi method add-kid(Str:D :$name!, *%o) {
+    multi method add-kid(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
         my $P := self.cos;
         my PDF::StructElem $cos .= COERCE: %(
             :Type( :name<StructElem> ),
@@ -67,7 +67,7 @@ class PDF::Tags::Node::Parent
         );
         self.add-kid(:$cos, |%o)
     }
-    multi method add-kid(:$cos!, *%o) {
+    multi method add-kid(:$cos!, *%o --> PDF::Tags::Node:D) {
         my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
         self!adopt-node($kid);
     }
@@ -167,7 +167,17 @@ Returns an iterator for the child elements:
     my @kids = $node.kids;  # consume all at once
 
 Unlike the `Array` and `Hash` methods `kids` does not cache child elements
-and may be more efficient for one-off traversal of larger DOMs.    
+and may be more efficient for one-off traversal of larger DOMs.
+
+=head3 method add-kid
+  multi method add-kid(Str :$name!, *%atts) returns PDF::Tags::Node:D;
+  multi method add-kid(PDF::Tags::Node:D :$node!) returns PDF::Tags::Node:D;
+
+Adds the node as a child of the current node.
+
+=item The `:$name` form creates a new empty child node with the given name and attributes
+
+=item The `:$node` reparents an existing node as a child of the current node.
 
 =head3 method keys
 
@@ -181,5 +191,43 @@ Returns a Hash of child nodes (arrays of lists) and attributes (prefixed by '@')
 
    say $tags.first('<Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
    say $tags.first('<Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
+
+=head3 Alias methods
+
+Standard structure tags and there aliases can be used as an alias for the `add-kid()` method. For example `$node.add-kid( :name(Paragraph) )` can be written as `$node.Paragraph`, or $node.P. The full list of alias methods is:
+=head4 Structure Tags
+
+Document, Part, Article(Art), Section(Sect),
+Division(Div), BlockQuotation(BlockQuote), Caption,
+TableOfContents(TOC), TableOfContentsItem(TOCI), Index,
+NonstructuralElement(NonStruct), PrivateElement(Private)
+
+=head4 Paragraph Tags
+
+Paragraph(P), Header(H),
+Header1(H1),  Header2(H2),  Header3(H3),
+Header4(H4),  Header5(H5),  Header6(H6),
+
+=head4 List Element Tags
+
+List(L), ListItem(LI), Label(Lbl), ListBody(LBody),
+
+=head4 Table Tags
+
+Table,  TableRow(TR),     TableHeader(TH),
+TableData(TD), TableBody(TBody), TableFooter(TFoot),
+
+=head4 Inline Element Tags
+
+Span, Quotation(Quote), Note, Reference,
+BibliographyEntry(BibEntry), Code, Link,
+Annotation(Annot),
+Ruby, RubyPunctutation(RP), RubyBaseText(RB), RubyText(RT),
+Warichu, WarichuPunctutation(RP), WarichuText(RT),
+Artifact,
+
+=head4 Illustration Tags
+
+Figure, Formula, Form
 
 =end pod

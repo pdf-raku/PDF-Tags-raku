@@ -2,7 +2,7 @@ use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 
 #| Tagged PDF root node
-class PDF::Tags:ver<0.0.4>
+class PDF::Tags:ver<0.0.5>
     is PDF::Tags::Node::Parent
     does PDF::Tags::Node::Root {
 
@@ -46,7 +46,7 @@ class PDF::Tags:ver<0.0.4>
 
     method create(
         PDF::StructTreeRoot :$cos = PDF::StructTreeRoot.COERCE({ :Type( :name<StructTreeRoot> )}),
-        PDF::Class :$pdf,
+        PDF::Class:D :$pdf,
         |c
         --> PDF::Tags:D
     ) {
@@ -153,10 +153,10 @@ class PDF::Tags:ver<0.0.4>
   my $body-font = $page.core-font: :family<Helvetica>;
 
   my PDF::Tags $tags .= create: :$pdf;
-  my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+  my PDF::Tags::Elem $doc = $tags.Document;
 
   $page.graphics: -> $gfx {
-      $doc.add-kid(Paragraph).mark: $gfx, {
+      $doc.Paragraph.mark: $gfx, {
           .say('Hello tagged world!',
                :$font,
                :font-size(15),
@@ -196,7 +196,7 @@ or creating tagged PDF content.
 
 =head2 Methods
 
-this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+this class inherits from L<PDF::Tags::Node::Parent> and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
 =head3 method read
 

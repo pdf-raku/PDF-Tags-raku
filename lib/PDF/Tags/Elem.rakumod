@@ -302,7 +302,7 @@ class PDF::Tags::Elem
   my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
 
   $page.graphics: -> $gfx {
-      my PDF::Tags::Elem $header = $doc.add-kid: :name(Header1);
+      my PDF::Tags::Elem $header = $doc.Header1;
       my PDF::Tags::Mark $mark = $header.mark: $gfx, {
         .say: 'This header is marked',
               :$font,
@@ -312,9 +312,9 @@ class PDF::Tags::Elem
 
       # add a figure with a caption
       my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-      $doc.add-kid(:name(Figure), :Alt('Incandescent apparatus'))
+      $doc.Figure(:Alt('Incandescent apparatus'))
           .do: $gfx, $img, :position[50, 70];
-      $doc.add-kid(:name(Caption)).mark: $gfx, {
+      $doc.Caption.mark: $gfx, {
           .say("Eureka!", :position[40, 60]),
       }
   }
@@ -330,7 +330,7 @@ class PDF::Tags::Elem
 
 =head2 Methods
 
-This class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+This class inherits from L<PDF::Tags::Node::Parent> and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`).
 
 =head3 method attributes
 
@@ -380,14 +380,14 @@ If the object is a Form that contains marked content, its structure is appended 
 The image argument can be omitted, if the element sub-tree contains an xobject image:
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-elem = $doc.add-kid: :name(Form);
+    my PDF::Tags::Elem $form-elem = $doc.Form;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.add-kid(:name(Header2)).mark: $_, {
+        $form-elem.Header2.mark: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size
         };
-        $form-elem.add-kid(:name(Paragraph)).mark: $_, {
+        $form-elem.Paragraph.mark: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size};
         }
 

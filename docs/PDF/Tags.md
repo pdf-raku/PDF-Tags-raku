@@ -23,10 +23,10 @@ Synopsis
     my $body-font = $page.core-font: :family<Helvetica>;
 
     my PDF::Tags $tags .= create: :$pdf;
-    my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+    my PDF::Tags::Elem $doc = $tags.Document;
 
     $page.graphics: -> $gfx {
-        $doc.add-kid(Paragraph).mark: $gfx, {
+        $doc.Paragraph.mark: $gfx, {
             .say('Hello tagged world!',
                  :$font,
                  :font-size(15),
@@ -61,7 +61,7 @@ This module is under construction as an experimental tool for reading or creatin
 Methods
 -------
 
-this class inherits from PDF::Tags::Node::Parent and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
+this class inherits from [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node/Parent) and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
 ### method read
 
