@@ -10,6 +10,7 @@ class PDF::Tags::Node {
     use PDF::Content::Tag;
     use PDF::Content::Graphics;
     use PDF::Tags::Node::Root;
+    use Method::Also;
 
     my subset TagName of Str is export(:TagName)
         where Str:U | /^<ident>$/;
@@ -43,7 +44,7 @@ class PDF::Tags::Node {
         node-class($_).new: :cos($_), |c;
     }
     
-    method xml(|c) { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
+    method xml(|c) is also<Str gist> { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
     method text { '' }
 
     method xpath-context {
@@ -69,7 +70,7 @@ class PDF::Tags::Node {
 
 =head3 method cos
 
-Returns the underlying PDF::Class or PDF::Content object. The PDF::Tags::Node subclass and PDF::COS type are mapped as follows:
+Returns the underlying L<PDF::Class> or L<PDF::Content> object. The L<PDF::Tags::Node> subclass and L<PDF::COS> type are mapped as follows:
 
 =begin table
 PDF::Tags::Node object | PDF::Class object |Base class | Notes
@@ -112,6 +113,6 @@ Like find, except the first matching node is returned.
 
 Serialize a node and any descendants as XML.
 
-Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str`
+Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str($node)`
 
 =end pod

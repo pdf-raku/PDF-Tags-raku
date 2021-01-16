@@ -23,13 +23,13 @@ Synopsis
     my PDF::Class $pdf .= new;
     my PDF::Tags $tags .= create: :$pdf;
     # create the document root
-    my PDF::Tags::Elem $doc = $tags.add-kid(Document);
+    my PDF::Tags::Elem $doc = $tags.Document;
 
     my PDF::Page $page = $pdf.add-page;
 
     $page.graphics: -> $gfx {
 
-        my PDF::Tags::Mark $mark = $doc.add-kid(Paragraph).mark: $gfx, {
+        my PDF::Tags::Mark $mark = $doc.Paragraph.mark: $gfx, {
             .say: 'Marked paragraph text', :position[50, 100];
         }
 
@@ -44,11 +44,11 @@ Synopsis
 Description
 -----------
 
-A mark is a reference to an area of marked content within a page or xobject form's content stream. A mark is a leaf node of a tagged PDF's logical structure and is usually parented by a PDF::Tags::Elem object.
+A mark is a reference to an area of marked content within a page or xobject form's content stream. A mark is a leaf node of a tagged PDF's logical structure and is usually parented by a [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Elem) object.
 
 ### Notes:
 
-  * The default action when reading PDF files is to omit PDF::Tags::Mark objects, replacing them with summary PDF::Tag::Text objects.
+  * The default action when reading PDF files is to omit [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Mark) objects, replacing them with summary PDF::Tag::Text objects.
 
     The `:marks` option can be used to override this behaviour and see raw marks:
 
@@ -83,7 +83,7 @@ The Marked Content ID within the content stream. These are usually numbered in s
 
     method value() returns PDF::Content::Tag
 
-The low-level PDF::Content::Tag object, which contains further details on the tag:
+The low-level [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) object, which contains further details on the tag:
 
   * `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 

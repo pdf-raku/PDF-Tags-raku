@@ -144,7 +144,7 @@ class PDF::Tags::Node::Parent
 =head2 Description
 
 This is a base class for nodes that may contain child elements (objects of type:
-PDF::Tags, PDF::Tags::Elem and PDF::Tags::Mark).
+L<PDF::Tags>, L<PDF::Tags::Elem> and L<PDF::Tags::Mark>).
 
 =head2 Methods
 

@@ -20,20 +20,20 @@ use PDF::Tags::Elem;
 
 my PDF::Class $pdf .= open: "t/pdf/tagged.pdf";
 my PDF::Tags $tags .= read: :$pdf;
-my PDF::Tags::Elem $dom = $tags[0];
-say $dom.name; # Document
+my PDF::Tags::Elem $root = $tags[0];
+say $root.name; # Document
 
 # DOM traversal
-for $dom.kids {
+for $root.kids {
     say .name; # L, P, H1, P ...
 }
 
 # XPath navigation
-my @tags = $dom.find('Document/L/LI[1]/LBody//*')>>.name;
+my @tags = $root.find('Document/L/LI[1]/LBody//*')>>.name;
 say @tags.join(','); # Reference,P,Code
 
 # XML Serialization
-say $dom.xml;
+say $root.xml;
 
 ```
 
@@ -52,7 +52,7 @@ use PDF::XObject::Form;
 my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
-my PDF::Tags::Elem $dom = $tags.add-kid: :name(Document);
+my PDF::Tags::Elem $root = $tags.Document;
 
 my $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
@@ -60,30 +60,30 @@ my $body-font = $page.core-font: :family<Helvetica>;
 
 $page.graphics: -> $gfx {
 
-    $dom.Header1.mark: $gfx, {
+    $root.Header1.mark: $gfx, {
         .say('Marked Level 1 Header',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
     }
 
-    $dom.Paragraph.mark: $gfx, {
+    $root.Paragraph.mark: $gfx, {
         .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
     }
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $dom.Figure(:Alt('Incandescent apparatus')).do($gfx, $img);
+    $root.Figure(:Alt('Incandescent apparatus')).do($gfx, $img);
 
     # add a marked link annotation
     my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
     my PDF::Annot $link = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
-    $dom.Link.reference($gfx, $link);
+    $root.Link.reference($gfx, $link);
 
     # tagged XObject Form
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $dom.Form;
+    my $form-elem = $root.Form;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];

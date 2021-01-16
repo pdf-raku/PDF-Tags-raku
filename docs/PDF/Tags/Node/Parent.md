@@ -12,7 +12,7 @@ Abstract non-leaf node
 Description
 -----------
 
-This is a base class for nodes that may contain child elements (objects of type: PDF::Tags, PDF::Tags::Elem and PDF::Tags::Mark).
+This is a base class for nodes that may contain child elements (objects of type: [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags), [PDF::Tags::Elem](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Elem) and [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Mark)).
 
 Methods
 -------

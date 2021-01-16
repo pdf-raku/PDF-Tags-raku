@@ -19,7 +19,7 @@ Synopsis
     # element creation
     my PDF::Class $pdf .= new;
     my PDF::Tags $tags .= create: :$pdf;
-    my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
+    my PDF::Tags::Elem $doc = $tags.Document;
 
     my $page = $pdf.add-page;
     my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
@@ -125,5 +125,5 @@ This is the recommended way of composing an XObject Form with marked content. It
         PDF::Content $gfx, PDF::Class::StructItem $Obj
     ) returns PDF::Tags::Elem
 
-Create and place a reference to an XObject (type PDF::XObject) , Annotation (type PDF::Annot), or Form (type PDF::Form);
+Create and place a reference to an XObject (type [PDF::XObject](https://pdf-raku.github.io/PDF-Class-raku)) , Annotation (type [PDF::Annot](https://pdf-raku.github.io/PDF-Class-raku)), or Form (type [PDF::Form](https://pdf-raku.github.io/PDF-Class-raku));
 
