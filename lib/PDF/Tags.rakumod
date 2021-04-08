@@ -20,7 +20,8 @@ class PDF::Tags:ver<0.0.5>
     has Hash $.role-map          is built;
     has NumberTree $.parent-tree is built;
     has Bool $.strict = True;
-    has Bool $.raw;
+    has Bool $.graphics;
+    has Bool $.marks = $!graphics;
     method root { self }
 
     my class Cache {
@@ -65,7 +66,7 @@ class PDF::Tags:ver<0.0.5>
                 given .Root<MarkInfo> //= {};
             .creator.push: "PDF::Tags-{PDF::Tags.^ver}";
         }
-        self.new: :$cos, :root(self.WHAT), :raw, |c
+        self.new: :$cos, :root(self.WHAT), :marks, |c
     }
 
     class TextDecoder {
@@ -73,7 +74,7 @@ class PDF::Tags:ver<0.0.5>
         use Method::Also;
         has Hash @!save;
         has Hash $!font;
-        has $.raw;
+        has $.graphics;
         has $.current-font;
         has Cache $.cache is required;
         method current-font {
@@ -129,7 +130,7 @@ class PDF::Tags:ver<0.0.5>
         method ShowText($text-encoded) {
             with $*gfx.open-tags.tail -> $tag {
                 self!set-graphics-attributes: $tag, $*gfx
-                    if $!raw;
+                    if $!graphics;
                 $tag.children.push: $.current-font.decode($text-encoded, :str);
             }
             else {
@@ -139,7 +140,7 @@ class PDF::Tags:ver<0.0.5>
         method ShowSpaceText(List $text) {
             with $*gfx.open-tags.tail -> $tag {
                 self!set-graphics-attributes: $tag, $*gfx
-                    if $!raw;
+                    if $!graphics;
                 my Str $last := ' ';
                 my @chunks = $text.map: {
                     when Str {
@@ -167,7 +168,7 @@ class PDF::Tags:ver<0.0.5>
     method graphics-tags($obj --> Hash) {
         %!graphics-tags{$obj} //= do {
             $*ERR.print: '.';
-            my &callback = TextDecoder.new(:$!cache, :$!raw).callback;
+            my &callback = TextDecoder.new(:$!cache, :$!graphics).callback;
             my $gfx = $obj.gfx: :&callback, :$!strict;
             $obj.render;
             my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map: {.mcid => $_ };

@@ -20,16 +20,16 @@ class PDF::Tags::Mark
     has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
     method set-cos($!value) {
-        my PDF::Page $Pg = $.Pg;
-        given $!value.owner {
-            when PDF::XObject::Form { $!Stm = $_ }
-            when PDF::Page { $Pg = $_; }
-            # unlikely
-            default { warn "can mark object of type {.WHAT.raku}"; }
-        }
         my PDF::MCR $mcr;
         with $.mcid -> $MCID {
             # only linked into the struct-tree if it has an MCID attribute
+            my PDF::Page $Pg = $.Pg;
+            given $!value.owner {
+                when PDF::XObject::Form { $!Stm = $_ }
+                when PDF::Page { $Pg = $_; }
+                # unlikely
+                default { warn "can mark object of type {.WHAT.raku}"; }
+            }
 
             $mcr .= COERCE: %(
                 :Type( :name<MCR> ),
@@ -125,9 +125,9 @@ A mark is a reference to an area of marked content within a page or xobject form
   The default action when reading PDF files is to omit L<PDF::Tags::Mark> objects, replacing them with
   summary PDF::Tag::Text objects.
 
-  The `:raw` option can be used to override this behaviour and see raw tags:
+  The `:marks` option can be used to override this behaviour and see raw tags:
 
-     my PDF::Tags $tags .= read: :$pdf, :raw;
+     my PDF::Tags $tags .= read: :$pdf, :marks;
      say "first mark is: " ~ $tags<//mark()[0]>;
   =end item
 

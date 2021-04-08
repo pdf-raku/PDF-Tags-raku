@@ -50,9 +50,9 @@ A mark is a reference to an area of marked content within a page or xobject form
 
   * The default action when reading PDF files is to omit [PDF::Tags::Mark](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Mark) objects, replacing them with summary PDF::Tag::Text objects.
 
-    The `:raw` option can be used to override this behaviour and see raw tags:
+    The `:marks` option can be used to override this behaviour and see raw tags:
 
-        my PDF::Tags $tags .= read: :$pdf, :raw;
+        my PDF::Tags $tags .= read: :$pdf, :marks;
         say "first mark is: " ~ $tags<//mark()[0]>;
 
   * There is commonly a one-to-one relationship between a parent element and its child marked content element. Multiple child tags may indicate that the tag spans graphical boundaries. For example a paragraph element (name 'P') usually has a single child marked content sequence, but may have multiple child tags, if the paragraph spans pages.

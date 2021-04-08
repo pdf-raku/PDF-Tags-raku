@@ -15,7 +15,8 @@ sub MAIN(Str $infile,               #= input PDF
          Number  :$max-depth = 16,  #= depth to ascend/descend struct tree
          Bool    :$atts = True,     #= include attributes in tags
          Bool    :$debug,           #= write extra debugging information
-         Bool    :$raw,           #= show physical marked content and graphics state
+         Bool    :$graphics,        #= dump graphics state
+         Bool    :$marks = $graphics,           #= descend into marked content
          Bool    :$strict = True,   #= warn about unknown tags, etc
          Bool    :$style = True,    #= include stylesheet
          Str     :$select,          #= XPath of twigs to include (relative to root)
@@ -30,8 +31,8 @@ sub MAIN(Str $infile,               #= input PDF
     );
 
     my PDF::Class $pdf .= open( $input, :$password );
-    my PDF::Tags $dom .= read: :$pdf, :$strict, :$raw;
-    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$atts, :$debug, :$omit, :$style, :$root-tag, :$raw;
+    my PDF::Tags $dom .= read: :$pdf, :$strict, :$graphics, :$marks;
+    my PDF::Tags::XML-Writer $xml .= new: :$max-depth, :$atts, :$debug, :$omit, :$style, :$root-tag, :$marks;
 
     my PDF::Tags::Node @nodes = do with $select {
         $dom.find($_);
@@ -66,7 +67,7 @@ Options:
    --select=XPath      nodes to be included
    --omit=tag-name     nodes to be excluded
    --root-tag=tag-name define outer root tag
-   --raw               dump marked content and graphics state
+   --marks             decend into marked content
    --debug             add debugging to output
    --/atts             omit attributes in tags
    --/strict           suppress warnings
@@ -76,7 +77,7 @@ Options:
 
 Dumps structure elements from a tagged PDF.
 
-Produces raw tagged output in an XML format.
+Produces tagged output in an XML format.
 
 Only some PDF files contain tagged PDF. pdf-info.raku can be
 used to check this:

@@ -142,7 +142,7 @@ Classes in this Distribution
 Scripts in this Distribution
 ------
 
-##### `pdf-tag-dump.raku --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --/atts --/style --debug t/pdf/tagged.pdf`
+##### `pdf-tag-dump.raku --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --graphics --/atts --/style --debug t/pdf/tagged.pdf`
 
 Further Work
 ----

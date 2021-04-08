@@ -17,7 +17,7 @@ has Bool $.atts = True;
 has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
 has Bool $.style = True;
 has Bool $.debug = False;
-has Bool $.raw;
+has Bool $.marks;
 has Str  $.omit;
 has Str  $.root-tag;
 
@@ -86,7 +86,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $att = do if $!atts {
         my %attributes = $node.attributes;
         %attributes<O>:delete;
-        if $!raw {
+        if $!marks {
             %attributes<ActualText> = $_ with $actual-text;
         }
         atts-str(%attributes);
@@ -103,7 +103,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
     else {
         with $actual-text {
-            if $!raw {
+            if $!marks {
                 take line($depth, "<!-- actual text: {.raku} -->")
                     if $!debug;
             }
@@ -123,7 +123,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 }
             }
         }
-        if $!raw || !$actual-text.defined {
+        if $!marks || !$actual-text.defined {
             # descend
             my $elems = $node.elems;
             if $elems {
