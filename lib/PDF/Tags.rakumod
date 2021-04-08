@@ -13,12 +13,14 @@ class PDF::Tags:ver<0.0.5>
     use PDF::StructElem;
     use PDF::StructTreeRoot;
     use PDF::Font::Loader;
+    use PDF::Content::Ops :GraphicsContext;
+    use PDF::Content::Matrix :&is-identity;
 
     has Hash $.class-map         is built;
     has Hash $.role-map          is built;
     has NumberTree $.parent-tree is built;
     has Bool $.strict = True;
-    has Bool $.marks;
+    has Bool $.raw;
     method root { self }
 
     my class Cache {
@@ -63,7 +65,7 @@ class PDF::Tags:ver<0.0.5>
                 given .Root<MarkInfo> //= {};
             .creator.push: "PDF::Tags-{PDF::Tags.^ver}";
         }
-        self.new: :$cos, :root(self.WHAT), :marks, |c
+        self.new: :$cos, :root(self.WHAT), :raw, |c
     }
 
     class TextDecoder {
@@ -71,6 +73,7 @@ class PDF::Tags:ver<0.0.5>
         use Method::Also;
         has Hash @!save;
         has Hash $!font;
+        has $.raw;
         has $.current-font;
         has Cache $.cache is required;
         method current-font {
@@ -94,15 +97,49 @@ class PDF::Tags:ver<0.0.5>
                 }
             }
         }
+        method !set-graphics-attributes($tag, $gfx) {
+            if $tag.defined {
+                given $gfx.CTM {
+                    $tag.attributes<gm> = .join: ','
+                         unless .&is-identity();
+                }
+                given $gfx.StrokeColor {
+                    unless .key ~~ 'DeviceGray' && .value[0] =~= 0 {
+                        $tag.attributes<stroke> = flat(.key.subst(/^Device/, ''), .value).join: ',';
+                    }
+                }
+                given $gfx.FillColor {
+                    unless .key ~~ 'DeviceGray' && .value[0] =~= 0 {
+                        $tag.attributes<fill> = flat(.key.subst(/^Device/, ''), .value).join: ',';
+                    }
+                }
+
+                if $gfx.context == GraphicsContext::Text {
+                    given $gfx.TextMatrix {
+                        unless .&is-identity() {
+                            $tag.attributes<tm> = .join: ',';
+                        }
+                    }
+                }
+            }
+        }
         method SetFont($,$?) is also<SetGraphicsState> {
             $!font = $_ with $*gfx.font-face;
         }
         method ShowText($text-encoded) {
-            .children.push: $.current-font.decode($text-encoded, :str)
-                with $*gfx.open-tags.tail;
+            with $*gfx.open-tags.tail -> $tag {
+                self!set-graphics-attributes: $tag, $*gfx
+                    if $!raw;
+                $tag.children.push: $.current-font.decode($text-encoded, :str);
+            }
+            else {
+                warn $.current-font.decode($text-encoded, :str);
+            }
         }
         method ShowSpaceText(List $text) {
             with $*gfx.open-tags.tail -> $tag {
+                self!set-graphics-attributes: $tag, $*gfx
+                    if $!raw;
                 my Str $last := ' ';
                 my @chunks = $text.map: {
                     when Str {
@@ -116,6 +153,9 @@ class PDF::Tags:ver<0.0.5>
                 }
                 $tag.children.push: @chunks.join;
             }
+            else {
+                warn $text.raku;
+            }
         }
         method Do($key) {
             warn "todo Do $key";
@@ -127,7 +167,7 @@ class PDF::Tags:ver<0.0.5>
     method graphics-tags($obj --> Hash) {
         %!graphics-tags{$obj} //= do {
             $*ERR.print: '.';
-            my &callback = TextDecoder.new(:$!cache).callback;
+            my &callback = TextDecoder.new(:$!cache, :$!raw).callback;
             my $gfx = $obj.gfx: :&callback, :$!strict;
             $obj.render;
             my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map: {.mcid => $_ };

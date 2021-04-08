@@ -17,6 +17,7 @@ has Bool $.atts = True;
 has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
 has Bool $.style = True;
 has Bool $.debug = False;
+has Bool $.raw;
 has Str  $.omit;
 has Str  $.root-tag;
 
@@ -81,9 +82,13 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             given $node.cos;
     }
     my $name = $node.name;
+    my $actual-text = $node.ActualText;
     my $att = do if $!atts {
         my %attributes = $node.attributes;
         %attributes<O>:delete;
+        if $!raw {
+            %attributes<ActualText> = $_ with $actual-text;
+        }
         atts-str(%attributes);
     }
     else {
@@ -94,24 +99,32 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
-        take line($depth, "<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->");
+        take line($depth, "<$name> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->");
     }
     else {
-        with $node.ActualText {
-            take line($depth, '<!-- actual text -->')
-                if $!debug;
-            given html-escape(trim($_)) -> $text {
-                if $omit-tag {
-                    take $text;
-                }
-                else {
-                    take $_ eq ''
-                        ?? line($depth, "<$name$att/>")
-                        !! line($depth, "<$name$att>{$text}</$name>");
+        with $actual-text {
+            if $!raw {
+                take line($depth, "<!-- actual text: {.raku} -->")
+                    if $!debug;
+            }
+            else {
+                take line($depth, '<!-- actual text -->')
+                    if $!debug;
+                given html-escape(trim($_)) -> $text {
+                    if $omit-tag {
+                        take $text;
+                    }
+                    else {
+                        $node.attributes<ActualText> = $_;
+                        take $_ eq ''
+                            ?? line($depth, "<$name$att/>")
+                            !! line($depth, "<$name$att>{$text}</$name>");
+                    }
                 }
             }
         }
-        else {
+        if $!raw || !$actual-text.defined {
+            # descend
             my $elems = $node.elems;
             if $elems {
                 take line($depth++, "<$name$att>")
@@ -134,7 +147,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 }
 
 multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
-    take line($depth, "<!-- OBJR {.object.obj-num} {.object.gen-num} R -->")
+    take line($depth, "<!-- OBJR {.cos.obj-num} {.cos.gen-num} R -->")
         if $!debug;
 ##     take self.stream-xml($_, :$depth) with .parent;
 }

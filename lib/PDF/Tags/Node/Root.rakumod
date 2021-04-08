@@ -4,7 +4,7 @@ role PDF::Tags::Node::Root {
     method parent      { fail "already at root" }
     method name        { '#root' }
     method read        {...}
-    method marks       {...}
+    method raw         {...}
     method class-map   {...}
     method role-map    {...}
     method parent-tree {...}

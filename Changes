@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - Replace :marks option with :raw. This has been extended to dump some graphics
+    information: TextMatrix and CTM matrices, Stroke and Fill colors
 
 0.0.5  2021-01-15T10:29:13+13:00
   - Implement shorthand form of child constructor .e.g
