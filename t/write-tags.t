@@ -26,15 +26,12 @@ my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
 
 $page.graphics: -> $gfx {
     my PDF::Tags::Elem $header;
-    my PDF::Tags::Mark $mark;
-
-    $header = $doc.Header1;
-    $mark = $header.mark: $gfx, {
+    my PDF::Tags::Mark:D $mark = $doc.Header1( $gfx, {
         .say('Header text',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
-    }
+    });
 
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
@@ -42,11 +39,11 @@ $page.graphics: -> $gfx {
     is $mark.parent.ActualText, "Header text\n", '$.ActualText()';
 
     is $page.struct-parent, 0, '$page.struct-parent';
-    is-deeply $tags.parent-tree[0][0], $header.cos, 'parent-tree entry'; 
+    is-deeply $tags.parent-tree[0][0], $mark.parent.cos, 'parent-tree entry';
 
-    $mark = $doc.Paragraph.mark: $gfx, {
+    $mark = $doc.Paragraph( $gfx, {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
-    }
+    });
     is $mark.name, 'P', 'inner tag name';
     is $mark.parent.name, 'P', 'outer tag name';
 
@@ -58,9 +55,9 @@ $page.graphics: -> $gfx {
     my PDF::Tags::ObjRef $ref = $figure.kids[0];
     ok $ref.value === $img, '$ref.value';
 
-    $doc.Caption.mark: $gfx, {
+    $doc.Caption( $gfx, {
         .say: "Eureka!", :position[40, 60];
-    }
+    });
 
     my PDF::Annot $annot .= COERCE: {
         :Type(:name<Annot>),

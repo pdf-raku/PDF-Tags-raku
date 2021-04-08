@@ -60,16 +60,16 @@ my $body-font = $page.core-font: :family<Helvetica>;
 
 $page.graphics: -> $gfx {
 
-    $root.Header1.mark: $gfx, {
+    $root.Header1( $gfx, {
         .say('Marked Level 1 Header',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
-    }
+    });
 
-    $root.Paragraph.mark: $gfx, {
+    $root.Paragraph($gfx, {
         .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
-    }
+    });
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
@@ -88,13 +88,13 @@ $page.graphics: -> $gfx {
         my $font-size = 12;
         .text-position = [10, 38];
 
-        $form-elem.Header2.mark: $_, {
+        $form-elem.Header2( $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
-        }
+        });
 
-        $form-elem.Paragraph.mark: $_, {
+        $form-elem.Paragraph($_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
-        }
+        });
     }
 
     # render the form contained in $form-elem

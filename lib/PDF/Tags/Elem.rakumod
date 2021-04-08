@@ -78,10 +78,10 @@ class PDF::Tags::Elem
         self.cos.Alt = $_ with $Alt;
     }
 
-    method mark(PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark) {
+    method mark(PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
         my $*ActualText = ''; # Populated by PDF::Content::Text::Block
         my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
-        my PDF::Tags::Mark $kid = self.add-kid: :$cos;
+        my PDF::Tags::Mark:D $kid = self.add-kid: :$cos;
         self.ActualText ~= $*ActualText;
 
         # Register this mark in the parent tree
@@ -93,6 +93,11 @@ class PDF::Tags::Elem
         }
 
         $kid;
+    }
+
+    #| combined add-kid + mark
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, |c --> PDF::Tags::Mark:D) {
+        self.add-kid(:$name).mark($gfx, &action, |c);
     }
 
     # copy intermediate node and descendants
