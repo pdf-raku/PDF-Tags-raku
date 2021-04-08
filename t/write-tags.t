@@ -82,12 +82,12 @@ $page.graphics: -> $gfx {
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.Header2.mark: $_, {
+        $form-elem.Header2( $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
-        }
-        $form-elem.Paragraph.mark: $_, {
+        });
+        $form-elem.Paragraph($_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
-        }
+        });
     }
 
     $form-elem.do($gfx, :position[150, 70]);

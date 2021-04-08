@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.0.6  2021-04-09T11:18:57+12:00
   - Add :graphics option to dump selected graphics state. Currently
     outputs: TextMatrix and CTM matrices, Stroke and Fill colors
   - Allow marking from add-kid method. In particular this allows
