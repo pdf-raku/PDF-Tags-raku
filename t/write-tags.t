@@ -25,39 +25,38 @@ my PDF::Tags $tags .= create: :$pdf;
 my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
 
 $page.graphics: -> $gfx {
-    my PDF::Tags::Elem $header;
-    my PDF::Tags::Mark:D $mark = $doc.Header1( $gfx, {
+    my PDF::Tags::Elem $header = $doc.Header1: $gfx, {
         .say('Header text',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
-    });
+    };
 
+    is $header.name, 'H1', 'parent elem name';
+    is $header.ActualText, "Header text\n", '$.ActualText()';
+    my PDF::Tags::Mark:D $mark = $header.kids[0];
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
-    is $mark.parent.name, 'H1', 'parent elem name';
-    is $mark.parent.ActualText, "Header text\n", '$.ActualText()';
 
     is $page.struct-parent, 0, '$page.struct-parent';
     is-deeply $tags.parent-tree[0][0], $mark.parent.cos, 'parent-tree entry';
 
-    $mark = $doc.Paragraph( $gfx, {
+    my $para = $doc.Paragraph: $gfx, {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
-    });
-    is $mark.name, 'P', 'inner tag name';
-    is $mark.parent.name, 'P', 'outer tag name';
+    };
+    is $para.name, 'P', 'outer tag name';
+    is $para.kids[0].name, 'P', 'inner tag name';
 
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
-    my $figure = $doc.Figure: :Alt("A light-bulb");
-    $figure.do: $gfx, $img, :position[50, 70];
+    my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
     is $img.struct-parent, 1, '$img.struct-parent';
     my PDF::Tags::ObjRef $ref = $figure.kids[0];
     ok $ref.value === $img, '$ref.value';
 
-    $doc.Caption( $gfx, {
+    $doc.Caption: $gfx, {
         .say: "Eureka!", :position[40, 60];
-    });
+    };
 
     my PDF::Annot $annot .= COERCE: {
         :Type(:name<Annot>),
@@ -82,12 +81,12 @@ $page.graphics: -> $gfx {
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.Header2( $_, {
+        $form-elem.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
-        });
-        $form-elem.Paragraph($_, {
+        };
+        $form-elem.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
-        });
+        };
     }
 
     $form-elem.do($gfx, :position[150, 70]);

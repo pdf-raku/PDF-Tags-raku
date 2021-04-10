@@ -60,26 +60,26 @@ my $body-font = $page.core-font: :family<Helvetica>;
 
 $page.graphics: -> $gfx {
 
-    $root.Header1( $gfx, {
+    $root.Header1: $gfx, {
         .say('Marked Level 1 Header',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
-    });
+    };
 
-    $root.Paragraph($gfx, {
+    $root.Paragraph: $gfx, {
         .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
-    });
+    };
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $root.Figure(:Alt('Incandescent apparatus')).do($gfx, $img);
+    $root.Figure: $gfx, $img, :Alt('Incandescent apparatus');
 
     # add a marked link annotation
     my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
-    my PDF::Annot $link = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
+    my PDF::Annot $annot = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
-    $root.Link.reference($gfx, $link);
+    $root.Link: $gfx, $annot;
 
     # tagged XObject Form
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
@@ -88,13 +88,13 @@ $page.graphics: -> $gfx {
         my $font-size = 12;
         .text-position = [10, 38];
 
-        $form-elem.Header2( $_, {
+        $form-elem.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
-        });
+        };
 
-        $form-elem.Paragraph($_, {
+        $form-elem.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
-        });
+        };
     }
 
     # render the form contained in $form-elem

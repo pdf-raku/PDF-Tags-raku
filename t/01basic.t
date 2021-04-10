@@ -15,7 +15,7 @@ my PDF::Tags::Elem $doc = $tags[0];
 is $doc.name, 'Document';
 my PDF::Tags::Elem $node = $doc[2];
 is $node.name, 'H1';
-is-deeply $doc[0].kids>>.name.join(' '), 'LI LI LI LI LI';
+is $doc[0].kids>>.name.join(' '), 'LI LI LI LI LI';
 is $node.parent.name, 'Document';
 is $tags.name, '#root';
 

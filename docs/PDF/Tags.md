@@ -26,12 +26,12 @@ Synopsis
     my PDF::Tags::Elem $doc = $tags.Document;
 
     $page.graphics: -> $gfx {
-        $doc.Paragraph( $gfx, {
+        $doc.Paragraph.mark: $gfx, {
             .say('Hello tagged world!',
                  :$font,
                  :font-size(15),
                  :position[50, 120]);
-        });
+        }
     }
     $pdf.save-as: "t/pdf/tagged.pdf";
 

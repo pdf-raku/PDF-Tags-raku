@@ -95,19 +95,25 @@ class PDF::Tags::Elem
         $kid;
     }
 
-    #| combined add-kid + mark
-    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, |c --> PDF::Tags::Mark:D) {
-        self.add-kid(:$name).mark($gfx, &action, |c);
+    # combined add-kid + mark
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt) {
+            .mark($gfx, &action, |c);
+            $_;
+        }
     }
 
-    #| combined add-kid + do
-    multi method add-kid(PDF::Content:D $gfx, PDF::XObject:D $xobj, :$name!, |c --> PDF::Tags::Mark:D) {
-        self.add-kid(:$name).do($gfx, $xobj, |c);
+    # combined add-kid + do
+    multi method add-kid(PDF::Content:D $gfx, PDF::XObject:D $xobj, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt) {
+            .do($gfx, $xobj, |c);
+            $_;
+        }
     }
 
-    #| combined add-kid + reference
-    multi method add-kid(PDF::Content:D $gfx, PDF::Class::StructItem:D $obj, :$name!, |c --> PDF::Tags::Elem:D) {
-        self.add-kid(:$name).reference($gfx, $obj, |c);
+    # combined add-kid + reference
+    multi method add-kid(PDF::Content:D $gfx, PDF::Class::StructItem:D $obj, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
+        self.add-kid(:$name, :$Alt).reference($gfx, $obj, |c);
     }
 
     # copy intermediate node and descendants
