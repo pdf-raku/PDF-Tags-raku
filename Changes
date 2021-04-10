@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.0.7  2021-04-11T07:13:25+12:00
   - Also allow reference from add-kid method. This allows shortening
     of $root.Link.reference($gfx, $annot) to $root.Link($gfx, $annot)
 
