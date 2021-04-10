@@ -69,7 +69,7 @@ $page.graphics: -> $gfx {
     };
 
     my PDF::Tags::Elem $link;
-    lives-ok { $link = $doc.Link.reference($gfx, $annot); }, 'add reference';
+    lives-ok { $link = $doc.Link($gfx, $annot); }, 'add reference';
     # inspect COS objects
     my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;

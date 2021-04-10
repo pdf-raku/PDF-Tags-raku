@@ -100,6 +100,16 @@ class PDF::Tags::Elem
         self.add-kid(:$name).mark($gfx, &action, |c);
     }
 
+    #| combined add-kid + do
+    multi method add-kid(PDF::Content:D $gfx, PDF::XObject:D $xobj, :$name!, |c --> PDF::Tags::Mark:D) {
+        self.add-kid(:$name).do($gfx, $xobj, |c);
+    }
+
+    #| combined add-kid + reference
+    multi method add-kid(PDF::Content:D $gfx, PDF::Class::StructItem:D $obj, :$name!, |c --> PDF::Tags::Elem:D) {
+        self.add-kid(:$name).reference($gfx, $obj, |c);
+    }
+
     # copy intermediate node and descendants
     multi method copy-tree(PDF::Tags::Elem $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
         my PDF::StructElem $from-cos = $from-elem.cos;

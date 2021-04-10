@@ -77,9 +77,9 @@ $page.graphics: -> $gfx {
 
     # add a marked link annotation
     my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
-    my PDF::Annot $link = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
+    my PDF::Annot $annot = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
-    $root.Link.reference($gfx, $link);
+    $root.Link($gfx, $annot);
 
     # tagged XObject Form
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];

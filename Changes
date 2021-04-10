@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - Also allow reference from add-kid method. This allows shortening
+    of $root.Link.reference($gfx, $annot) to $root.Link($gfx, $annot)
 
 0.0.6  2021-04-09T11:18:57+12:00
   - Add :graphics option to dump selected graphics state. Currently
