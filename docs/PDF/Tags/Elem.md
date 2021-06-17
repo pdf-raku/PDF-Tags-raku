@@ -49,7 +49,7 @@ Synopsis
     $tags .= read: :$pdf;
     $doc = $tags[0]; # root element
     say $doc.name; # Document
-    say $doc.kids>>.name.join(','); # H1,Figure,Caption
+    say $doc.kids».name.join(','); # H1,Figure,Caption
 
 Methods
 -------

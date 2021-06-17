@@ -24,7 +24,7 @@ of type PDF::Tags::Elem, or PDF::Tags::Mark
 
 ### method name
 
-```perl6
+```raku
 method name() returns Mu
 ```
 
@@ -32,7 +32,7 @@ Node name (always '#text')
 
 ### method cos
 
-```perl6
+```raku
 method cos() returns Str
 ```
 

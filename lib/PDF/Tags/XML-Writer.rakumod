@@ -30,7 +30,7 @@ sub html-escape(Str $_) {
         /\>/ => '&gt;',
         
 }
-multi sub str-escape(@a) { @a.map({str-escape($_)}).join: ' '; }
+multi sub str-escape(@a) { @a.map(&str-escape).join: ' '; }
 multi sub str-escape(Str $_) {
     html-escape($_).trans: /\"/ => '&quote;';
 }

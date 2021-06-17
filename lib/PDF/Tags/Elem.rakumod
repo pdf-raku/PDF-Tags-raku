@@ -27,6 +27,7 @@ class PDF::Tags::Elem
     has Hash $!attributes;
     has TagName $.name is built;
     has Str $.class is built;
+    has $.style is rw; # Styling hook - see PDF::Markup
 
     method attributes {
         $!attributes //= do {
@@ -63,7 +64,7 @@ class PDF::Tags::Elem
         }
     }
 
-    method text { $.ActualText // $.kids.map(*.text).join }
+    method text { $.ActualText // $.kids».text.join }
 
     submethod TWEAK(Str :$Alt) {
         self.Pg = $_ with self.cos.Pg;
@@ -258,7 +259,7 @@ class PDF::Tags::Elem
         my @parents = find-parents(self, $xobj);
         if @parents {
             my UInt $idx := $.root.parent-tree.max-key + 1;
-            $.root.parent-tree[$idx] = [ @parents.map(*.cos) ];
+            $.root.parent-tree[$idx] = [ @parents».cos ];
             $xobj.StructParents = $idx;
         }
         else {
@@ -347,7 +348,7 @@ class PDF::Tags::Elem
   $tags .= read: :$pdf;
   $doc = $tags[0]; # root element
   say $doc.name; # Document
-  say $doc.kids>>.name.join(','); # H1,Figure,Caption
+  say $doc.kids».name.join(','); # H1,Figure,Caption
 
 =head2 Methods
 

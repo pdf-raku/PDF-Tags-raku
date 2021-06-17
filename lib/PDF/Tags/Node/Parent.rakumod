@@ -22,8 +22,8 @@ class PDF::Tags::Node::Parent
         } // 0;
     }
 
-    method build-kid($cos, :$Pg = $.Pg, |c) {
-        build-node($cos, :parent(self), :$Pg, :$.root, |c);
+    method build-kid(PDF::Tags::Node::Parent:D $parent: $cos, :$Pg = $.Pg, |c) {
+        build-node($cos, :$parent, :$Pg, :$.root, |c);
     }
 
     method !adopt-node($node) {

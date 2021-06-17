@@ -12,9 +12,6 @@ use PDF::Annot;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
 
-# ensure consistant document ID generation
-srand(123456);
-
 my PDF::Class $pdf .= new;
 
 my $page = $pdf.add-page;
@@ -92,6 +89,9 @@ $page.graphics: -> $gfx {
     $form-elem.do($gfx, :position[150, 70]);
     $form-elem.do($gfx, :position[150, 20]);
 }
+
+# ensure consistant document ID generation
+$pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
 lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 

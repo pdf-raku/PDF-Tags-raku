@@ -39,7 +39,6 @@ say $root.xml;
 
 ### Writing
 ```
-use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags;
 use PDF::Tags;
 use PDF::Tags::Elem;
 

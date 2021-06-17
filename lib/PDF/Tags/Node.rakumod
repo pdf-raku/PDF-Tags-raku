@@ -47,8 +47,8 @@ class PDF::Tags::Node {
     method xml(|c) is also<Str gist> { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
     method text { '' }
 
-    method xpath-context {
-        (require ::('PDF::Tags::XPath')).new: :node(self);
+    method xpath-context(PDF::Tags::Node:D $node:) {
+        (require ::('PDF::Tags::XPath')).new: :$node;
     }
     method find($expr) { $.xpath-context.find($expr) }
 

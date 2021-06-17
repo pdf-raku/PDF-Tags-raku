@@ -197,7 +197,7 @@ class PDF::Tags:ver<0.0.7>
   my PDF::Tags::Elem $doc = $tags.Document;
 
   $page.graphics: -> $gfx {
-      $doc.Paragraph.mark: $gfx, {
+      $doc.Paragraph: $gfx, {
           .say('Hello tagged world!',
                :$font,
                :font-size(15),

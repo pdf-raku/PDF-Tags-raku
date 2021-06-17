@@ -10,7 +10,7 @@ class PDF::Tags::Attr
     submethod TWEAK(Pair :$cos!) {
         self.set-cos($cos);
     }
-    multi sub to-str(@a) { @a.map(*.Str).join: ' '}
+    multi sub to-str(@a) { @a».Str.join: ' '}
     multi sub to-str($_) { .Str}
     method name { $.cos.key }
     method value { $.cos.value }

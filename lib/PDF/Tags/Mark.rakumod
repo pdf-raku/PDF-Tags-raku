@@ -74,7 +74,7 @@ class PDF::Tags::Mark
         $!actual-text //= PDF::COS::TextString.new: :value($_)
             with %!attributes<ActualText>;
     }
-    method text { $.ActualText // $.kids.map(*.text).join }
+    method text { $.ActualText // $.kids».text.join }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         self.kids-raw[$i] //= self.build-kid($!value.kids[$i]);

@@ -16,7 +16,7 @@ class PDF::Tags::XPath::Actions {
     constant Text      = PDF::Tags::Text;
 
     method TOP($/) {
-        my @query = @<query>>>.ast;
+        my @query = @<query>».ast;
 
         make  -> PDF::Tags::Node:D $ref {
             if @query == 1 {
@@ -110,8 +110,8 @@ class PDF::Tags::XPath::Actions {
         my @terms;
         my @ops;
         if $<term> ~~ Array {
-            @terms = @<term>>>.ast;
-            @ops = @<q-op>>>.ast;
+            @terms = @<term>».ast;
+            @ops = @<q-op>».ast;
         }
         else {
             @terms.push: $<term>.ast;

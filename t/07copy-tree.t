@@ -11,9 +11,6 @@ use PDF::Tags::Mark;
 use PDF::Tags::ObjRef;
 use PDF::XObject;
 
-# ensure consistant document ID generation
-srand(123456);
-
 my PDF::Class $pdf .= new;
 
 my $page = $pdf.add-page;
