@@ -30,5 +30,7 @@ jobs:
           # install and test if need be (includes [test-depends])
           zef install --/test App::Prove6
           zef install --deps-only .
+          git clone https://github.com/p6-pdf/PDF-Font-Loader-p6.git
+          (cd PDF-Font-Loader-p6/ && zef install .)
       - name: Run Tests
         run: prove6 -I. t
