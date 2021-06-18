@@ -30,7 +30,7 @@ jobs:
           # install and test if need be (includes [test-depends])
           zef install --/test App::Prove6
           git clone https://github.com/pdf-raku/PDF-Font-Loader-raku.git
-          (cd PDF-Font-Loader-p6/ && zef install .)
+          (cd PDF-Font-Loader-raku/ && zef install .)
           zef install --deps-only .
       - name: Run Tests
         run: prove6 -I. t
