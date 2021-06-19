@@ -1,5 +1,4 @@
 {
-  "api": "PDF-1.7",
   "auth": "cpan:WARRINGD",
   "authors": [
     "David Warring"
@@ -41,5 +40,5 @@
   ],
   "test-depends": [
   ],
-  "version": "0.0.7"
+  "version": "0.0.8"
 }
