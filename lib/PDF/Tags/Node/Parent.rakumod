@@ -14,6 +14,7 @@ class PDF::Tags::Node::Parent
     has Hash $!store;
     has Bool $!reified;
     has UInt $!elems;
+    has      $.style is rw; # Computed CSS style
 
     method elems is also<Numeric> {
         $!elems //= do with $.cos.kids {

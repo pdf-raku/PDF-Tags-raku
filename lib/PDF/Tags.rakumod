@@ -24,6 +24,7 @@ class PDF::Tags:ver<0.0.8>
     has Bool $.strict = True;
     has Bool $.graphics;
     has Bool $.marks = $!graphics;
+    has      $.styler;
     method root { self }
 
     submethod TWEAK(PDF::StructTreeRoot :$cos!) {

@@ -27,7 +27,6 @@ class PDF::Tags::Elem
     has Hash $!attributes;
     has TagName $.name is built;
     has Str $.class is built;
-    has $.style is rw; # Styling hook - see PDF::Markup
 
     method attributes {
         $!attributes //= do {
@@ -303,6 +302,15 @@ class PDF::Tags::Elem
             $.root.parent-tree[$_ + 0] = self.cos;
         }
         self;
+    }
+
+    method style {
+        callsame() //= do {
+            my $s = $.root.styler.tag-style($!name, |$.attributes);
+            $s.inherit($_)
+                with self.parent.?style;
+            $s;
+        }
     }
 }
 
