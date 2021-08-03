@@ -13,8 +13,10 @@ class PDF::Tags:ver<0.0.8>
     use PDF::StructElem;
     use PDF::StructTreeRoot;
     use PDF::Font::Loader;
+    use PDF::Content::Font;
     use PDF::Content::Ops :GraphicsContext;
     use PDF::Content::Matrix :&is-identity;
+    use PDF::Font::Loader::FontObj;
 
     has Hash $.class-map         is built;
     has Hash $.role-map          is built;
@@ -24,11 +26,6 @@ class PDF::Tags:ver<0.0.8>
     has Bool $.marks = $!graphics;
     method root { self }
 
-    my class Cache {
-        has %.font{Any};
-    }
-    has Cache $!cache .= new;
-
     submethod TWEAK(PDF::StructTreeRoot :$cos!) {
         $!class-map = $_ with $cos.ClassMap;
         $!role-map = $_ with $cos.RoleMap;
@@ -36,7 +33,7 @@ class PDF::Tags:ver<0.0.8>
             given $cos.ParentTree //= { :Nums[] };
     }
 
-    method read(PDF::Class :$pdf!, Bool :$create, |c --> PDF::Tags:D) {
+    method read(PDF::Class:D :$pdf!, Bool :$create, |c --> PDF::Tags:D) {
         with $pdf.catalog.StructTreeRoot -> $cos {
             self.new: :$cos, :root(self.WHAT), |c;
         }
@@ -48,7 +45,7 @@ class PDF::Tags:ver<0.0.8>
     }
 
     method create(
-        PDF::StructTreeRoot :$cos = PDF::StructTreeRoot.COERCE({ :Type( :name<StructTreeRoot> )}),
+        PDF::StructTreeRoot() :$cos = PDF::StructTreeRoot.COERCE({ :Type( :name<StructTreeRoot> )}),
         PDF::Class:D :$pdf,
         |c
         --> PDF::Tags:D
@@ -73,12 +70,14 @@ class PDF::Tags:ver<0.0.8>
         use PDF::Content::Ops :OpCode;
         use Method::Also;
         has Hash @!save;
-        has Hash $!font;
+        has PDF::Content::Font $!font;
         has $.graphics;
         has $.current-font;
-        has Cache $.cache is required;
         method current-font {
-            $!cache.font{$!font} //= PDF::Font::Loader.load-font: :dict($!font);
+            my $font-obj := $!font.font-obj;
+            PDF::Font::Loader.load-font: :dict($!font)
+                unless $font-obj ~~ PDF::Font::Loader::FontObj:D;
+            $font-obj;
         }
 
         method callback {
@@ -168,7 +167,7 @@ class PDF::Tags:ver<0.0.8>
     method graphics-tags($obj --> Hash) {
         %!graphics-tags{$obj} //= do {
             $*ERR.print: '.';
-            my &callback = TextDecoder.new(:$!cache, :$!graphics).callback;
+            my &callback = TextDecoder.new(:$!graphics).callback;
             my $gfx = $obj.gfx: :&callback, :$!strict;
             $obj.render;
             my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map: {.mcid => $_ };
