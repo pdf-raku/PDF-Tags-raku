@@ -106,12 +106,12 @@ class PDF::Tags:ver<0.0.8>
                 }
                 given $gfx.StrokeColor {
                     unless .key ~~ 'DeviceGray' && .value[0] =~= 0 {
-                        $tag.attributes<stroke> = flat(.key.subst(/^Device/, ''), .value).join: ',';
+                        $tag.attributes<stroke> = (.key.subst(/^Device/, ''), .value).join: ',';
                     }
                 }
                 given $gfx.FillColor {
                     unless .key ~~ 'DeviceGray' && .value[0] =~= 0 {
-                        $tag.attributes<fill> = flat(.key.subst(/^Device/, ''), .value).join: ',';
+                        $tag.attributes<fill> = (.key.subst(/^Device/, ''), .value).join: ',';
                     }
                 }
 

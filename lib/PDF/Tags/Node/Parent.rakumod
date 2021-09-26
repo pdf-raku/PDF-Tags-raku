@@ -85,7 +85,7 @@ class PDF::Tags::Node::Parent
     }
     method Array {
         $!reified ||= do {
-            self.AT-POS($_) for 0 ..^ $.elems;
+            self.AT-POS($_) for ^$.elems;
             True;
         }
         @!kids;

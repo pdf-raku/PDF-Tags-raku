@@ -3,6 +3,8 @@ use Test;
 plan 16;
 
 use PDF::Class;
+use PDF::Page;
+use PDF::Content::FontObj;
 use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :StructureTags;
 use PDF::Tags;
 use PDF::Tags::Elem;
@@ -14,9 +16,9 @@ use PDF::XObject::Form;
 
 my PDF::Class $pdf .= new;
 
-my $page = $pdf.add-page;
-my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
-my $body-font = $page.core-font: :family<Helvetica>;
+my PDF::Page $page = $pdf.add-page;
+my PDF::Content::FontObj $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
+my PDF::Content::FontObj $body-font = $page.core-font: :family<Helvetica>;
 
 my PDF::Tags $tags .= create: :$pdf;
 my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);

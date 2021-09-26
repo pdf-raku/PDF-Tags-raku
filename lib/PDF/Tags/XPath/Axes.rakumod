@@ -60,7 +60,7 @@ sub following-sibling(PDF::Tags::Node:D $item) is export {
 sub preceding(PDF::Tags::Node:D $item) is export {
     my @nodes;
     with $item.?parent -> $parent {
-        for 0 ..^ $parent.elems {
+        for ^$parent.elems {
             with $parent[$_] {
                 last if $_ === $item;
                 @nodes.append: descendant-or-self($_);
@@ -73,7 +73,7 @@ sub preceding(PDF::Tags::Node:D $item) is export {
 sub preceding-sibling(PDF::Tags::Node:D $item) is export {
     my @nodes;
     with $item.?parent -> $parent {
-        for 0 ..^ $parent.elems {
+        for ^$parent.elems {
             with $parent[$_] {
                 last if $_ === $item;
                 @nodes.push: $_;

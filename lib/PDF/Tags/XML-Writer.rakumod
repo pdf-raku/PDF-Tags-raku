@@ -130,7 +130,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 take line($depth++, "<$name$att>")
                     unless $omit-tag;
         
-                for 0 ..^ $elems {
+                for ^$elems {
                     my $kid = $node.kids[$_];
                     self.stream-xml($kid, :$depth);
                 }
