@@ -30,7 +30,7 @@ jobs:
         run: |
           # install and test if need be (includes [test-depends])
           zef install --/test App::Prove6
-          zef install OpenSSL
+          zef install --force OpenSSL
           zef install --deps-only .
       - name: Run Tests
         run: prove6 -I. t
