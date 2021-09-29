@@ -18,7 +18,7 @@ class PDF::Tags::Node {
     has PDF::Tags::Node::Root $.root is required;
     has PDF::Page $.Pg is rw; # current page scope
     has $.cos is required;
-    method set-cos($!cos) {}
+    method set-cos($!cos) { }
 
     proto sub node-class($) is export(:node-class) {*}
     multi sub node-class(PDF::StructTreeRoot) { require ::('PDF::Tags') }
@@ -40,8 +40,8 @@ class PDF::Tags::Node {
     multi sub build-node(PDF::OBJR $cos, PDF::Page:D :$Pg = $cos.Pg, |c) {
         node-class(PDF::OBJR).new( :$cos, :$Pg, |c)
     }
-    multi sub build-node($_, |c) {
-        node-class($_).new: :cos($_), |c;
+    multi sub build-node($cos, |c) {
+        node-class($cos).new: :$cos, |c;
     }
     
     method xml(|c) is also<Str gist> { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }

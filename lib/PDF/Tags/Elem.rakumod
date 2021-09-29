@@ -53,11 +53,11 @@ class PDF::Tags::Elem
 
     method build-kid($) {
         given callsame() {
-            when ! $.root.marks && $_ ~~ PDF::Tags::Mark {
-                # skip marked content tags. just get the aggregate text
+            if ! $.root.marks && $_ ~~ PDF::Tags::Mark {
+                # dereference marked content tags. just get the aggregate text
                 $.build-kid(.text);
             }
-            default {
+            else {
                 $_;
             }
         }

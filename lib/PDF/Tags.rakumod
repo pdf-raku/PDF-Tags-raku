@@ -14,6 +14,7 @@ class PDF::Tags:ver<0.0.8>
     use PDF::StructTreeRoot;
     use PDF::Font::Loader;
     use PDF::Content::Font;
+    use PDF::Content::FontObj;
     use PDF::Content::Ops :GraphicsContext;
     use PDF::Content::Matrix :&is-identity;
     use PDF::Font::Loader::FontObj;
@@ -75,10 +76,9 @@ class PDF::Tags:ver<0.0.8>
         has $.graphics;
         has $.current-font;
         method current-font {
-            my $font-obj := $!font.font-obj;
             PDF::Font::Loader.load-font: :dict($!font)
-                unless $font-obj ~~ PDF::Font::Loader::FontObj:D;
-            $font-obj;
+                unless $!font.font-obj ~~ PDF::Content::FontObj:D;
+            $!font.font-obj;
         }
 
         method callback {
@@ -131,7 +131,8 @@ class PDF::Tags:ver<0.0.8>
             with $*gfx.open-tags.tail -> $tag {
                 self!set-graphics-attributes: $tag, $*gfx
                     if $!graphics;
-                $tag.children.push: $.current-font.decode($text-encoded, :str);
+                my $text = $.current-font.decode($text-encoded, :str);
+                $tag.children.push: $text;
             }
             else {
                 warn $.current-font.decode($text-encoded, :str);

@@ -9,7 +9,7 @@ class PDF::Tags::Text
     =para Objects of this class hold derived text.
     =head2 Attributes and Methods
 
-    submethod TWEAK(Str :$cos!) {
+    submethod TWEAK(Str:D :$cos!) {
         self.set-cos($cos);
     }
 
@@ -21,6 +21,6 @@ class PDF::Tags::Text
     method name { '#text' }
 
     #| Text content
-    method cos(--> Str) is also<Str gist text value> { callsame() }
+    method Str(--> Str) is also<gist text value> { $.cos() }
 }
 
