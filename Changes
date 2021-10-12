@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.0.10  2021-10-13T06:53:46+13:00
   - Upgrade to PDF::Content v0.5.9+. Deprecate PDF::Content owner()
     and parent() methods in favor of canvas()
 

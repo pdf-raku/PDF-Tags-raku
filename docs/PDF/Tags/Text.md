@@ -30,10 +30,10 @@ method name() returns Mu
 
 Node name (always '#text')
 
-### method cos
+### method Str
 
 ```raku
-method cos() returns Str
+method Str() returns Str
 ```
 
 Text content

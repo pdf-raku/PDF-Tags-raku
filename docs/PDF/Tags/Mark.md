@@ -85,7 +85,7 @@ The Marked Content ID within the content stream. These are usually numbered in s
 
 The low-level [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) object, which contains further details on the tag:
 
-  * `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
+  * `canvas` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 
   * `start` - The position of the start of the marked content sequence ('BDC' operator).
 

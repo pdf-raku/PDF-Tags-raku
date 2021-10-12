@@ -79,9 +79,9 @@ Create an empty tagged PDF structure in a PDF.
 
 The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the PDF object should be empty; content and tags should be co-created in read-order.
 
-### method graphics-tags
+### method canvas-tags
 
-    method graphics-tags(PDF::Content::Graphics) returns Hash
+    method canvas-tags(PDF::Content::Canvas) returns Hash
 
-Renders a graphics object (Page or XObject form) and caches marked content as a hash of [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) objects, indexed by `MCID` (Marked Content ID).
+Renders a canvas object (Page or XObject form) and caches marked content as a hash of [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) objects, indexed by `MCID` (Marked Content ID).
 
