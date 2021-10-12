@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - Upgrade to PDF::Content v0.5.9+. Deprecate PDF::Content owner()
+    and parent() methods in favor of canvas()
 
 0.0.9  2021-09-29T17:55:25+13:00
   - Add CSS::TagSet::TaggedPDF integration - see t/style.t

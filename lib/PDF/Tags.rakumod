@@ -13,6 +13,7 @@ class PDF::Tags:ver<0.0.9>
     use PDF::StructElem;
     use PDF::StructTreeRoot;
     use PDF::Font::Loader;
+    use PDF::Content::Canvas;
     use PDF::Content::Font;
     use PDF::Content::FontObj;
     use PDF::Content::Ops :GraphicsContext;
@@ -164,10 +165,10 @@ class PDF::Tags:ver<0.0.9>
         }
     }
     constant Tags = Hash[PDF::Content::Tag];
-    has Tags %!graphics-tags{PDF::Content::Graphics};
+    has Tags %!canvas-tags{PDF::Content::Canvas};
 
-    method graphics-tags($obj --> Hash) {
-        %!graphics-tags{$obj} //= do {
+    method canvas-tags($obj --> Hash) {
+        %!canvas-tags{$obj} //= do {
             $*ERR.print: '.';
             my &callback = TextDecoder.new(:$!graphics).callback;
             my $gfx = $obj.gfx: :&callback, :$!strict;
@@ -257,11 +258,11 @@ Create an empty tagged PDF structure in a PDF.
 The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the
 PDF object should be empty; content and tags should be co-created in read-order.
 
-=head3 method graphics-tags
+=head3 method canvas-tags
 
-   method graphics-tags(PDF::Content::Graphics) returns Hash
+   method canvas-tags(PDF::Content::Canvas) returns Hash
 
-Renders a graphics object (Page or XObject form) and caches
+Renders a canvas object (Page or XObject form) and caches
 marked content as a hash of L<PDF::Content::Tag> objects,
 indexed by `MCID` (Marked Content ID).
 

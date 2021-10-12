@@ -8,7 +8,7 @@ class PDF::Tags::Node {
     use PDF::StructTreeRoot;
     use PDF::StructElem;
     use PDF::Content::Tag;
-    use PDF::Content::Graphics;
+    use PDF::Content::Canvas;
     use PDF::Tags::Node::Root;
     use Method::Also;
 
@@ -32,7 +32,7 @@ class PDF::Tags::Node {
 
     proto sub build-node($, |c --> PDF::Tags::Node) is export(:build-node) {*}
     multi sub build-node(PDF::MCR $ref, PDF::Page :$Pg is copy, |c) {
-        my PDF::Content::Graphics $Stm = $_ with $ref.Stm;
+        my PDF::Content::Canvas $Stm = $_ with $ref.Stm;
         my UInt:D $cos = $ref.MCID;
         $Pg //= $_ with $ref.Pg;
         node-class(PDF::MCR).new(:$cos, :$Pg, :$Stm, |c);

@@ -8,7 +8,7 @@ class PDF::Tags::Mark
     use PDF::COS;
     use PDF::COS::TextString;
     use PDF::Content::Tag;
-    use PDF::Content::Graphics;
+    use PDF::Content::Canvas;
     use PDF::XObject::Form;
     use PDF::MCR;
 
@@ -16,7 +16,7 @@ class PDF::Tags::Mark
     has %!attributes;
     has Bool $!atts-built;
     has Str $!actual-text;
-    has PDF::Content::Graphics $.Stm;
+    has PDF::Content::Canvas $.Stm;
     has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
     method set-cos($!value) {
@@ -24,7 +24,7 @@ class PDF::Tags::Mark
         with $.mcid -> $MCID {
             # only linked into the struct-tree if it has an MCID attribute
             my PDF::Page $Pg = $.Pg;
-            given $!value.owner {
+            given $!value.canvas {
                 when PDF::XObject::Form { $!Stm = $_ }
                 when PDF::Page { $Pg = $_; }
                 # unlikely
@@ -45,8 +45,8 @@ class PDF::Tags::Mark
         self.set-cos($_);
     }
     multi submethod TWEAK(UInt:D :cos($mcid)!) {
-        with self.Stm // self.Pg -> PDF::Content::Graphics $_ {
-            with self.root.graphics-tags($_){$mcid} {
+        with self.Stm // self.Pg -> PDF::Content::Canvas $_ {
+            with self.root.canvas-tags($_){$mcid} {
                 self.set-cos($_);
             }
             else {
@@ -164,7 +164,7 @@ The Marked Content ID within the content stream. These are usually numbered in s
 
 The low-level L<PDF::Content::Tag> object, which contains further details on the tag:
 
-    =item `owner` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
+    =item `canvas` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 
     =item `start` - The position of the start of the marked content sequence ('BDC' operator).
 

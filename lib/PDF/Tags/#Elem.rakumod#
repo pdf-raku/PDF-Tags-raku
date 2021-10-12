@@ -85,6 +85,7 @@ class PDF::Tags::Elem
         self.ActualText ~= $*ActualText;
 
         # Register this mark in the parent tree
+        give gfx.canvas -> $canvas {
         given $gfx.canvas.StructParents -> $idx is rw {
             $idx //= $.root.parent-tree.max-key + 1
                 if $gfx.canvas ~~ PDF::Page;

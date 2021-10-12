@@ -6,10 +6,10 @@
   "build-depends": [
   ],
   "depends": [
-    "PDF::Content:ver<0.5.0+>",
     "PDF:ver<0.4.17+>",
+    "PDF::Content:ver<0.5.9+>",
     "PDF::Font::Loader:ver<0.5.12+>",
-    "PDF::Class:ver<0.4.10+>",
+    "PDF::Class:ver<0.4.16+>",
     "Method::Also"
   ],
   "description": "Reads and writes tagged PDF files",
