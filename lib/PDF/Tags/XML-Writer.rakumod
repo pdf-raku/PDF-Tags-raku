@@ -171,7 +171,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
                 my $text = self!marked-content($_, :$depth);
             }
             when PDF::Tags::Text { html-escape(.Str) }
-            default { die "unhandled tagged content: {.WHAT.perl}"; }
+            default { die "unhandled tagged content: {.WHAT.raku}"; }
         }
         @text.join;
     }
