@@ -34,11 +34,10 @@ sub descendant(PDF::Tags::Node:D $_) is export {
 sub following(PDF::Tags::Node:D $item) is export {
     my @nodes;
     with $item.?parent {
-        my @kids = .kids;
-        my Bool $following;
-        for @kids {
-            when $following { @nodes.append: descendant-or-self($_) }
-            when $_ === $item { $following = True }
+        for .kids {
+            if ($_ === $item) ^ff * {
+                @nodes.append: descendant-or-self($_);
+            }
         }
     }
     @nodes;
@@ -47,11 +46,10 @@ sub following(PDF::Tags::Node:D $item) is export {
 sub following-sibling(PDF::Tags::Node:D $item) is export {
     my @nodes;
     with $item.?parent {
-        my @kids = .kids;
-        my Bool $following;
-        for @kids {
-            when $following { @nodes.push: $_ }
-            when $_ === $item { $following = True }
+        for .kids {
+            if ($_ === $item) ^ff * {
+                @nodes.push: $_;
+            }
         }
     }
     @nodes;
