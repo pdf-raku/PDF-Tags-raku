@@ -68,11 +68,19 @@ class PDF::Tags::Mark
     method set-attribute(Str() $key, $val) {
         fail "todo: update marked content attributes";
         callsame();
-     }
+    }
     method ActualText {
         $.attributes unless $!atts-built;
-        $!actual-text //= PDF::COS::TextString.new: :value($_)
+        $!actual-text //= PDF::COS::TextString.COERCE: $_
             with %!attributes<ActualText>;
+    }
+    method remove-actual-text {
+        with $.ActualText {
+            $!actual-text = Nil;
+            $!value.attributes<ActualText>:delete;
+            %!attributes<ActualText>:delete;
+            $_;
+        }
     }
     method text { $.ActualText // $.kids».text.join }
     method AT-POS(UInt $i) {

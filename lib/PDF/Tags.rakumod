@@ -55,7 +55,7 @@ class PDF::Tags:ver<0.0.10>
     ) {
         $cos.check;
 
-        with $pdf {
+        given $pdf {
             with .catalog.StructTreeRoot {
                 fail "document already contains marked content";
             }
@@ -64,7 +64,7 @@ class PDF::Tags:ver<0.0.10>
             }
             .<Marked> = True
                 given .Root<MarkInfo> //= {};
-            .creator.push: "PDF::Tags-{PDF::Tags.^ver}";
+            .creator.push: "{self.^name}-{self.^ver}";
         }
         self.new: :$cos, :root(self.WHAT), :marks, |c
     }
@@ -176,7 +176,6 @@ class PDF::Tags:ver<0.0.10>
             my PDF::Content::Tag % = $gfx.tags.grep(*.mcid.defined).map: {.mcid => $_ };
         }
     }
-
 }
 
 =begin pod

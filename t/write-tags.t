@@ -5,7 +5,6 @@ plan 16;
 use PDF::Class;
 use PDF::Page;
 use PDF::Content::FontObj;
-use PDF::Content::Tag :ParagraphTags, :InlineElemTags, :IllustrationTags, :StructureTags;
 use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Mark;
@@ -21,7 +20,7 @@ my PDF::Content::FontObj $header-font = $page.core-font: :family<Helvetica>, :we
 my PDF::Content::FontObj $body-font = $page.core-font: :family<Helvetica>;
 
 my PDF::Tags $tags .= create: :$pdf;
-my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
+my PDF::Tags::Elem $doc = $tags.Document;
 
 $page.graphics: -> $gfx {
     my PDF::Tags::Elem $header = $doc.Header1: $gfx, {
@@ -32,8 +31,8 @@ $page.graphics: -> $gfx {
     };
 
     is $header.name, 'H1', 'parent elem name';
-    is $header.ActualText, "Header text\n", '$.ActualText()';
-    my PDF::Tags::Mark:D $mark = $header.kids[0];
+    is $header.text, "Header text\n", '$.ActualText()';
+    my PDF::Tags::Mark:D $mark = $header.kids[0][0];
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
 
@@ -44,7 +43,7 @@ $page.graphics: -> $gfx {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
     };
     is $para.name, 'P', 'outer tag name';
-    is $para.kids[0].name, 'P', 'inner tag name';
+    is $para.kids[0][0].name, 'P', 'inner tag name';
 
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
@@ -99,6 +98,6 @@ lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 
 $pdf .= open: "t/write-tags.pdf";
 $tags .= read: :$pdf;
-is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
+is $tags.find('Document//*')>>.name.grep(* ne 'Span').join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
 
 done-testing;

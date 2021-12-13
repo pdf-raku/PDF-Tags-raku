@@ -82,7 +82,7 @@ Note that ActualText is an optional field in the structure tree. The `text()` me
 
     method text() returns Str
 
-Return the text for the node and its children. Uses `ActualText()` if present. Otherwise this is computed as concatenated child text elements.
+Return the text for the node and its children. Uses `ActualText()` if present in the current node or its ancestors. Otherwise this is computed as concatenated child text elements.
 
 ### method Alt
 

@@ -1,0 +1,161 @@
+%PDF-1.3
+%¥±ë¼
+1 0 obj
+<<
+  /Type /Catalog
+  /MarkInfo << /Marked true >>
+  /Pages 2 0 R
+  /StructTreeRoot 6 0 R
+>>
+endobj
+
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [ 3 0 R ] >>
+endobj
+
+3 0 obj
+<<
+  /Type /Page
+  /Contents 4 0 R
+  /MediaBox [ 0 0 612 792 ]
+  /Parent 2 0 R
+  /Resources << /Font << /F1 5 0 R >> >>
+  /StructParents 0
+>>
+endobj
+
+4 0 obj
+<< /Length 330 >> stream
+q
+  BT
+    /P << /MCID 0 >> BDC
+      1 0 0 1 50 520 Tm
+      /F1 15 Tf
+      (This paragraph links to ) Tj
+    EMC
+    /Link << /MCID 1 >> BDC
+      (http://google.com) Tj
+    EMC
+    /P << /MCID 2 >> BDC
+      (. ) Tj
+    EMC
+  ET
+  /Sect << /MCID 3 >> BDC
+    BT
+      1 0 0 1 50 420 Tm
+      (top level text) Tj
+    ET
+  EMC
+Q
+endstream
+endobj
+
+5 0 obj
+<<
+  /Type /Font
+  /Subtype /Type1
+  /BaseFont /Courier
+  /Encoding /WinAnsiEncoding
+>>
+endobj
+
+6 0 obj
+<<
+  /Type /StructTreeRoot
+  /K [ 7 0 R ]
+  /ParentTree << /Nums [ 0 [ 10 0 R 13 0 R 15 0 R 17 0 R ] ] >>
+>>
+endobj
+
+7 0 obj
+<< /Type /StructElem /S /Document /K [ 8 0 R ] /P 6 0 R >>
+endobj
+
+8 0 obj
+<< /Type /StructElem /S /Sect /K [ 9 0 R 17 0 R ] /P 7 0 R >>
+endobj
+
+9 0 obj
+<< /Type /StructElem /S /P /K [ 10 0 R 12 0 R 15 0 R ] /P 8 0 R >>
+endobj
+
+10 0 obj
+<<
+  /Type /StructElem
+  /S /Span
+  /ActualText (This paragraph links to )
+  /K [ 11 0 R ]
+  /P 9 0 R
+>>
+endobj
+
+11 0 obj
+<< /Type /MCR /MCID 0 /Pg 3 0 R >>
+endobj
+
+12 0 obj
+<< /Type /StructElem /S /Link /K [ 13 0 R ] /P 9 0 R >>
+endobj
+
+13 0 obj
+<<
+  /Type /StructElem
+  /S /Span
+  /ActualText (http://google.com)
+  /K [ 14 0 R ]
+  /P 12 0 R
+>>
+endobj
+
+14 0 obj
+<< /Type /MCR /MCID 1 /Pg 3 0 R >>
+endobj
+
+15 0 obj
+<< /Type /StructElem /S /Span /ActualText (. ) /K [ 16 0 R ] /P 9 0 R >>
+endobj
+
+16 0 obj
+<< /Type /MCR /MCID 2 /Pg 3 0 R >>
+endobj
+
+17 0 obj
+<<
+  /Type /StructElem
+  /S /Span
+  /ActualText (top level text)
+  /K [ 18 0 R ]
+  /P 8 0 R
+>>
+endobj
+
+18 0 obj
+<< /Type /MCR /MCID 3 /Pg 3 0 R >>
+endobj
+
+xref
+0 19
+0000000000 65535 f 
+0000000015 00000 n 
+0000000124 00000 n 
+0000000184 00000 n 
+0000000342 00000 n 
+0000000724 00000 n 
+0000000828 00000 n 
+0000000953 00000 n 
+0000001028 00000 n 
+0000001106 00000 n 
+0000001189 00000 n 
+0000001311 00000 n 
+0000001363 00000 n 
+0000001436 00000 n 
+0000001552 00000 n 
+0000001604 00000 n 
+0000001694 00000 n 
+0000001746 00000 n 
+0000001858 00000 n 
+trailer
+<< /ID [ (t/actual-text.t ) (t/actual-text.t ) ] /Root 1 0 R /Size 19 >>
+startxref
+1910
+%%EOF

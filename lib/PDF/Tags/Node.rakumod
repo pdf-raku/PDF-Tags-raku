@@ -35,10 +35,10 @@ class PDF::Tags::Node {
         my PDF::Content::Canvas $Stm = $_ with $ref.Stm;
         my UInt:D $cos = $ref.MCID;
         $Pg //= $_ with $ref.Pg;
-        node-class(PDF::MCR).new(:$cos, :$Pg, :$Stm, |c);
+        node-class($ref).new(:$cos, :$Pg, :$Stm, |c);
     }
     multi sub build-node(PDF::OBJR $cos, PDF::Page:D :$Pg = $cos.Pg, |c) {
-        node-class(PDF::OBJR).new( :$cos, :$Pg, |c)
+        node-class($cos).new( :$cos, :$Pg, |c)
     }
     multi sub build-node($cos, |c) {
         node-class($cos).new: :$cos, |c;

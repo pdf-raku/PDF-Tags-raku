@@ -51,7 +51,7 @@ class PDF::Tags::Node::Parent
 
         # update caches
         $!elems = Nil;
-        self.AT_POS($.elems-1) if $!reified;
+        self.AT-POS($.elems-1) if $!reified;
         .{$node.name}.push: $node with $!store;
 
         $node;
@@ -72,6 +72,7 @@ class PDF::Tags::Node::Parent
         my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
         self!adopt-node($kid);
     }
+
     multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
         self.add-kid(:$name, |c)
     }

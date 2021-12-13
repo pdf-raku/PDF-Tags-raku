@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 3;
+plan 4;
 
 use lib 't';
 use PDF::Class;
@@ -18,14 +18,14 @@ my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
 
 my PDF::Tags $tags .= create: :$pdf;
-my PDF::Tags::Elem $doc = $tags.add-kid: :name(Document);
+my PDF::Tags::Elem $doc = $tags.Document;
 
 $page.graphics: -> $gfx {
     my PDF::Tags::Elem $header;
     my PDF::Tags::Mark $mark;
 
-    $header = $doc.add-kid: :name(Header1);
-    $mark = $header.mark: $gfx, :name(Span), {
+    $header = $doc.Header1;
+    $mark = $header.mark: $gfx, {
         .say('Header text',
              :font($header-font),
              :font-size(15),
@@ -33,7 +33,8 @@ $page.graphics: -> $gfx {
     }
     my  PDF::XObject $Stm = $page.xobject-form: :BBox[0, 0, 200, 50];
 
-    is $mark.xml.trim, '<Span/>';
+    is $mark.xml().trim, '<H1/>';
+    is $header.text, "Header text\n";
     is $header.xml.trim, '<H1>Header text</H1>';
     my $copy = $header.copy-tree(:$Stm, :parent($doc));
     is $copy.xml.trim, '<H1>Header text</H1>';

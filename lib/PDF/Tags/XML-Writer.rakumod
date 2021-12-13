@@ -18,7 +18,7 @@ has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/c
 has Bool $.style = True;
 has Bool $.debug = False;
 has Bool $.marks;
-has Str  $.omit;
+has Str  $.omit = 'Span';
 has Str  $.root-tag;
 
 sub line(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s ~ "\n" }
@@ -69,11 +69,18 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self.stream-xml($_, :$depth) for .kids;
     }
     else {
-        warn "Tagged PDF has no content; no :root-tag given"
+        warn "Tagged PDF has no content and no :root-tag has been given"
             unless $!root-tag.defined;
     }
     take line(--$depth, '</' ~ $_ ~ '>')
         with $!root-tag;
+}
+
+method !actual-text($node) {
+    my $actual-text = $node.ActualText;
+    $actual-text //= self!actual-text($node.kids[0])
+        if $node.kids == 1 && $node.kids[0].name ~~ $!omit;
+    $actual-text;
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
@@ -82,7 +89,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             given $node.cos;
     }
     my $name = $node.name;
-    my $actual-text = $node.ActualText;
+    my $actual-text = self!actual-text($node);
     my $att = do if $!atts {
         my %attributes = $node.attributes;
         %attributes<O>:delete;
@@ -103,25 +110,23 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
     else {
         with $actual-text {
-            if $!marks {
-                take line($depth, "<!-- actual text: {.raku} -->")
-                    if $!debug;
-            }
-            else {
-                take line($depth, '<!-- actual text -->')
-                    if $!debug;
-                given html-escape(trim($_)) -> $text {
-                    if $omit-tag {
-                        take $text;
-                    }
-                    else {
-                        $node.attributes<ActualText> = $_;
-                        take $_ eq ''
-                            ?? line($depth, "<$name$att/>")
-                            !! line($depth, "<$name$att>{$text}</$name>");
-                    }
+            if $!debug {
+                if $!marks {
+                    take line($depth, "<!-- actual text: {.raku} -->")
+                }
+                else {
+                    take line($depth, '<!-- actual text -->');
                 }
             }
+            
+            $node.attributes<ActualText> = $_;
+
+            my $frag = do given html-escape(trim($_)) {
+                when $omit-tag { $_ }
+                when .so       { '<%s%s>%s</%s>'.sprintf: $name, $att, $_, $name }
+                default        { '<%s%s/>'.sprintf: $name, $att }
+            }
+            take line($depth, $frag);
         }
         if $!marks || !$actual-text.defined {
             # descend

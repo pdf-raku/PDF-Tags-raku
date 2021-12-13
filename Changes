@@ -1,4 +1,5 @@
 {{$NEXT}}
+  - Fix handling of ActualText entries when marking at different levels in the structure tree.
 
 0.0.10  2021-10-13T06:53:46+13:00
   - Upgrade to PDF::Content v0.5.9+. Deprecate PDF::Content owner()

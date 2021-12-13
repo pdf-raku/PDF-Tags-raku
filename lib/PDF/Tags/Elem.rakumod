@@ -63,7 +63,7 @@ class PDF::Tags::Elem
         }
     }
 
-    method text { $.ActualText // $.kids».text.join }
+    method text returns Str { self.cos.ActualText // $.kids».text.join }
 
     submethod TWEAK(Str :$Alt) {
         self.Pg = $_ with self.cos.Pg;
@@ -79,16 +79,22 @@ class PDF::Tags::Elem
     }
 
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
-        my $*ActualText = ''; # Populated by PDF::Content::Text::Block
+        temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
         my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
-        my PDF::Tags::Mark:D $kid = self.add-kid: :$cos;
-        self.ActualText ~= $*ActualText;
+        my PDF::Tags::Elem:D $elem = self;
+        if $gfx.actual-text -> $actual-text {
+            # Add Span nodes to ensure there's only one ActualText
+            # entry in the sub-tree
+            $elem .= Span;
+            $elem.ActualText ~= $actual-text;
+        }
 
+        my PDF::Tags::Mark:D $kid = $elem.add-kid: :$cos;
         # Register this mark in the parent tree
         given $gfx.canvas.StructParents -> $idx is rw {
             $idx //= $.root.parent-tree.max-key + 1
                 if $gfx.canvas ~~ PDF::Page;
-            $.root.parent-tree[$_+0][$kid.mcid] //= self.cos
+            $.root.parent-tree[$_+0][$kid.mcid] //= $elem.cos
                 with $idx;
         }
 
@@ -388,7 +394,7 @@ Note that ActualText is an optional field in the structure tree. The `text()` me
 
   method text() returns Str
 
-Return the text for the node and its children. Uses `ActualText()` if present. Otherwise this is computed as concatenated child text elements.
+Return the text for the node and its children. Uses `ActualText()` if present in the current node or its ancestors. Otherwise this is computed as concatenated child text elements.
 
 =head3 method Alt
 
