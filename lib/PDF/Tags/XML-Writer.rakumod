@@ -6,6 +6,7 @@ use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Node;
 use PDF::Tags::ObjRef;
+use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 use PDF::Tags::Mark;
 use PDF::Tags::Text;
@@ -77,9 +78,11 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
 }
 
 method !actual-text($node) {
-    my $actual-text = $node.ActualText;
-    $actual-text //= self!actual-text($node.kids[0])
-        if $node.kids == 1 && $node.kids[0].name ~~ $!omit;
+    my $actual-text = $node.ActualText
+        if $node ~~ PDF::Tags::Node::Parent;
+    $actual-text //= $node.kids.map({ .cos.ActualText }).join
+        if $node ~~ PDF::Tags::Node::Parent
+        && !$node.kids.first: { ! (.name ~~ $!omit && .cos.ActualText.defined)};
     $actual-text;
 }
 

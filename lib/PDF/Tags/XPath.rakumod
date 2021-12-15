@@ -34,6 +34,10 @@ class PDF::Tags::XPath {
         &expr($!node).Seq;
     }
 
+    method first($expr is raw) {
+        self.find($expr)[0] // PDF::Tags::Node;
+    }
+
 }
 
 =begin pod

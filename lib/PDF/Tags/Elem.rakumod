@@ -82,10 +82,11 @@ class PDF::Tags::Elem
         temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
         my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
         my PDF::Tags::Elem:D $elem = self;
-        if $gfx.actual-text -> $actual-text {
-            # Add Span nodes to ensure there's only one ActualText
-            # entry in the sub-tree
-            $elem .= Span;
+        with $gfx.actual-text -> $actual-text {
+            # Add Span nodes to ensure we don't occlude other
+            # ActualText entries in the structure tree
+            $elem .= Span
+                unless $elem.name ~~ Label;
             $elem.ActualText ~= $actual-text;
         }
 
