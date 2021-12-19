@@ -45,7 +45,7 @@ $page.graphics: -> $gfx {
         is $section.text, 'This paragraph links to http://google.com. top level text';
     }
 
-    is $doc.xml, q{<Document>
+    is $doc.xml(:omit<Span>), q{<Document>
   <Sect>
     <P>
       This paragraph links to
