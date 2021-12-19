@@ -21,6 +21,6 @@ class PDF::Tags::Text
     method name { '#text' }
 
     #| Text content
-    method Str(--> Str) is also<gist text value> { $.cos() }
+    method Str(--> Str) is also<gist text value ActualText> { $.cos() }
 }
 

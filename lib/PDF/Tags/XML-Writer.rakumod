@@ -19,7 +19,7 @@ has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/c
 has Bool $.style = True;
 has Bool $.debug = False;
 has Bool $.marks;
-has Str  $.omit = 'Span';
+has Str  $.omit;
 has Str  $.root-tag;
 
 sub line(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s ~ "\n" }
@@ -79,10 +79,13 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
 
 method !actual-text($node) {
     my $actual-text = $node.ActualText
-        if $node ~~ PDF::Tags::Node::Parent;
-    $actual-text //= $node.kids.map({ .cos.ActualText }).join
-        if $node ~~ PDF::Tags::Node::Parent
-        && !$node.kids.first: { ! (.name ~~ $!omit && .cos.ActualText.defined)};
+        if $node ~~ PDF::Tags::Node::Parent|PDF::Tags::Text;
+    with $!omit {
+        # flatten child elements if they are all omitted and have actual text
+        $actual-text //= $node.kids.map({ .ActualText }).join
+            if $node ~~ PDF::Tags::Node::Parent
+            && !$node.kids.first: {!(.name ~~ $!omit && .?ActualText.defined)};
+    }
     $actual-text;
 }
 
@@ -129,7 +132,8 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 when .so       { '<%s%s>%s</%s>'.sprintf: $name, $att, $_, $name }
                 default        { '<%s%s/>'.sprintf: $name, $att }
             }
-            take line($depth, $frag);
+            take line($depth, $frag)
+                if $frag;
         }
         if $!marks || !$actual-text.defined {
             # descend
@@ -165,11 +169,15 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
         take line($depth, "<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R-->")
             given $node.value;
     }
-    take line($depth, trim(self!marked-content($node, :$depth)));
+    if trim(self!marked-content($node, :$depth)) -> $text {
+        take line($depth, $text);
+    }
 }
 
 multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
-    take line($depth, html-escape(.Str));
+    if .Str -> $text {
+        take line($depth, html-escape($text));
+    }
 }
 
 method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
