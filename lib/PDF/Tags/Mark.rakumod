@@ -4,13 +4,14 @@ use PDF::Tags::Node::Parent;
 class PDF::Tags::Mark
     is PDF::Tags::Node::Parent {
 
-    use PDF::Page;
     use PDF::COS;
     use PDF::COS::TextString;
     use PDF::Content::Tag;
     use PDF::Content::Canvas;
-    use PDF::XObject::Form;
+    # PDF::Class
+    use PDF::Page;
     use PDF::MCR;
+    use PDF::XObject::Form;
 
     has PDF::Tags::Node::Parent $.parent is rw;
     has %!attributes;

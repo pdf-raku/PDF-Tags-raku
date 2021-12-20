@@ -14,11 +14,11 @@ Synopsis
 ### Reading
 
 ```
-use PDF::Class;
+use PDF::API6;
 use PDF::Tags;
 use PDF::Tags::Elem;
 
-my PDF::Class $pdf .= open: "t/pdf/tagged.pdf";
+my PDF::API6 $pdf .= open: "t/pdf/tagged.pdf";
 my PDF::Tags $tags .= read: :$pdf;
 my PDF::Tags::Elem $root = $tags[0];
 say $root.name; # Document

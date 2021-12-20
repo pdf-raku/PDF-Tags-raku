@@ -2,7 +2,7 @@ use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 
 #| Tagged PDF root node
-class PDF::Tags:ver<0.0.10>
+class PDF::Tags:ver<0.0.11>
     is PDF::Tags::Node::Parent
     does PDF::Tags::Node::Root {
 
@@ -152,7 +152,7 @@ class PDF::Tags:ver<0.0.10>
                         # assume implicit space
                         ' '
                     }
-                    default { '' }
+                    default { Empty }
                 }
                 $tag.children.push: @chunks.join;
             }
