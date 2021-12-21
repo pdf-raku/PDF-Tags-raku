@@ -33,14 +33,7 @@ Synopsis
                  :position[50, 120]);
         }
     }
-    $pdf.save-as: "t/pdf/tagged.pdf";
-
-    # read tags
-    my PDF::Class $pdf .= open: "t/pdf/tagged.pdf");
-    my PDF::Tags $tags .= read: :$pdf;
-    my PDF::Tags::Elem $doc = $tags[0];
-    say "document root {$doc.name}";
-    say " - child {.name}" for $doc.kids;
+    $pdf.save-as: "tagged.pdf";
 
     # search tags
     my PDF::Tags @elems = $tags.find('Document//*');
@@ -63,14 +56,6 @@ Methods
 
 this class inherits from [PDF::Tags::Node::Parent](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node/Parent) and has its method available, (including `cos`, `kids`, `add-kid`, `AT-POS`, `AT-KEY`, `Array`, `Hash`, `find`, `first` and `xml`)
 
-### method read
-
-    method read(PDF::Class :$pdf!, Bool :$create) returns PDF::Tags
-
-Read tagged PDF structure from an existing file that has been previously tagged.
-
-The `:create` option creates a new struct-tree root, if one does not already exist.
-
 ### method create
 
     method create(PDF::Class :$pdf!) returns PDF::Tags
@@ -78,10 +63,4 @@ The `:create` option creates a new struct-tree root, if one does not already exi
 Create an empty tagged PDF structure in a PDF.
 
 The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the PDF object should be empty; content and tags should be co-created in read-order.
-
-### method canvas-tags
-
-    method canvas-tags(PDF::Content::Canvas) returns Hash
-
-Renders a canvas object (Page or XObject form) and caches marked content as a hash of [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) objects, indexed by `MCID` (Marked Content ID).
 

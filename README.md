@@ -1,7 +1,7 @@
 [[Raku PDF Project]](https://pdf-raku.github.io)
  / [PDF::Tags](https://pdf-raku.github.io/PDF-Tags-raku)
 
-PDF-Tags-raku (**EXPERIMENTAL**)
+PDF-Tags-raku
 ============
 
 A small DOM-like API for the navigation or creation of tagged PDF files.
@@ -228,10 +228,10 @@ Classes in this Distribution
 - [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer) - XML Serializer
 - [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XPath) - XPath evaluation context
 
-Scripts in this Distribution
+See Also
 ------
 
-##### `pdf-tag-dump.raku --select=XPath --omit=tag --password=Xxxx --max-depth=n --marks --graphics --/atts --/style --debug t/pdf/tagged.pdf`
+- [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku) - for reading PDF files with existing tagged content
 
 Further Work
 ----

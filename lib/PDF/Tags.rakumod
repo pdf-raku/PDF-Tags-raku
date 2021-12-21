@@ -38,7 +38,7 @@ class PDF::Tags:ver<0.0.11>
 
     method create(
         PDF::Class:D :$pdf,
-        PDF::StructTreeRoot() :$cos = PDF::StructTreeRoot.COERCE({ :Type( :name<StructTreeRoot> )}),
+        PDF::StructTreeRoot() :$cos = { :Type( :name<StructTreeRoot> )},
         |c
         --> PDF::Tags:D
     ) {
