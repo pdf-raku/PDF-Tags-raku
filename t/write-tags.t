@@ -2,13 +2,13 @@ use v6;
 use Test;
 plan 16;
 
-use PDF::Class;
-use PDF::Page;
 use PDF::Content::FontObj;
 use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Mark;
 use PDF::Tags::ObjRef;
+use PDF::Class;
+use PDF::Page;
 use PDF::Annot;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
@@ -94,10 +94,8 @@ $page.graphics: -> $gfx {
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
-
-$pdf .= open: "t/write-tags.pdf";
-$tags .= read: :$pdf;
 is $tags.find('Document//*')>>.name.grep(* ne 'Span').join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
+
+lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 
 done-testing;

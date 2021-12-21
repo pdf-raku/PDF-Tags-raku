@@ -8,11 +8,10 @@
   "depends": [
     "PDF:ver<0.4.17+>",
     "PDF::Content:ver<0.5.14+>",
-    "PDF::Font::Loader:ver<0.5.12+>",
     "PDF::Class:ver<0.4.16+>",
     "Method::Also"
   ],
-  "description": "Reads and writes tagged PDF files",
+  "description": "Reads and manipulates tagged PDF files",
   "license": "Artistic-2.0",
   "name": "PDF::Tags",
   "perl": "6.*",
@@ -36,7 +35,7 @@
   ],
   "source-url": "git://github.com/pdf-raku/PDF-Tags-raku.git",
   "tags": [
-    "pdf"
+      "pdf", "accessibility"
   ],
   "test-depends": [
   ],

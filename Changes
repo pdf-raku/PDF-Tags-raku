@@ -1,4 +1,8 @@
 {{$NEXT}}
+  - Export read capability to new module PDF::Tags::Reader. This
+    module has been slimmed down to only allow writing, not reading
+    of tagged PDF. This also lets us drop PDF::Font::Loader as a
+    dependency.
 
 0.0.11  2021-12-20T18:17:21+13:00
   - Use PDF::Content v0.5.13 $.actual-text accessor
