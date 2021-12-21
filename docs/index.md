@@ -11,33 +11,6 @@ This module enables reading of tagged content with simple XPath queries and basi
 Synopsis
 --------
 
-### Reading
-
-```
-use PDF::API6;
-use PDF::Tags;
-use PDF::Tags::Elem;
-
-my PDF::API6 $pdf .= open: "t/pdf/tagged.pdf";
-my PDF::Tags $tags .= read: :$pdf;
-my PDF::Tags::Elem $root = $tags[0];
-say $root.name; # Document
-
-# DOM traversal
-for $root.kids {
-    say .name; # L, P, H1, P ...
-}
-
-# XPath navigation
-my @tags = $root.find('Document/L/LI[1]/LBody//*')>>.name;
-say @tags.join(','); # Reference,P,Code
-
-# XML Serialization
-say $root.xml;
-
-```
-
-### Writing
 ```
 use PDF::Tags;
 use PDF::Tags::Elem;

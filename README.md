@@ -11,33 +11,6 @@ This module enables reading of tagged content with simple XPath queries and basi
 Synopsis
 --------
 
-### Reading
-
-```
-use PDF::API6;
-use PDF::Tags;
-use PDF::Tags::Elem;
-
-my PDF::API6 $pdf .= open: "t/pdf/tagged.pdf";
-my PDF::Tags $tags .= read: :$pdf;
-my PDF::Tags::Elem $root = $tags[0];
-say $root.name; # Document
-
-# DOM traversal
-for $root.kids {
-    say .name; # L, P, H1, P ...
-}
-
-# XPath navigation
-my @tags = $root.find('Document/L/LI[1]/LBody//*')>>.name;
-say @tags.join(','); # Reference,P,Code
-
-# XML Serialization
-say $root.xml;
-
-```
-
-### Writing
 ```
 use PDF::Tags;
 use PDF::Tags::Elem;
@@ -113,16 +86,9 @@ document structure of PDF documents.
 PDF tagging may assist PDF readers and other automated tools in reading PDF
 documents and locating content such as text and images.
 
-This module provides a DOM  like interface for traversing PDF structure and content
-via tags. It also an XPath like search capability. It is designed for use in
+This module provides a DOM  like interface for creating and traversing PDF structure and
+content via tags. It also an XPath like search capability. It is designed for use in
 conjunction with PDF::Class or PDF::API6.
-
-Some, but not all PDF files have PDF tagging.  The `pdf-info.raku` script
-(PDF::Class module) can be used to verify this:
-```
-% pdf-info.raku my.pdf |grep Tagged
-Tagged:       yes
-```
 
 Standard Tags
 ----
@@ -134,6 +100,10 @@ Elements may be constructed using their `Tag` name or `Mnemonic`, as listed belo
 Can also be written as:
 
     $root.Paragraph: $gfx, { .say('Marked paragraph text') };
+
+Or as:
+
+    $root.add-kid(:name<P>).mark: $gfx, { .say('Marked paragraph text') };
 
 Documentation in this section adapted from [pdfkit](http://pdfkit.org/docs/accessibility.html).
 

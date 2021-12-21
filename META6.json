@@ -35,9 +35,10 @@
   ],
   "source-url": "git://github.com/pdf-raku/PDF-Tags-raku.git",
   "tags": [
-      "pdf", "accessibility"
+    "pdf",
+    "accessibility"
   ],
   "test-depends": [
   ],
-  "version": "0.0.11"
+  "version": "0.0.12"
 }
