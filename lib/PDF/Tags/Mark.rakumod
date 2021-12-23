@@ -19,27 +19,38 @@ class PDF::Tags::Mark
     has Str $!actual-text;
     has PDF::Content::Canvas $.Stm;
     has PDF::Content::Tag $.value is built handles<name mcid elems>;
+    has Bool $.deref = True;
 
     method set-cos($!value) {
-        my PDF::MCR $mcr;
-        with $.mcid -> $MCID {
-            # only linked into the struct-tree if it has an MCID attribute
+        given $.mcid -> UInt:D $MCID {
+            my $referrer;
+            my $cos;
             my PDF::Page $Pg = $.Pg;
             given $!value.canvas {
-                when PDF::XObject::Form { $!Stm = $_ }
+                when PDF::XObject::Form {
+                    $!Stm = $_;
+                    $!deref = True; # Need MCR to hold /Stm entry
+                }
                 when PDF::Page { $Pg = $_; }
                 # unlikely
                 default { warn "can mark object of type {.WHAT.raku}"; }
             }
+            if $!deref {
+                $cos = PDF::MCR.COERCE: %(
+                           :Type( :name<MCR> ),
+                           :$MCID,
+                       );
+                $referrer = $cos;
+            }
+            else {
+                $referrer = self.parent.cos;
+                $cos = $MCID;
+            }
 
-            $mcr .= COERCE: %(
-                :Type( :name<MCR> ),
-                :$MCID,
-            );
-            $mcr<Pg> = $_ with $Pg;
-            $mcr<Stm> = $_ with $!Stm;
+            $referrer<Pg> //= $_ with $Pg;
+            $referrer<Stm> //= $_ with $!Stm;
+            callwith($cos);
         }
-        callwith($mcr);
     }
 
     multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!) {
@@ -58,7 +69,6 @@ class PDF::Tags::Mark
             die "no current marked-content page";
         }
     }
-    method cos(--> PDF::MCR) { callsame() }
     method attributes {
         $!atts-built ||= do {
             %!attributes = $!value.attributes;

@@ -81,16 +81,21 @@ class PDF::Tags::Elem
     method mark(PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
         temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
         my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
+        my $deref = True;
         my PDF::Tags::Elem:D $elem = self;
         with $gfx.actual-text -> $actual-text {
             # Add Span nodes to ensure we don't occlude other
             # ActualText entries in the structure tree
-            $elem .= Span
-                unless $elem.name ~~ Label;
+            unless $elem.name ~~ Label {
+                $elem .= Span;
+                # no need to create an intermediate marked content
+                # reference. There will only ever be one marked child
+                $deref = False;
+            }
             $elem.ActualText ~= $actual-text;
         }
 
-        my PDF::Tags::Mark:D $kid = $elem.add-kid: :$cos;
+        my PDF::Tags::Mark:D $kid = $elem.add-kid: :$cos, :$deref;
         # Register this mark in the parent tree
         given $gfx.canvas.StructParents -> $idx is rw {
             $idx //= $.root.parent-tree.max-key + 1
@@ -103,8 +108,8 @@ class PDF::Tags::Elem
     }
 
     # combined add-kid + mark
-    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
-        given self.add-kid(:$name, :$Alt) {
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Bool :$deref=True, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt, :$deref) {
             .mark($gfx, &action, |c);
             $_;
         }
@@ -246,7 +251,7 @@ class PDF::Tags::Elem
     multi sub find-parents(PDF::Tags::Elem $_, $xobj) {
         my PDF::Tags::Elem @parents;
         if .kids.first({
-            $_ ~~ PDF::Tags::Mark && .cos.Stm === $xobj
+            $_ ~~ PDF::Tags::Mark && .deref && .Stm === $xobj
         }) {
             @parents.push: $_;
         }
@@ -351,7 +356,7 @@ class PDF::Tags::Elem
       my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
       $doc.Figure(:Alt('Incandescent apparatus'))
           .do: $gfx, $img, :position[50, 70];
-      $doc.Caption.mark: $gfx, {
+      $doc.Caption: $gfx, {
           .say("Eureka!", :position[40, 60]),
       }
   }
@@ -421,10 +426,10 @@ The image argument can be omitted, if the element sub-tree contains an xobject i
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.Header2.mark: $_, {
+        $form-elem.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size
         };
-        $form-elem.Paragraph.mark: $_, {
+        $form-elem.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size};
         }
 

@@ -61,7 +61,7 @@ class PDF::Tags::Node::Parent
     }
     multi method add-kid(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
         my $P := self.cos;
-        my PDF::StructElem $cos .= COERCE: %(
+        my PDF::StructElem() $cos = %(
             :Type( :name<StructElem> ),
             :S( :$name ),
             :$P,
