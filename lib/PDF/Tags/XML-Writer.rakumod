@@ -82,9 +82,12 @@ method !actual-text($node) {
         if $node ~~ PDF::Tags::Node::Parent|PDF::Tags::Text;
     with $!omit {
         # flatten child elements if they are all omitted and have actual text
-        $actual-text //= $node.kids.map({ .ActualText }).join
-            if $node ~~ PDF::Tags::Node::Parent
-            && !$node.kids.first: {!(.name ~~ $!omit && .?ActualText.defined)};
+        without $actual-text {
+            # todo: this look-ahead logic is defeating render laziness in some cases #8
+            $_ = $node.kids.map({ .ActualText }).join
+                if $node ~~ PDF::Tags::Node::Parent
+                && !$node.kids.first: {!(.name ~~ $!omit && .?ActualText.defined)};
+        }
     }
     $actual-text;
 }
