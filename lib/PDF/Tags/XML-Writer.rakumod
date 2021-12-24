@@ -126,12 +126,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             }
             
             $node.attributes<ActualText> = $_;
-
             given html-escape(trim($_)) {
                 my $frag = do {
-                    when $omit-tag { $_ }
+                    when $omit-tag.so { $_ }
                     when .so { '<%s%s>%s</%s>'.sprintf: $name, $att, $_, $name }
-                    default {'<%s%s/>'.sprintf: $name, $att;}
+                    default { '<%s%s/>'.sprintf: $name, $att;}
                 }
                 take line($depth, $frag)
                     if $frag;
