@@ -44,7 +44,7 @@ class PDF::Tags::Node {
         node-class($cos).new: :$cos, |c;
     }
     
-    method xml(|c) is also<Str gist> { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) }
+    method xml(|c) is also<Str gist> { (require ::('PDF::Tags::XML-Writer')).new(|c).Str(self) ~ "\n" }
     method text { '' }
 
     method xpath-context(PDF::Tags::Node:D $node:) handles<find first> {

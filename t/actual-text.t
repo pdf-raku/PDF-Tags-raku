@@ -30,10 +30,10 @@ $page.graphics: -> $gfx {
                 .print('http://google.com');
             }
             $para.mark: $gfx, {
-                .print('. ');
+                .say('.');
             }
             is $link.text, 'http://google.com';
-            is $para.text, 'This paragraph links to http://google.com. ';
+            is $para.text, "This paragraph links to http://google.com.\n";
         }
     }
 
@@ -42,15 +42,13 @@ $page.graphics: -> $gfx {
             .print: 'top level text', :position[50, 420];
         }
 
-        is $section.text, 'This paragraph links to http://google.com. top level text';
+        is $section.text, "This paragraph links to http://google.com.\ntop level text";
     }
 
     is $doc.xml(:omit<Span>), q{<Document>
   <Sect>
     <P>
-      This paragraph links to
-      <Link>http://google.com</Link>
-      .
+      This paragraph links to <Link>http://google.com</Link>.
     </P>
     top level text
   </Sect>

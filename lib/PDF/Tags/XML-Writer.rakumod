@@ -12,6 +12,7 @@ use PDF::Tags::Mark;
 use PDF::Tags::Text;
 use PDF::Tags::XPath;
 use PDF::Class::StructItem;
+use PDF::Content::Tag :Tags;
 
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
@@ -21,8 +22,20 @@ has Bool $.debug = False;
 has Bool $.marks;
 has Str  $.omit;
 has Str  $.root-tag;
+has $!got-nl = True;
+has $!feed;
 
-sub line(UInt $depth, Str $s = '') { ('  ' x $depth) ~ $s ~ "\n" }
+method !chunk(Str $s is copy = '', UInt $depth = 0) {
+    if $!feed || $!got-nl {
+        take "\n" unless $!got-nl;
+        take '  ' x $depth;
+        $!feed = False;
+    }
+    $!got-nl = $s ~~ /\n$/;
+    take $s;
+}
+
+method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
 
 sub html-escape(Str $_) {
     .trans:
@@ -58,10 +71,10 @@ method say(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
 }
 
 multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
-    take line($depth, '<?xml version="1.0" encoding="UTF-8"?>');
-    take line($depth, $!css) if $!style;
+    self!line('<?xml version="1.0" encoding="UTF-8"?>');
+    self!line($!css) if $!style;
 
-    take line($depth++, '<' ~ $_ ~ '>')
+    self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
 
     if .elems {
@@ -73,28 +86,33 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         warn "Tagged PDF has no content and no :root-tag has been given"
             unless $!root-tag.defined;
     }
-    take line(--$depth, '</' ~ $_ ~ '>')
+    self!line(--$depth, '</' ~ $_ ~ '>', --$depth)
         with $!root-tag;
 }
 
 method !actual-text($node) {
-    my $actual-text = $node.ActualText
-        if $node ~~ PDF::Tags::Node::Parent|PDF::Tags::Text;
-    with $!omit {
-        # flatten child elements if they are all omitted and have actual text
-        without $actual-text {
-            # todo: this look-ahead logic is defeating render laziness in some cases #8
-            $_ = $node.kids.map({ .ActualText }).join
-                if $node ~~ PDF::Tags::Node::Parent
-                && !$node.kids.first: {!(.name ~~ $!omit && .?ActualText.defined)};
+    my $actual-text;
+    if $node ~~ PDF::Tags::Node::Parent|PDF::Tags::Text {
+        $actual-text = $node.ActualText;
+        with $!omit {
+            without $actual-text {
+                # flatten child elements if they are all omitted and have actual text
+                $_ = $node.kids.map({ .ActualText }).join
+                    unless $node.kids.first: {!(.name ~~ $!omit && .?ActualText.defined)};
+            }
         }
     }
+
     $actual-text;
+}
+
+multi sub inlined-tag(Str $t) {
+    InlineElemTags($t) || $t eq 'Lbl';
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     if $!debug {
-        take line($depth, "<!-- elem {.obj-num} {.gen-num} R -->")
+        self!chunk("<!-- elem {.obj-num} {.gen-num} R -->", $depth)
             given $node.cos;
     }
     my $name = $node.name;
@@ -115,35 +133,38 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
-        take line($depth, "<$name> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->");
+        self!line("<$name> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
     }
     else {
         with $actual-text {
             if $!debug {
                 if $!marks {
-                    take line($depth, "<!-- actual text: {.raku} -->")
+                    self!line("<!-- actual text: {.raku} -->", $depth)
                 }
                 else {
-                    take line($depth, '<!-- actual text -->');
+                    self!line('<!-- actual text -->', $depth);
                 }
             }
             
-            $node.attributes<ActualText> = $_;
-            given html-escape(trim($_)) {
+            given html-escape($_) {
                 my $frag = do {
                     when $omit-tag.so { $_ }
-                    when .so { '<%s%s>%s</%s>'.sprintf: $name, $att, $_, $name }
-                    default { '<%s%s/>'.sprintf: $name, $att;}
+                    when .so { '<%s%s>%s</%s>'.sprintf($name, $att, $_, $name) }
+                    default  { '<%s%s/>'.sprintf($name, $att); }
                 }
-                take line($depth, $frag)
-                    if $frag;
+                if inlined-tag($name) {
+                    self!chunk($frag, $depth);
+                }
+                else {
+                    self!line($frag, $depth);
+                }
             }
         }
         if $!marks || !$actual-text.defined {
             # descend
             my $elems = $node.elems;
             if $elems {
-                take line($depth++, "<$name$att>")
+                self!line("<$name$att>", $depth++)
                     unless $omit-tag;
         
                 for ^$elems {
@@ -151,11 +172,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     self.stream-xml($kid, :$depth);
                 }
 
-                take line(--$depth, "</$name>")
+                self!line("</$name>", --$depth)
                      unless $omit-tag;
             }
             else {
-                take line($depth, "<$name$att/>")
+                self!chunk("<$name$att/>", $depth)
                     unless $omit-tag;
             }
         }
@@ -163,24 +184,23 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 }
 
 multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
-    take line($depth, "<!-- OBJR {.cos.obj-num} {.cos.gen-num} R -->")
+    self!line("<!-- OBJR {.cos.obj-num} {.cos.gen-num} R -->", $depth)
         if $!debug;
-##     take self.stream-xml($_, :$depth) with .parent;
 }
 
 multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
     if $!debug {
-        take line($depth, "<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R-->")
+        self!line("<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R-->", $depth)
             given $node.value;
     }
-    if trim(self!marked-content($node, :$depth)) -> $text {
-        take line($depth, $text);
+    if self!marked-content($node, :$depth) -> $text {
+        self!line($text, $depth);
     }
 }
 
 multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
     if .Str -> $text {
-        take line($depth, html-escape($text));
+        self!line(html-escape($text), $depth);
     }
 }
 

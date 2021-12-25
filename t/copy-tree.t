@@ -26,7 +26,7 @@ $page.graphics: -> $gfx {
 
     $header = $doc.Header1;
     $mark = $header.mark: $gfx, {
-        .say('Header text',
+        .print('Header text',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
@@ -34,7 +34,7 @@ $page.graphics: -> $gfx {
     my  PDF::XObject $Stm = $page.xobject-form: :BBox[0, 0, 200, 50];
 
     is $mark.xml().trim, '<H1/>';
-    is $header.text, "Header text\n";
+    is $header.text, "Header text";
     is $header.xml(:omit<Span>).trim, '<H1>Header text</H1>';
     my $copy = $header.copy-tree(:$Stm, :parent($doc));
     is $copy.xml(:omit<Span>).trim, '<H1>Header text</H1>';
