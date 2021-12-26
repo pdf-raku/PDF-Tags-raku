@@ -22,9 +22,9 @@ class PDF::Tags::Mark
     has Bool $.bind;
 
     method set-cos($!value) {
-        given $.mcid -> UInt:D $MCID {
+        my $cos = PDF::MCR ;
+        with $.mcid -> UInt $MCID {
             my $referrer;
-            my $cos;
             my PDF::Page $Pg = $.Pg;
             given $!value.canvas {
                 when PDF::XObject::Form {
@@ -46,16 +46,15 @@ class PDF::Tags::Mark
                 }
             }
             else {
-                $cos = PDF::MCR.COERCE: %(
+                $cos .= COERCE: %(
                            :Type( :name<MCR> ),
                            :$MCID,
                        );
                 $cos<Stm> = $_ with $!Stm;
                 $cos<Pg> //= $_ with $Pg;
             }
-
-            callwith($cos);
         }
+        callwith($cos);
     }
 
     multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!) {

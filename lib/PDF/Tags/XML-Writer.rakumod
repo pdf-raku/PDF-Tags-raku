@@ -25,17 +25,20 @@ has Str  $.root-tag;
 has $!got-nl = True;
 has $!feed;
 
-method !chunk(Str $s is copy = '', UInt $depth = 0) {
-    if $!feed || $!got-nl {
-        take "\n" unless $!got-nl;
-        take '  ' x $depth;
-        $!feed = False;
+method !chunk(Str $s, UInt $depth = 0) {
+    if $s {
+        if $!feed || $!got-nl {
+            take "\n" unless $!got-nl;
+            take '  ' x $depth;
+            $!feed = False;
+        }
+        $!got-nl = $s ~~ /\n$/;
+        take $s;
     }
-    $!got-nl = $s ~~ /\n$/;
-    take $s;
 }
 
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
+method !frag(:$inline, |c) { $inline ?? self!chunk(|c) !! self!line(|c) }
 
 sub html-escape(Str $_) {
     .trans:
@@ -107,7 +110,7 @@ method !actual-text($node) {
 }
 
 multi sub inlined-tag(Str $t) {
-    InlineElemTags($t) || $t eq 'Lbl';
+    InlineElemTags($t);
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
@@ -131,6 +134,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         ''
     }
     my $omit-tag = $name ~~ $_ with $!omit;
+    my $inline = inlined-tag($name);
 
     if $depth >= $!max-depth {
         self!line("<$name> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
@@ -152,19 +156,14 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     when .so { '<%s%s>%s</%s>'.sprintf($name, $att, $_, $name) }
                     default  { '<%s%s/>'.sprintf($name, $att); }
                 }
-                if inlined-tag($name) {
-                    self!chunk($frag, $depth);
-                }
-                else {
-                    self!line($frag, $depth);
-                }
+                self!frag($frag, $depth, :$inline);
             }
         }
         if $!marks || !$actual-text.defined {
             # descend
             my $elems = $node.elems;
             if $elems {
-                self!line("<$name$att>", $depth++)
+                self!frag("<$name$att>", $depth++, :$inline)
                     unless $omit-tag;
         
                 for ^$elems {
@@ -172,7 +171,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     self.stream-xml($kid, :$depth);
                 }
 
-                self!line("</$name>", --$depth)
+                self!frag("</$name>", --$depth, :$inline)
                      unless $omit-tag;
             }
             else {
