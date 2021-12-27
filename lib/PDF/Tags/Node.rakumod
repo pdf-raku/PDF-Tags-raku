@@ -16,9 +16,17 @@ class PDF::Tags::Node {
         where Str:U | /^<ident>$/;
 
     has PDF::Tags::Node::Root $.root is required;
-    has PDF::Page $.Pg is rw; # current page scope
+    has PDF::Page $.Pg; # current page scope
     has $.cos is required;
     method set-cos($!cos) { }
+    method Pg is rw {
+        Proxy.new(
+            FETCH => {$!Pg},
+            STORE => -> $, $!Pg {
+                $!cos.Pg = $!Pg if $!cos ~~  PDF::OBJR|PDF::MCR;
+            }
+        );
+    }
 
     proto sub node-class($) is export(:node-class) {*}
     multi sub node-class(PDF::StructTreeRoot) { require ::('PDF::Tags') }
@@ -34,7 +42,7 @@ class PDF::Tags::Node {
     multi sub build-node(PDF::MCR $ref, PDF::Page :$Pg is copy, |c) {
         my PDF::Content::Canvas $Stm = $_ with $ref.Stm;
         my UInt:D $cos = $ref.MCID;
-        $Pg //= $_ with $ref.Pg;
+        $Pg = $_ with $ref.Pg;
         node-class($ref).new(:$cos, :$Pg, :$Stm, |c);
     }
     multi sub build-node(PDF::OBJR $cos, PDF::Page:D :$Pg = $cos.Pg, |c) {

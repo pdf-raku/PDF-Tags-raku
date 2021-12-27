@@ -28,7 +28,6 @@ class PDF::Tags::Elem
     has Hash $!attributes;
     has TagName $.name is built;
     has Str $.class is built;
-    has Bool $.leaf; # only contain marked content, not sub elements
 
     method attributes {
         $!attributes //= do {
@@ -60,8 +59,6 @@ class PDF::Tags::Elem
                 $.build-kid(.text);
             }
             else {
-                die "Attempt to insert {.name} of type {.WHAT.raku} into a leaf node {$.name}"
-                   if $!leaf && $_ !~~ PDF::Tags::Mark| PDF::Tags::Text;
                 $_;
             }
         }
@@ -79,41 +76,29 @@ class PDF::Tags::Elem
         else {
             $!name = $tag;
         }
-        $!leaf ||= True if $!name eq 'Lbl';
         self.cos.Alt = $_ with $Alt;
     }
 
-    method mark(PDF::Content $gfx, &action, :$name = self.name, Bool :$bind is copy, |c --> PDF::Tags::Mark:D) {
+    method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
         temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
-        my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
-        my PDF::Tags::Elem:D $elem = self;
-        with $gfx.actual-text -> $actual-text {
-            # Add Span to non-leaf nodes to ensure we don't occlude
-            # descendant ActualText entries in the structure tree
-            unless $!leaf {
-                $elem .= Span;
-                # no need to create an intermediate marked content
-                # reference. There will only ever be one marked child
-                $bind = True;
-            }
-            $elem.ActualText ~= $actual-text;
-        }
 
-        my PDF::Tags::Mark:D $kid = $elem.add-kid: :$cos, :$bind;
+        my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
+        my PDF::Tags::Mark:D $mark = $elem.add-kid: :$cos;
+        $mark.actual-text = $gfx.actual-text;
         # Register this mark in the parent tree
         given $gfx.canvas.StructParents -> $idx is rw {
             $idx //= $.root.parent-tree.max-key + 1
                 if $gfx.canvas ~~ PDF::Page;
-            $.root.parent-tree[$_+0][$kid.mcid] //= $elem.cos
+            $.root.parent-tree[$_+0][$mark.mcid] //= $elem.cos
                 with $idx;
         }
 
-        $kid;
+        $mark;
     }
 
     # combined add-kid + mark
-    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Bool :$bind, |c --> PDF::Tags::Elem:D) {
-        given self.add-kid(:$name, :$Alt, :$bind) {
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt) {
             .mark($gfx, &action, |c);
             $_;
         }
@@ -255,7 +240,7 @@ class PDF::Tags::Elem
     multi sub find-parents(PDF::Tags::Elem $_, $xobj) {
         my PDF::Tags::Elem @parents;
         if .kids.first({
-            $_ ~~ PDF::Tags::Mark && !.bind && .Stm === $xobj
+            $_ ~~ PDF::Tags::Mark && .Stm === $xobj
         }) {
             @parents.push: $_;
         }

@@ -16,51 +16,51 @@ class PDF::Tags::Mark
     has PDF::Tags::Node::Parent $.parent is rw;
     has %!attributes;
     has Bool $!atts-built;
-    has Str $!actual-text;
+    has Str $.actual-text is rw;
     has PDF::Content::Canvas $.Stm;
     has PDF::Content::Tag $.value is built handles<name mcid elems>;
-    has Bool $.bind;
+
+    sub mcr(Int:D $MCID, :$Stm, :$Pg) {
+        my PDF::MCR $cos .= COERCE: %(
+                                :Type( :name<MCR> ),
+                                :$MCID,
+                            );
+        $cos<Stm> = $_ with $Stm;
+        $cos<Pg>  = $_ with $Pg;
+        $cos;
+    }
 
     method set-cos($!value) {
-        my $cos = PDF::MCR ;
+        my $cos;
         with $.mcid -> UInt $MCID {
+            $cos = $MCID;
             my $referrer;
-            my PDF::Page $Pg = $.Pg;
             given $!value.canvas {
                 when PDF::XObject::Form {
                     $!Stm = $_;
-                    $!bind = False; # Need MCR to hold /Stm entry
+                    $cos = mcr($MCID, :$!Stm, :$.Pg);
                 }
-                when PDF::Page { $Pg = $_; }
+                when PDF::Page {
+                    my $Pg = $_;
+                    with self.parent.Pg {
+                        $cos = mcr($MCID, :$Pg)
+                            unless $_ === $Pg;
+                    }
+                    else {
+                        $_ = $Pg;
+                    }
+                }
                 # unlikely
                 default { warn "can mark object of type {.WHAT.raku}"; }
-            }
-            if $!bind {
-                $cos = $MCID;
-                with self.parent.cos<Pg> {
-                    fail "StructElem is already bound to another page"
-                        unless $_ === $Pg;
-                }
-                else {
-                    $_ = $Pg;
-                }
-            }
-            else {
-                $cos .= COERCE: %(
-                           :Type( :name<MCR> ),
-                           :$MCID,
-                       );
-                $cos<Stm> = $_ with $!Stm;
-                $cos<Pg> //= $_ with $Pg;
             }
         }
         callwith($cos);
     }
 
-    multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!) {
+    multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!, Str :$!actual-text) {
         self.set-cos($_);
     }
-    multi submethod TWEAK(UInt:D :cos($mcid)!, :$!bind = True) {
+    multi submethod TWEAK(UInt:D :cos($mcid)!) {
         with self.Stm // self.Pg -> PDF::Content::Canvas $_ {
             with self.root.canvas-tags($_){$mcid} {
                 self.set-cos($_);
@@ -88,6 +88,7 @@ class PDF::Tags::Mark
         $.attributes unless $!atts-built;
         $!actual-text //= PDF::COS::TextString.COERCE: $_
             with %!attributes<ActualText>;
+        $!actual-text;
     }
     method remove-actual-text {
         with $.ActualText {
@@ -188,19 +189,6 @@ The raw dictionary, as it appears in the marked content stream.
     method mcid() returns UInt
 
 The Marked Content ID within the content stream. These are usually numbered in sequence, within a stream, starting at zero.
-
-=head3 method bind
-
-    method bind returns Bool
-
-If False the node holds a simple marked content index and the parent element is bound the the page.
-
-If True the holds an internal Marked Content Reference (MCR)
-that binds to the page or XObject.
-
-Setting :bind is an optimisation that can be applied to reduce the number of objects in the PDF when
-marking a page and the parent element that will not be spanning pages.
-
 
 =head3 method value
 

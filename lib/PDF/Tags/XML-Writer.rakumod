@@ -38,7 +38,7 @@ method !chunk(Str $s, UInt $depth = 0) {
 }
 
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
-method !frag(:$inline, |c) { $inline ?? self!chunk(|c) !! self!line(|c) }
+method !frag(:$inline!, |c) { $inline ?? self!chunk(|c) !! self!line(|c) }
 
 sub html-escape(Str $_) {
     .trans:
@@ -89,7 +89,7 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         warn "Tagged PDF has no content and no :root-tag has been given"
             unless $!root-tag.defined;
     }
-    self!line(--$depth, '</' ~ $_ ~ '>', --$depth)
+    self!line('</' ~ $_ ~ '>', --$depth)
         with $!root-tag;
 }
 
@@ -110,7 +110,7 @@ method !actual-text($node) {
 }
 
 multi sub inlined-tag(Str $t) {
-    InlineElemTags($t);
+    InlineElemTags($t).so;
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
@@ -165,7 +165,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             if $elems {
                 self!frag("<$name$att>", $depth++, :$inline)
                     unless $omit-tag;
-        
+
                 for ^$elems {
                     my $kid = $node.kids[$_];
                     self.stream-xml($kid, :$depth);
@@ -193,18 +193,18 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
             given $node.value;
     }
     if self!marked-content($node, :$depth) -> $text {
-        self!line($text, $depth);
+        self!chunk($text, $depth);
     }
 }
 
 multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
     if .Str -> $text {
-        self!line(html-escape($text), $depth);
+        self!chunk(html-escape($text), $depth);
     }
 }
 
-method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
-    my $text = $node.ActualText // do {
+method !marked-content(PDF::Tags::Mark $node, :$depth!) {
+    my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
             when PDF::Tags::Mark {
                 my $text = self!marked-content($_, :$depth);
@@ -214,10 +214,9 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) is default {
         }
         @text.join;
     }
-
     my $name := $node.name;
-    my $omit-tag = $name ~~ $_ with $!omit;
-
+    my $omit-tag = ! $!marks;
+    $omit-tag ||= $name ~~ $_ with $!omit;
     if $omit-tag {
         $text;
     }

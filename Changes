@@ -1,10 +1,10 @@
 {{$NEXT}}
-  - Optimize writing of Span elements. Omit writing of intermediate
-    MCR references in most cases.
+  - Avoid writing /ActualText entries into StructElems when they replicate
+    the marked content sequence in the content stream..
   - Add element leaf() attribute and add-kid :$bind option. Both of
     these help to further reduce the number of StructElem nodes.
-  - Revamped XML serialization formatting. It now reduces line-breaks
-    when outputting text and inline tags
+  - Revamped XML serialization formatting. It now correctly detects
+    inline elements and avoids line-feeds.
 
 0.0.12  2021-12-22T06:54:30+13:00
   - Export read capability to new module PDF::Tags::Reader. This

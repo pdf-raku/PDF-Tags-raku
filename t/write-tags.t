@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 16;
+plan 18;
 
 use PDF::Content::FontObj;
 use PDF::Tags;
@@ -32,18 +32,19 @@ $page.graphics: -> $gfx {
 
     is $header.name, 'H1', 'parent elem name';
     is $header.text, "Header text\n", '$.ActualText()';
-    my PDF::Tags::Mark:D $mark = $header.kids[0][0];
+    my PDF::Tags::Mark:D $mark = $header.kids[0];
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
+    ok defined($header.Pg), 'Element has Pg defined...'; 
+    ok ($header.Pg === $page), '...and Element Pg references this page'; 
 
     is $page.struct-parent, 0, '$page.struct-parent';
     is-deeply $tags.parent-tree[0][0], $mark.parent.cos, 'parent-tree entry';
-
     my $para = $doc.Paragraph: $gfx, {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
     };
     is $para.name, 'P', 'outer tag name';
-    is $para.kids[0][0].name, 'P', 'inner tag name';
+    is $para.kids[0].name, 'P', 'inner tag name';
 
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
@@ -94,7 +95,7 @@ $page.graphics: -> $gfx {
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-is $tags.find('Document//*')>>.name.grep(* ne 'Span').join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
 
 lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 
