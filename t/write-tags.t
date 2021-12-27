@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 18;
+plan 19;
 
 use PDF::Content::FontObj;
 use PDF::Tags;
@@ -37,6 +37,7 @@ $page.graphics: -> $gfx {
     is $mark.mcid, 0, 'mark tag mcid';
     ok defined($header.Pg), 'Element has Pg defined...'; 
     ok ($header.Pg === $page), '...and Element Pg references this page'; 
+    ok ($header.cos.Pg === $page), '...and Element.cos Pg references this page';
 
     is $page.struct-parent, 0, '$page.struct-parent';
     is-deeply $tags.parent-tree[0][0], $mark.parent.cos, 'parent-tree entry';

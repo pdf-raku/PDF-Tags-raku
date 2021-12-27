@@ -74,11 +74,11 @@ endobj
 endobj
 
 8 0 obj
-<< /Type /StructElem /S /Sect /K [ 9 0 R 3 ] /P 7 0 R >>
+<< /Type /StructElem /S /Sect /K [ 9 0 R 3 ] /P 7 0 R /Pg 3 0 R >>
 endobj
 
 9 0 obj
-<< /Type /StructElem /S /P /K [ 0 10 0 R 2 ] /P 8 0 R >>
+<< /Type /StructElem /S /P /K [ 0 10 0 R 2 ] /P 8 0 R /Pg 3 0 R >>
 endobj
 
 10 0 obj
@@ -96,10 +96,10 @@ xref
 0000000850 00000 n 
 0000000972 00000 n 
 0000001047 00000 n 
-0000001120 00000 n 
-0000001193 00000 n 
+0000001130 00000 n 
+0000001213 00000 n 
 trailer
 << /ID [ (t/actual-text.t ) (t/actual-text.t ) ] /Root 1 0 R /Size 11 >>
 startxref
-1261
+1281
 %%EOF

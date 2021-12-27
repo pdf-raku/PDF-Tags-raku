@@ -23,7 +23,7 @@ class PDF::Tags::Node {
         Proxy.new(
             FETCH => {$!Pg},
             STORE => -> $, $!Pg {
-                $!cos.Pg = $!Pg if $!cos ~~  PDF::OBJR|PDF::MCR;
+                $!cos.Pg = $!Pg if $!cos ~~ PDF::OBJR|PDF::MCR|PDF::StructElem;
             }
         );
     }
