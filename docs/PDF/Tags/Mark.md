@@ -52,10 +52,20 @@ A mark is a reference to an area of marked content within a page or xobject form
 
     The `:marks` option can be used to override this behaviour and see raw tags:
 
-        my PDF::Tags $tags .= read: :$pdf, :marks;
-        say "first mark is: " ~ $tags<//mark()[0]>;
+    ```raku
+    my PDF::Tags $tags .= read: :$pdf, :marks;
+    say "first mark is: " ~ $tags<//mark()[0]>;
+    ```
 
   * There is commonly a one-to-one relationship between a parent element and its child marked content element. Multiple child tags may indicate that the tag spans graphical boundaries. For example a paragraph element (name 'P') usually has a single child marked content sequence, but may have multiple child tags, if the paragraph spans pages.
+
+    ```raku
+    my $gfx = $pdf.add-page.gfx;
+    my $para = $dom.Paragraph;
+    $para.mark: { $gfx.say: "This logical paragraph starts on one page...", :position[30, 50]; }
+    $gfx = $pdf.add-page.gfx;
+    $para.mark: { $gfx.say: "and ends on another.", :position[30, 680]; }
+    ```
 
 Methods
 -------

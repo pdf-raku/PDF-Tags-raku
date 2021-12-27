@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.0.13  2021-12-27T17:26:35+13:00
   - Avoid writing /ActualText entries into StructElems when they replicate
     the marked content sequence in the content stream..
   - Add element leaf() attribute and add-kid :$bind option. Both of
