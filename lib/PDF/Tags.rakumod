@@ -39,9 +39,13 @@ class PDF::Tags:ver<0.0.13>
     method create(
         PDF::Class:D :$pdf,
         PDF::StructTreeRoot() :$cos = { :Type( :name<StructTreeRoot> )},
+        :%role-map,
+        :%class-map,
         |c
         --> PDF::Tags:D
     ) {
+        $cos.RoleMap = %role-map if %role-map;
+        $cos.ClassMap = %class-map if %class-map;
         $cos.check;
 
         given $pdf {

@@ -27,7 +27,10 @@ class PDF::Tags::Elem
     has PDF::Tags::Node::Parent $.parent is rw = self.root;
     has Hash $!attributes;
     has TagName $.name is built;
-    has Str $.class is built;
+    has Str $.role is built;
+    has List $!classes;
+
+    method classes { $!classes //= $.cos.class-map-keys }
 
     method attributes {
         $!attributes //= do {
@@ -38,7 +41,7 @@ class PDF::Tags::Elem
             }
 
             unless %atts {
-                for $.cos.class-map-keys {
+                for @.classes {
                     with $.root.class-map{$_} -> $atts {
                         %atts{$_} = $atts{$_}
                             for $atts.keys
@@ -46,7 +49,7 @@ class PDF::Tags::Elem
                 }
             }
 
-            %atts<class> = $_ with $!class;
+            %atts<role> = $_ with $!role;
 
             %atts;
         }
@@ -70,7 +73,7 @@ class PDF::Tags::Elem
         self.Pg = $_ with self.cos.Pg;
         my Str:D $tag = self.cos.tag;
         with self.root.role-map{$tag} {
-            $!class = $tag;
+            $!role = $tag;
             $!name = $_;
         }
         else {
