@@ -29,7 +29,7 @@ class PDF::Tags:ver<0.0.13>
         my constant Reader = 'PDF::Tags::Reader';
         CATCH {
             when X::CompUnit::UnsatisfiedDependency {
-                fail "{Reader} needs to be installed to read tagged PDF files";
+                fail "{Reader.raku} needs to be installed to read tagged PDF files";
             }
         }
         require ::(Reader);

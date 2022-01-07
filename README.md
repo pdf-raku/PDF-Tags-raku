@@ -163,7 +163,7 @@ Link | | hyperlink; should contain a link annotation
 Annot | Annotation | annotation (other than a link)
 Ruby | | Chinese/Japanese pronunciation/explanation
 RB | RubyBaseText | Ruby base text
-RT | RubyBaseText | Ruby annotation text
+RT | RubyText | Ruby annotation text
 RP | RubyPunctuation |
 Warichu | | Japanese/Chinese longer description
 WT | WarichuText

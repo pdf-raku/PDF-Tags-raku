@@ -1,4 +1,13 @@
 {{$NEXT}}
+  - PDF::Tags::XML-Writer
+    -- Handle serialization of target links to 'href' attribute #7, e.g.
+       <Link href="#foo">Foo</Link>
+  - PDF::Tags::Elem:
+    -- Rename $.class attribute to $.role. This represents the original tag-name
+       before being dereferenced via StructTreeRoot.RoleMap.
+    -- Added classes accessor
+  - PDF::Tags:
+    -- Added :$role-map and :$class-map options to create() method
 
 0.0.13  2021-12-27T17:26:35+13:00
   - Avoid writing /ActualText entries into StructElems when they replicate

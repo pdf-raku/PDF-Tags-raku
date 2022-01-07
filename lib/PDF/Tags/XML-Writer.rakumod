@@ -1,7 +1,6 @@
 #| XML Serializer for tagged PDF structural items
 unit class PDF::Tags::XML-Writer;
 
-use PDF::Annot;
 use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Tags::Node;
@@ -22,23 +21,29 @@ has Bool $.debug = False;
 has Bool $.marks;
 has Str  $.omit;
 has Str  $.root-tag;
-has $!got-nl = True;
-has $!feed;
+has Bool $!got-nl = True;
+has Bool $!feed;
+has Bool $!first = True;
 
-method !chunk(Str $s, UInt $depth = 0) {
+method !chunk(Str $s is copy, UInt $depth = 0) {
     if $s {
         if $!feed || $!got-nl {
-            take "\n" unless $!got-nl;
-            take '  ' x $depth;
+            take "\n" ~ ('  ' x $depth) unless $!first--;
             $!feed = False;
         }
-        $!got-nl = $s ~~ /\n$/;
-        take $s;
+        if $*inline {
+            take $s
+        }
+        else {
+            # defer output of final new-line - indentation may change
+            $!got-nl = so($s ~~ s/\n$//);
+            take $s.subst(/\n/, { "\n" ~ ( '  ' x $depth)}, :g);
+        }
     }
 }
 
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
-method !frag(:$inline!, |c) { $inline ?? self!chunk(|c) !! self!line(|c) }
+method !frag(|c) { $*inline ?? self!chunk(|c) !! self!line(|c) }
 
 sub html-escape(Str $_) {
     .trans:
@@ -113,6 +118,54 @@ multi sub inlined-tag(Str $t) {
     InlineElemTags($t).so;
 }
 
+sub find-href($node) {
+    use PDF::Annot::Link;
+    use PDF::Action::URI;
+    use PDF::Action::GoTo;
+
+    my constant &object-refs = PDF::Tags::XPath.compile: 'descendant::object()';
+    my Str $href;
+    for $node.find(&object-refs) {
+        given .value {
+            when PDF::Annot::Link {
+                my $l = $_;
+                with $l<A> // $l<PA> {
+                    when PDF::Action::URI {
+                        $href = .URI;
+                        last;
+                    }
+                    when PDF::Action::GoTo {
+                        given .<D> {
+                            when Str {
+                                $href = '#' ~ $_;
+                                last;
+                            }
+                        }
+                    }
+                    default {
+                        warn "ignoring {.WHAT.raku}";
+                    }
+                }
+                else {
+                    with $l<Dest> {
+                        when Str {
+                            $href = '#' ~ $_;
+                            last;
+                        }
+                        default {
+                            warn "ignoring {.WHAT.raku}";
+                        }
+                    }
+                }
+            }
+            default {
+                warn "ignoring {.WHAT.raku}";
+            }
+        }
+    }
+    $href;
+}
+
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     if $!debug {
         self!chunk("<!-- elem {.obj-num} {.gen-num} R -->", $depth)
@@ -120,11 +173,16 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
     my $name = $node.name;
     my $actual-text = self!actual-text($node);
+    my $*inline = inlined-tag($name);
     my $att = do if $!atts {
         my %attributes = $node.attributes;
         %attributes<O>:delete;
         if $!marks {
             %attributes<ActualText> = $_ with $actual-text;
+        }
+
+        if $name eq 'Link' {
+            %attributes<href> = $_ with find-href($node);
         }
         atts-str(%attributes);
     }
@@ -134,7 +192,6 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         ''
     }
     my $omit-tag = $name ~~ $_ with $!omit;
-    my $inline = inlined-tag($name);
 
     if $depth >= $!max-depth {
         self!line("<$name> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
@@ -156,14 +213,14 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     when .so { '<%s%s>%s</%s>'.sprintf($name, $att, $_, $name) }
                     default  { '<%s%s/>'.sprintf($name, $att); }
                 }
-                self!frag($frag, $depth, :$inline);
+                self!frag($frag, $depth);
             }
         }
         if $!marks || !$actual-text.defined {
             # descend
             my $elems = $node.elems;
             if $elems {
-                self!frag("<$name$att>", $depth++, :$inline)
+                self!frag("<$name$att>", $depth++)
                     unless $omit-tag;
 
                 for ^$elems {
@@ -171,7 +228,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     self.stream-xml($kid, :$depth);
                 }
 
-                self!frag("</$name>", --$depth, :$inline)
+                self!frag("</$name>", --$depth)
                      unless $omit-tag;
             }
             else {

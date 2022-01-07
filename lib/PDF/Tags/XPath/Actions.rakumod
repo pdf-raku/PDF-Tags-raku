@@ -18,7 +18,7 @@ class PDF::Tags::XPath::Actions {
     method TOP($/) {
         my @query = @<query>».ast;
 
-        make  -> PDF::Tags::Node:D $ref {
+        make -> PDF::Tags::Node:D $ref {
             if @query == 1 {
                 (@query[0])($ref);
             }

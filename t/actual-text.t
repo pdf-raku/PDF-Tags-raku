@@ -3,6 +3,7 @@ use Test;
 plan 5;
 
 use PDF::Class;
+use PDF::Annot;
 use PDF::Page;
 use PDF::Tags;
 use PDF::Tags::Elem;
@@ -26,7 +27,18 @@ $page.graphics: -> $gfx {
         is $para.text, 'This paragraph links to ';
 
         subtest 'marking at lower level', {
-            my PDF::Tags::Elem $link = $para.Link: $gfx, {
+            my PDF::Annot $annot .= COERCE: {
+                :Type(:name<Annot>),
+                :Subtype(:name<Link>),
+                :Rect[71, 717, 190, 734],
+                :A{
+                    :Type(:name<Action>),
+                    :S(:name<URI>),
+                    :URI<http://google.com>,
+                }
+            };
+            my $link = $para.Link: $gfx, $annot;
+            $link.mark: $gfx, {
                 .print('http://google.com');
             }
             $para.mark: $gfx, {
@@ -48,7 +60,7 @@ $page.graphics: -> $gfx {
     is $doc.xml, q{<Document>
   <Sect>
     <P>
-      This paragraph links to <Link>http://google.com</Link>.
+      This paragraph links to <Link href="http://google.com">http://google.com</Link>.
     </P>
     top level text
   </Sect>
