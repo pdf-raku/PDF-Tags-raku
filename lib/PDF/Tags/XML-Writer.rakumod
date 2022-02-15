@@ -122,6 +122,7 @@ sub find-href($node) {
     use PDF::Annot::Link;
     use PDF::Action::URI;
     use PDF::Action::GoTo;
+    use PDF::Destination;
 
     my constant &object-refs = PDF::Tags::XPath.compile: 'descendant::object()';
     my Str $href;
@@ -142,6 +143,9 @@ sub find-href($node) {
                             }
                         }
                     }
+                    when PDF::Destination {
+                        # Todo: work out page number from page reference
+                    }
                     default {
                         warn "ignoring {.WHAT.raku}";
                     }
@@ -151,6 +155,9 @@ sub find-href($node) {
                         when Str {
                             $href = '#' ~ $_;
                             last;
+                        }
+                        when PDF::Destination {
+                            # Todo: work out page number from page reference
                         }
                         default {
                             warn "ignoring {.WHAT.raku}";

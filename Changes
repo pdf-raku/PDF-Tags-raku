@@ -1,7 +1,10 @@
 {{$NEXT}}
+
+0.0.14  2022-02-16T10:36:38+13:00
   - PDF::Tags::XML-Writer
     -- Handle serialization of target links to 'href' attribute #7, e.g.
-       <Link href="#foo">Foo</Link>
+       <Link href="#foo">Foo</Link>. Implemented for named destinations
+       and external links. TODO: Page level destination links.
   - PDF::Tags::Elem:
     -- Rename $.class attribute to $.role. This represents the original tag-name
        before being dereferenced via StructTreeRoot.RoleMap.

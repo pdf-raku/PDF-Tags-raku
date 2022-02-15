@@ -2,7 +2,7 @@ use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 
 #| Tagged PDF root node
-class PDF::Tags:ver<0.0.13>
+class PDF::Tags:ver<0.0.14>
     is PDF::Tags::Node::Parent
     does PDF::Tags::Node::Root {
 
