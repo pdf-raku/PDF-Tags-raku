@@ -195,7 +195,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
     else {
         $name = $_
-            with $node.dom.role-map{$name};
+            with $node.root.class-map{$name};
         ''
     }
     my $omit-tag = $name ~~ $_ with $!omit;
