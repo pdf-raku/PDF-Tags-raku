@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+0.0.15  2022-03-25T11:38:23+13:00
+  - Fix $tags.xml(:!atts) option
+  - Move this module from CPAN to zef
+
 0.0.14  2022-02-16T10:36:38+13:00
   - PDF::Tags::XML-Writer
     -- Handle serialization of target links to 'href' attribute #7, e.g.
