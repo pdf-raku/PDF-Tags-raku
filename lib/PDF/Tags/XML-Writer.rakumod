@@ -247,7 +247,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 }
 
 multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
-    self!line("<!-- OBJR {.cos.obj-num} {.cos.gen-num} R -->", $depth)
+    self!line("<!-- OBJR {.cos.Obj.obj-num} {.cos.Obj.gen-num} R -->", $depth)
         if $!debug;
 }
 
