@@ -23,6 +23,30 @@ class PDF::Tags::Node::Parent
         } // 0;
     }
 
+    method xpath {
+        my $name  = self.name;
+        my $xpath = $name;
+
+        with self.parent {
+            $xpath = .xpath ~ '/' ~ $xpath
+                unless .name eq '#root';
+            unless .kids == 1 {
+                # add [n] index
+                my Int $nth;
+                for .kids {
+                    if .name eq $name {
+                        $nth++;
+                        if $_ === self {
+                            $xpath ~= '[' ~ $nth ~ ']';
+                            last;
+                        }
+                    }
+                }
+            }
+        }
+        $xpath;
+    }
+
     method build-kid(PDF::Tags::Node::Parent:D $parent: $cos, :$Pg = $.Pg, |c) {
         build-node($cos, :$parent, :$Pg, :$.root, |c);
     }

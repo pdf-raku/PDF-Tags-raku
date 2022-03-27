@@ -32,6 +32,15 @@ class PDF::Tags::Elem
 
     method classes { $!classes //= $.cos.class-map-keys }
 
+    method name is rw {
+        Proxy.new(
+            FETCH => { $!name },
+            STORE => -> $, $!name {
+                self.cos.tag = $!name;
+            }
+        );
+    }
+
     method attributes {
         $!attributes //= do {
             my %atts;

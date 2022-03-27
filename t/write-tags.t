@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 19;
+plan 20;
 
 use PDF::Content::FontObj;
 use PDF::Tags;
@@ -84,9 +84,10 @@ $page.graphics: -> $gfx {
         $form-elem.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
         };
-        $form-elem.Paragraph: $_, {
+        my $p = $form-elem.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
+        is $p.xpath, 'Document/Form[1]/P[1]';
     }
 
     $form-elem.do($gfx, :position[150, 70]);

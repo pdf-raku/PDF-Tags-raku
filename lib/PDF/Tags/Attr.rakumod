@@ -6,9 +6,13 @@ class PDF::Tags::Attr
     use Method::Also;
 
     has PDF::Tags::Node::Parent $.parent is rw;
-
     submethod TWEAK(Pair :$cos!) {
         self.set-cos($cos);
+    }
+    method xpath {
+        my Str $xpath = .xpath  with $!parent;
+        $xpath ~= '@' ~ self.name;
+        $xpath;
     }
     multi sub to-str(@a) { @a».Str.join: ' '}
     multi sub to-str($_) { .Str}
