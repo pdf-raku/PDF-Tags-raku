@@ -128,7 +128,4 @@ this class inherits from L<PDF::Tags::Node::Parent> and has its method available
 
 Create an empty tagged PDF structure in a PDF.
 
-The PDF::Tags API currently only supports writing of tagged content in read-order. Hence the
-PDF object should be empty; content and tags should be co-created in read-order.
-
 =end pod

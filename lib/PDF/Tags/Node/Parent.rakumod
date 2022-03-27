@@ -23,12 +23,12 @@ class PDF::Tags::Node::Parent
         } // 0;
     }
 
-    method xpath {
+    method node-path {
         my $name  = self.name;
         my $xpath = $name;
 
         with self.parent {
-            $xpath = .xpath ~ '/' ~ $xpath
+            $xpath = .node-path ~ '/' ~ $xpath
                 unless .name eq '#root';
             unless .kids == 1 {
                 # add [n] index
@@ -211,12 +211,16 @@ Adds the node as a child of the current node.
 
 returns the names of the nodes immediate children and attributes (prefixed by '@');
 
+=head3 method node-path
+
+Returns an XPath expression to locate the node in the document tree.
+
 =head3 method Hash
 
 Returns a Hash of child nodes (arrays of lists) and attributes (prefixed by '@')
 
-   say $tags.first('<Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
-   say $tags.first('<Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
+   say $tags.first('Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
+   say $tags.first('Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
 
 =head3 Alias methods
 

@@ -87,7 +87,7 @@ $page.graphics: -> $gfx {
         my $p = $form-elem.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
-        is $p.xpath, 'Document/Form[1]/P[1]';
+        is $p.node-path, 'Document/Form[1]/P[1]';
     }
 
     $form-elem.do($gfx, :position[150, 70]);

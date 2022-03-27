@@ -4,9 +4,10 @@
 PDF-Tags-raku
 ============
 
-A small DOM-like API for the navigation or creation of tagged PDF files.
+A small DOM-like API for the creation of tagged PDF files.
 
-This module enables reading of tagged content with simple XPath queries and basic XML serialization.
+This module enables PDF tagged content manipulation, with simple construction,
+XPath queries and basic XML serialization.
 
 Synopsis
 --------
@@ -219,5 +220,5 @@ Further Work
 
 The PDF accessibility standard ISO 14289-1 cannot be distributed and needs to be [purchased from ISO](https://www.iso.org/standard/64599.html).
 
-- Editing. Currently the API primarily runs in `create` or `read` modes, but doesn't readily support editing tags into existing content. More work is also
+- Editing. Currently the API doesn't readily support editing tags into existing content. More work is also
 needed in the PDF::Content module to support content editing.
