@@ -183,7 +183,6 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $*inline = inlined-tag($name);
     my $att = do if $!atts {
         my %attributes = $node.attributes;
-        %attributes<O>:delete;
         if $!marks {
             %attributes<ActualText> = $_ with $actual-text;
         }

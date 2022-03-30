@@ -18,7 +18,7 @@ class PDF::Tags::Elem
     use PDF::MCR;
     use PDF::OBJR;
     use PDF::Page;
-    use PDF::StructElem;
+    use PDF::StructElem :Attributes;
     use PDF::XObject::Form;
     use PDF::XObject::Image;
     use PDF::XObject;
@@ -41,19 +41,32 @@ class PDF::Tags::Elem
         );
     }
 
+    sub merge-atts(%atts, Attributes $a) {
+        if $a.Hash -> %a {
+            my $owner = $a.owner;
+            # guess owner, if not given
+            $owner //= att-owner($_) given %a.keys.head;
+            if $owner ~~ 'Layout'|'List'|'PrintField'|'Table' {
+                # standard owners (Table 341) with mutually distinct attribute names
+                %atts{.key} = .value for %a;
+            }
+            else {
+                %atts{$owner ~ ':' ~ .key} = .value for %a;
+            }
+        }
+    }
+
     method attributes {
         $!attributes //= do {
             my %atts;
-            for $.cos.attribute-dicts -> Hash $atts {
-                %atts{$_} = $atts{$_}
-                    for $atts.keys
+            for $.cos.attribute-dicts -> Attributes $atts {
+                merge-atts(%atts, $atts);
             }
 
             unless %atts {
                 for @.classes {
-                    with $.root.class-map{$_} -> $atts {
-                        %atts{$_} = $atts{$_}
-                            for $atts.keys
+                    with $.root.class-map{$_} -> Attributes $atts {
+                        merge-atts(%atts, $atts);
                     }
                 }
             }
@@ -279,15 +292,37 @@ class PDF::Tags::Elem
         }
     }
 
+    constant ListAtts = set <ListNumbering>;
+    constant RoleAtts = set <Role checked Desc>;
+    constant TableAtts = set <RowSpan ColSpan Headers Scope Summary>;
+    constant LayoutAtts = set <BBox BackgroundColor BaselineShift BlockAlign BorderColor
+	BorderStyle BorderThickness Color ColumnCount ColumnGap
+	ColumnWidths EndIndent GlyphOrientationVertical Height
+	InlineAlign LineHeight Padding Placement RubyName RubyPosition
+	SpaceBefore StartIndent TBorderStyle TPadding TextAlign
+	TextDecorationColor TextDecorationThickness TextDecorationType
+	TextIndent Width WritingMode>;
+    constant %Owner = %(
+        all(ListAtts.keys) => 'List',
+        all(RoleAtts.keys) => 'Role',
+        all(TableAtts.keys) => 'Table',
+        all(LayoutAtts.keys) => 'Layout',
+    );
+    multi sub att-owner($_ where .contains(':')) {
+        .split(':')
+    }
+    multi sub att-owner($key) {
+        (%Owner{$key}, $key);
+    }
+
     has Bool $!atts-reset;
     method set-attribute(Str() $key, Any:D $val) {
-        given self.cos<A> {
-            # could be an array of dicts + revisions
-            $_ = %(self.attributes)
-                unless $_ ~~ Hash:D;
-            .{$key} = self.attributes{$key} = $val;
-       }
-       callsame();
+        my ($owner, $att) = att-owner($key);
+        fail "unable to determine owner for attribute: $key"
+            unless $owner;
+        $.cos.vivify-attributes(:$owner).set-attribute($att, $val);
+        self.attributes{$key} = $val;
+        callsame();
      }
 
     method !bbox($gfx, @rect) {

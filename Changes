@@ -1,4 +1,7 @@
 {{$NEXT}}
+  - Add node-path() method to compute an XPath for the node in a tree.
+  - Allow update of Element names
+  - Improve conformance of attribute handling. Detect and respect tag owners.
 
 0.0.15  2022-03-25T11:38:23+13:00
   - Fix $tags.xml(:!atts) option

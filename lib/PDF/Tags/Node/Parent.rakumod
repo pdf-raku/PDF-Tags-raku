@@ -63,7 +63,7 @@ class PDF::Tags::Node::Parent
 
         # re-parent cos node
         given self.cos.kids //= [] {
-            $_ = [$_] if $_ ~~ Hash;
+            $_ = [$_] unless $_ ~~ List;
             $node.cos.P = self.cos
                 if $node.cos ~~ PDF::StructElem;
             .push($node.cos);
