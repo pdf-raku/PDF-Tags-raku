@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.1.0  2022-03-31T08:06:23+13:00
   - Add node-path() method to compute an XPath for the node in a tree.
   - Allow update of Element names
   - Improve conformance of attribute handling. Detect and respect tag owners.
