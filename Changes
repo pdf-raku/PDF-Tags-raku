@@ -1,4 +1,5 @@
 {{$NEXT}}
+  - Add resources/tagged-pdf.dtd - exterbal DtD for XML serialization.
 
 0.1.1  2022-03-31T08:12:02+13:00
   - Restore README, eaten by Mi6

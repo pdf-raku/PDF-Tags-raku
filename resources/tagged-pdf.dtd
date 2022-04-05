@@ -1,0 +1,215 @@
+<!-- Non normative XML DtD for tagged PDF XML serialization. Based on:
+      - PDF ISO-32000 1.7 Specification,
+        - Section 14.8.4 Standard Structure Types
+        - Section 14.8.5 Standard Structure Attributes
+      - https://accessible-pdf.info/basics/general/overview-of-the-pdf-tags
+
+     Not applying ordering or arity constraints on child nodes
+-->
+
+<!ENTITY % Block "BlockQuote|Caption|Figure|Form|Formula|Index|L|P|TOC|Table">
+<!ENTITY % DocFrag "Art|Div|Document|Part|Sect">
+<!ENTITY % Hdr "H1|H2|H3|H4|H5|H6|H">
+<!ENTITY % Inline "Annot|Code|Formula|H1|H2|H3|H4|H5|H6|L|LBody|LI|Lbl|Link|Note|P|Quote|Reference|Span|Table|Annot|Code|Span|Note|Reference|BibEntry|Ruby|Quote|Warichu|Link">
+<!ENTITY % StructMisc "NonStruct|Private">
+<!ENTITY % SubPart "Art|Div|Sect">
+<!ENTITY % attsAny "
+	Placement (Block|Inline|Before|Start|End) #IMPLIED
+	WritingMode (LrTb|RlTb|TbRl) 'LrTb'
+	BackgroundColor CDATA #IMPLIED
+	BorderColor CDATA #IMPLIED
+	BorderStyle CDATA #IMPLIED
+	BorderThickness CDATA #IMPLIED
+	Padding CDATA #IMPLIED
+	Color CDATA #IMPLIED
+	role CDATA #IMPLIED">
+<!ENTITY % attsBLSE "
+	SpaceBefore CDATA #IMPLIED
+	SpaceAfter CDATA #IMPLIED
+	StartIndent CDATA #IMPLIED
+	EndIndent CDATA #IMPLIED
+	TextIndent CDATA #IMPLIED
+	TextAlign (Start|Center|End|Justify) 'Start'
+	BBox CDATA #IMPLIED
+	Width CDATA #IMPLIED
+	Height CDATA #IMPLIED
+	BlockAlign (Before|Middle|After|Justify) 'Before'
+	InlineAlign (Start|Center|End) 'Start'
+	TBorderStyle CDATA #IMPLIED
+	TPadding CDATA #IMPLIED
+	class CDATA #IMPLIED">
+<!ENTITY % attsCell "
+	RowSpan CDATA #IMPLIED
+	ColSpan CDATA #IMPLIED
+	Headers CDATA #IMPLIED
+	Scope (Row|Column|Both) #IMPLIED
+	Width CDATA #IMPLIED
+	Height CDATA #IMPLIED
+	BlockAlign (Before|Middle|After|Justify) 'Before'
+	InlineAlign (Start|Center|End) 'Start'
+	TBorderStyle CDATA #IMPLIED
+	TPadding CDATA #IMPLIED">
+<!ENTITY % attsCols "
+	ColumnCount CDATA #IMPLIED
+	ColumnGap CDATA #IMPLIED
+	ColumnWidths CDATA #IMPLIED">
+<!ENTITY % attsILSE "
+	BaselineShift CDATA #IMPLIED
+	LineHeight CDATA #IMPLIED
+	TextDecorationColor CDATA #IMPLIED
+	TextDecorationThickness CDATA #IMPLIED
+	TextDecorationType (None|Underline|Overline|LineThrough) 'None'
+	RubyName (Start|Center|End|Justify|Distribute) 'Distribute'
+	RubyPosition (Before|After|Warichu|Inline) 'Before'
+	GlyphOrientationVertical CDATA #IMPLIED">
+<!ENTITY % attsList "
+	ListNumbering (None|Disc|Circle|Square|Decimal|UpperRoman|LowerRoman|UpperAlpha|LowerAlpha) 'None'">
+<!ENTITY % attsRuby "
+	RubyAlign (Start|Center|End|Justify|Distribute) 'Distribute'">
+<!ENTITY % attsTable "
+	Summary CDATA #IMPLIED">
+
+<!ELEMENT Annot (#PCDATA|%Inline;)*>
+<!ATTLIST Annot %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Art (%Block;|%Hdr;|Div|LBody|LI|Lbl|Sect)*>
+<!ATTLIST Art %attsAny; %attsCols;>
+
+<!ELEMENT BlockQuote (%Hdr;|%SubPart;|Caption|Figure|Formula|L|LBody|LI|Lbl|P|Table)*>
+<!ATTLIST BlockQuote %attsAny;>
+
+<!ELEMENT Caption (#PCDATA|%Hdr;|%Inline;|L|LBody|LI|Lbl|P|Table)*>
+<!ATTLIST Caption %attsAny;>
+
+<!ELEMENT Code (#PCDATA|%Inline;)*>
+<!ATTLIST Code %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Div (%Block;|%Hdr;|%SubPart;|LBody|LI|Lbl)*>
+<!ATTLIST Div %attsAny; %attsCols;>
+
+<!ELEMENT Document (%Block;|%Hdr;|%SubPart;|LBody|LI|Lbl|Part)*>
+<!ATTLIST Document %attsAny;>
+
+<!ELEMENT Figure (EMPTY)*>
+<!ATTLIST Figure %attsAny;>
+
+<!ELEMENT Form (EMPTY)*>
+<!ATTLIST Form %attsAny;>
+
+<!ELEMENT Formula (#PCDATA|%Inline;)*>
+<!ATTLIST Formula %attsAny;>
+
+<!ELEMENT H (#PCDATA|%Inline;)*>
+<!ATTLIST H %attsAny;>
+
+<!ELEMENT H1 (#PCDATA|%Inline;|Annot|Code|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST H1 %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT H2 (#PCDATA|%Inline;|Annot|Code|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST H2 %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT H3 (#PCDATA|%Inline;|Annot|Code|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST H3 %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT H4 (#PCDATA|%Inline;|Annot|Code|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST H4 %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT H5 (#PCDATA|%Inline;|Annot|Code|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST H5 %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT H6 (#PCDATA|%Inline;|Annot|Code|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST H6 %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Index (%Hdr;|L|LBody|LI|Lbl|P|Table)*>
+<!ATTLIST Index %attsAny;>
+
+<!ELEMENT L (#PCDATA|%Inline;|Caption|LI)*>
+<!ATTLIST L %attsAny; %attsBLSE; %attsILSE; %attsList;>
+
+<!ELEMENT LBody (#PCDATA|%Inline;|Annot|Code|Figure|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST LBody %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT LI (#PCDATA|%Inline;|L|LBody|Lbl)*>
+<!ATTLIST LI %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Lbl (#PCDATA|%Inline;)*>
+<!ATTLIST Lbl %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Link (#PCDATA|%Inline;)*>
+<!ATTLIST Link %attsAny; %attsBLSE; %attsILSE; href CDATA #IMPLIED>
+
+<!ELEMENT NonStruct (%DocFrag;|%Hdr;|%StructMisc;|BlockQuote|Caption|Index|L|LBody|LI|Lbl|P|TOC|TOCI|Table)*>
+<!ATTLIST NonStruct %attsAny;>
+
+<!ELEMENT Note (#PCDATA|%Inline;|Lbl|P|Span)*>
+<!ATTLIST Note %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT P (#PCDATA|%Inline;|Annot|Code|Figure|Form|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST P %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Part (%Block;|%Hdr;|%SubPart;|LBody|LI|Lbl)*>
+<!ATTLIST Part %attsAny;>
+
+<!ELEMENT Private (%DocFrag;|%Hdr;|%StructMisc;|BlockQuote|Caption|Index|L|LBody|LI|Lbl|P|TOC|TOCI|Table)*>
+<!ATTLIST Private %attsAny;>
+
+<!ELEMENT Quote (#PCDATA|%Inline;|Span)*>
+<!ATTLIST Quote %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT RB (#PCDATA|Span)*>
+<!ATTLIST RB %attsAny; %attsRuby;>
+
+<!ELEMENT RP (#PCDATA|Span)*>
+<!ATTLIST RP %attsAny; %attsRuby;>
+
+<!ELEMENT RT (#PCDATA|Span)*>
+<!ATTLIST RT %attsAny; %attsRuby;>
+
+<!ELEMENT Reference (#PCDATA|%Inline;|Lbl)*>
+<!ATTLIST Reference %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Ruby (RB|RP|RT)*>
+<!ATTLIST Ruby %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT Sect (%Block;|%Hdr;|%SubPart;|LBody|LI|Lbl)*>
+<!ATTLIST Sect %attsAny; %attsCols;>
+
+<!ELEMENT Span (#PCDATA|%Inline;)*>
+<!ATTLIST Span %attsAny; %attsBLSE; %attsILSE;>
+
+<!ELEMENT TBody (TR)*>
+<!ATTLIST TBody %attsAny;>
+
+<!ELEMENT TD (#PCDATA|%Inline;|Annot|Code|Figure|Form|Formula|Link|Note|Quote|Reference|Span)*>
+<!ATTLIST TD %attsAny; %attsCell;>
+
+<!ELEMENT TFoot (TR)*>
+<!ATTLIST TFoot %attsAny;>
+
+<!ELEMENT TH (#PCDATA|%Inline;)*>
+<!ATTLIST TH %attsAny; %attsCell;>
+
+<!ELEMENT THead (TR)*>
+<!ATTLIST THead %attsAny;>
+
+<!ELEMENT TOC (%Hdr;|L|LBody|LI|Lbl|P|TOCI|Table)*>
+<!ATTLIST TOC %attsAny;>
+
+<!ELEMENT TOCI (%Hdr;|L|LBody|LI|Lbl|P|Reference|TOC|Table)*>
+<!ATTLIST TOCI %attsAny;>
+
+<!ELEMENT TR (TD|TH)*>
+<!ATTLIST TR %attsAny;>
+
+<!ELEMENT Table (#PCDATA|%Inline;|Caption|TBody|TFoot|THead|TR)*>
+<!ATTLIST Table %attsAny; %attsBLSE; %attsILSE; %attsTable;>
+
+<!ELEMENT WP (#PCDATA|Span)*>
+<!ATTLIST WP %attsAny;>
+
+<!ELEMENT WT (#PCDATA|Span)*>
+<!ATTLIST WT %attsAny;>
+
+<!ELEMENT Warichu (WP|WT)*>
+<!ATTLIST Warichu %attsAny; %attsBLSE; %attsILSE;>
+

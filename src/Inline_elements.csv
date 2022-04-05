@@ -1,0 +1,8 @@
+PDF tag	Semantic meaning	Possible and semantically meaningful parent elements	Possible and semantically meaningful child elements
+Span	Generic container without semantic meaning; is used, among other things, for visual markups, language changes or for adding ActualText (e.g. for ignoring hyphens)	P, H1–H6, LBody, TD, Quote, Note	–
+Quote	Used like BlockQuote for quoted content; however, Quote is used at line level	P, H1–H6, LBody, TD	Span
+Note	Footnote or endnote text (not the reference character in the body text). The footer/end-note character within Note and Reference will be placed in a Lbl.	P, H1–H6, LBody, TD	Lbl, P, Span
+Reference	Refers to another place in the document, e.g. footnote or directory entry	P, H1–H6, LBody, TD	Lbl
+Code	Marking of programming language	P, H1–H6, LBody, TD	–
+Link	Link to a web page or to a place within the document	P, H1–H6, LBody, TD	–
+Annot	Annotations that are not a link or a widget (form field), like comments and videos.	P, H1–H6, LBody, TD	–

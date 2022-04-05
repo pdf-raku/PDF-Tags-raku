@@ -1,0 +1,8 @@
+PDF tag	Semantic meaning	Possible and semantically meaningful parent elements	Possible and semantically meaningful child elements
+Table	Table container; combines all related table elements	Document, Part, Art, Sect, Div, BlockQuote	TR, Caption, THead, TBody, TFoot
+TR	Groups a table row	Table, THead, TBody, TFoot	TH, TD
+TH	Table heading cell; describes the meaning either at horizontal (line) or vertical (column) level	TR	Inline-level structure elements
+TD	Ordinary table data cells	TR	Inline-level structure elements
+THead	A group of table rows (TR) to mark them as table header; can be used optionally	Table	TR
+TBody	A group of table rows (TR) to mark them as table content; can be used optionally	Table	TR
+TFoot	A group of table rows (TR) to mark them as table footer; can be used optionally	Table	TR

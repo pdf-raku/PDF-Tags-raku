@@ -1,0 +1,3 @@
+PDF tag	Semantic meaning	Possible and semantically meaningful parent elements	Possible and semantically meaningful child elements
+P	Ordinary paragraph	Document, Part, Art, Sect, Div, BlockQuote, Caption, TOCI	Inline-level structure elements
+H1, H2, H3, H4, H5, H6	Hierarchical headings on levels 1 to 6	Document, Part, Art, Sect, Div, BlockQuote	Inline-level structure elements

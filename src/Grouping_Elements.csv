@@ -1,0 +1,11 @@
+PDF tag	Semantic meaning	Possible and semantically meaningful parent elements	Possible and semantically meaningful child elements
+Document	Represents a complete document	–	Grouping elements, Block-level structure elements
+Part	Division of a larger document into smaller, associated parts	Document	Art, Sect, Div, BlockQuote, Caption, TOC, Index, Block-level structure elements
+Art	Parts of content which together are conclusive, i.e. an article or part of a document	Document, Part, Sect, Div, BlockQuote	Sect, Div, BlockQuote, Caption, TOC, Index, Block-level structure elements
+Sect	Grouped related content parts, for example several paragraphs, which can be combined into a group	Document, Part, Art, Sect, Div, BlockQuote	Art, Sect, Div, BlockQuote, Caption, TOC, Index, Block-level structure elements
+Div	Generic group element without semantic meaning	Document, Part, Art, Sect, Div, BlockQuote	Art, Sect, Div, BlockQuote, Caption, TOC, Index, Block-level structure elements
+BlockQuote	One or more paragraphs that originate from another author, in other words, that have been quoted	Document, Part, Art, Sect, Div	Art, Sect, Div, Caption, Block-level structure elements
+Caption	A caption to describe for example a picture or a table	Document, Part, Art, Sect, Div, BlockQuote, Table, L	Sect, Div, BlockQuote, Block-level structure elements
+TOC	Container for table of contents entries. Can be used either as a flat hierarchy (all contained TOCI on one level) or as a complex hierarchy (TOC within a TOCI as a subgroup). Can be contained multiple times in a document, since it can also be used for image or table directories.	Document, Part, Art, Sect, Div	TOCI
+TOCI	Entry within a table of contents (TOC).	TOC	TOC, P, Lbl, Reference
+Index	Container for a subject index	Document, Part, Art, Sect, Div

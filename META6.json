@@ -32,6 +32,7 @@
     "PDF::Tags::XPath::Grammar": "lib/PDF/Tags/XPath/Grammar.rakumod"
   },
   "resources": [
+      "tagged-pdf.dtd"
   ],
   "source-url": "git://github.com/pdf-raku/PDF-Tags-raku.git",
   "tags": [

@@ -1,0 +1,4 @@
+PDF tag	Semantic meaning	Possible and semantically meaningful parent elements	Possible and semantically meaningful child elements
+Figure	Photo or graphic	Document, Part, Art, Sect, Div, BlockQuote, P, LBody, TD	–
+Formula	Mathematical formula	Document, Part, Art, Sect, Div, BlockQuote, P, H1–H6, LBody, TD	–
+Form	Form element	Document, Part, Art, Sect, Div, P, TD	–
