@@ -16,7 +16,9 @@ use PDF::Content::Tag :Tags;
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
 has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
+has $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
 has Bool $.style = True;
+has Bool $.valid = True;
 has Bool $.debug = False;
 has Bool $.marks;
 has Str  $.omit;
@@ -80,6 +82,12 @@ method say(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
 
 multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     self!line('<?xml version="1.0" encoding="UTF-8"?>');
+    if $!dtd && $!valid {
+        my $doctype = $!root-tag;
+        $doctype //= .name with .kids.head;
+        $doctype //= 'Document';
+        self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
+    }
     self!line($!css) if $!style;
 
     self!line('<' ~ $_ ~ '>', $depth++)
@@ -200,7 +208,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
-        self!line("<$name> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
+        self!line("<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
     }
     else {
         with $actual-text {
