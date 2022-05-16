@@ -1,4 +1,5 @@
 {{$NEXT}}
+  - PDF::Tags::XML-Writer now links to external DtD: http://pdf-raku.github.io/dtd/tagged-pdf.dtd
 
 0.1.1  2022-03-31T08:12:02+13:00
   - Restore README, eaten by Mi6
