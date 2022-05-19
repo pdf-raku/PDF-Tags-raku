@@ -47,7 +47,7 @@ class PDF::Tags::Node::Parent
         $xpath;
     }
 
-    method build-kid(PDF::Tags::Node::Parent:D $parent: $cos, :$Pg = $.Pg, |c) {
+    method build-kid(::?CLASS:D: $cos, :$parent=self, :$Pg = $.Pg, |c) {
         build-node($cos, :$parent, :$Pg, :$.root, |c);
     }
 
@@ -95,6 +95,16 @@ class PDF::Tags::Node::Parent
     multi method add-kid(:$cos!, *%o --> PDF::Tags::Node:D) {
         my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
         self!adopt-node($kid);
+    }
+
+    method fragment(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
+        my PDF::StructElem() $cos = %(
+            :Type( :name<StructElem> ),
+            :S( :$name ),
+            :P(Any), # tba
+        );
+        my $parent = self.WHAT;
+        self.build-kid($cos, :$parent, |%o);
     }
 
     multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {

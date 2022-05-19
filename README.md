@@ -106,60 +106,58 @@ Or as:
 
     $root.add-kid(:name<P>).mark: $gfx, { .say('Marked paragraph text') };
 
-Documentation in this section adapted from [pdfkit](http://pdfkit.org/docs/accessibility.html).
-
 ### "Grouping" elements:
 
 Tag | Mnemonic | Description
 ---------|-----|------------
-Document | | whole document; must be used if there are multiple parts or articles
-Part | | part of a document
-Art | Article |
-Sect | Section | may nest
-Div | Division| generic division
-BlockQuote | | block quotation
-Caption | | describing a figure or table
-TOC | TableOfContents | may be nested, and may be used for lists of figures, tables, etc.
-TOCI | TableOfContentsItem |  table of contents (leaf) item
-Index | | index (text with accompanying Reference content)
+Document | | Whole document; must be used if there are multiple parts or articles
+Part | | Large division of a document; may group smaller units of content together, such as Division, Article, or Section elements.
+Art | Article | Self-contained body of text considered to be a single narrative.
+Sect | Section | General container element type that is usually a component of a Part or Article element
+Div | Division| Generic block element or group of element
+BlockQuote | | A large portion of text referencing content from another source
+Caption | | Description of a Figure or Table
+TOC | TableOfContents | May be nested, and may be used for lists of figures, tables, etc.
+TOCI | TableOfContentsItem | Table of contents (leaf) item
+Index | | An index of keywords and topics, usually at the end of the document (text with accompanying Reference content)
 NonStruct | NonStructural | non-structural grouping element (element itself not intended to be exported to other formats like HTML, but 'transparent' to its content which is processed normally)
-Private | | content only meaningful to the creator (element and its content not intended to be exported to other formats like HTML)
+Private | | Content only meaningful to the creator (element and its content not intended to be exported to other formats like HTML)
 
 ### "Block" elements:
 
-Mmemonic | Tag | Description
+Mnemonic | Tag | Description
 Tag | Mnemonic | Description
 ---------|-----|------------
-H | Heading | heading (first element in a section, etc.)
-H1 - H6 | Heading1 - Heading6 | heading of a particular level intended for use only if nesting sections is not possible for some reason
-P | Paragraph |
-L | List | should include optional Caption, and list items
-LI | ListItem | should contain Lbl and/or LBody
-Lbl | Label | bullet, number, or "dictionary headword"
-LBody | ListBody | (item text, or "dictionary definition"); may have nested lists or other blocks
+H | Heading | Nested section heading (not recommended)
+H1 - H6 | Heading1 - Heading6 | The title or heading of a section within the text content
+P | Paragraph | A distinct section of a piece of writing, usually dealing with a single theme
+L | List | A group of similar items that are related to each other. Should include optional Caption, and list items
+LI | ListItem | A Single list element. Should contain Lbl and/or LBody
+Lbl | Label | Bullet, number, or "dictionary headword"
+LBody | ListBody | Description of the item; may have nested lists or other blocks
 
 ### "Table" elements:
 
 Tag | Mnemonic | Description
 ---------|-----|------------
-Table | | table; should either contain TR, or THead, TBody and/or TFoot
-TR | TableRow |
-TH | TableHeader | table heading cell
-TD | TableData | table data cell
-THead | TableHead | table header row group
-TBody |TableBody | table body row group; may have more than one per table
-TFoot | TableFoot | table footer row group
+Table | | Content arranged into rows and columns; should either contain TR, or THead, TBody and/or TFoot
+TR | TableRow | A single row of cell elements within a table
+TH | TableHeader | Description of column contents
+TD | TableData | A cell element
+THead | TableHead | A row of table headers
+TBody |TableBody | Table body; may have more than one per table
+TFoot | TableFoot | Table footer row group
 
 ### "Inline" elements:
 
 Tag | Mnemonic | Description
 ---------|-----|------------
-Span | | generic inline content
-Quote | | inline quotation
-Note | | e.g. footnote; may have a Lbl (see "block" elements)
-Reference | | content in a document that refers to other content (e.g. page number in an index)
-BibEntry | BibliographyEntry | may have a Lbl (see "block" elements)
-Code | | code
+Span | | Generic inline content.
+Quote | | Inline text referencing content from another source
+Note | | End-note or footnote; may have a Lbl (see "block" elements)
+Reference | | Content in a document that refers to other content (e.g. page number in an index)
+BibEntry | BibliographyEntry | Text referring the user to source of cited text. May have a Lbl (see "block" elements)
+Code | | Computer code
 Link | | hyperlink; should contain a link annotation
 Annot | Annotation | annotation (other than a link)
 Ruby | | Chinese/Japanese pronunciation/explanation
@@ -174,16 +172,16 @@ WP | WarichuPunctuation
 
 Tag | Mnemonic | Description
 ---------|-----|------------
-Figure | |
-Formula | |
-Form | | form widget
+Figure | | An image or graphic that is referenced by the text
+Formula | | A scientific or mathematical formula element
+Form | |  An editable PDF field used to complete a form
 
 ### Non-structure tags:
 
 Tag | Mnemonic | Description
 ---------|-----|------------
-Artifact | | used to mark all content not part of the logical structure
-ReversedChars | | every string of text has characters in reverse order for technical reasons (due to how fonts work for right-to-left languages); strings may have spaces at the beginning or end to separate words, but may not have spaces in the middle
+Artifact | | Used to mark all content not part of the logical structure
+ReversedChars | | Every string of text has characters in reverse order for technical reasons (due to how fonts work for right-to-left languages); strings may have spaces at the beginning or end to separate words, but may not have spaces in the middle
 
 Classes in this Distribution
 ----------

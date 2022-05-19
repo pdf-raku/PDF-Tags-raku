@@ -14,8 +14,8 @@ use PDF::XObject;
 my PDF::Class $pdf .= new;
 
 my $page = $pdf.add-page;
-my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
-my $body-font = $page.core-font: :family<Helvetica>;
+my $header-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
+my $body-font = $pdf.core-font: :family<Helvetica>;
 
 my PDF::Tags $tags .= create: :$pdf;
 my PDF::Tags::Elem $doc = $tags.Document;
