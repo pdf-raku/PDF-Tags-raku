@@ -111,11 +111,13 @@ class PDF::Tags::Elem
         my PDF::Tags::Mark:D $mark = $elem.add-kid: :$cos;
         $mark.actual-text = $gfx.actual-text;
         # Register this mark in the parent tree
-        given $gfx.canvas.StructParents -> $idx is rw {
-            $idx //= $.root.parent-tree.max-key + 1
-                if $gfx.canvas ~~ PDF::Page;
-            $.root.parent-tree[$_+0][$mark.mcid] //= $elem.cos
-                with $idx;
+        $.root.protect: {
+            given $gfx.canvas.StructParents -> $idx is rw {
+                $idx //= $.root.parent-tree.max-key + 1
+                    if $gfx.canvas ~~ PDF::Page;
+                $.root.parent-tree[$_+0][$mark.mcid] //= $elem.cos
+                    with $idx;
+            }
         }
 
         $mark;
@@ -283,9 +285,11 @@ class PDF::Tags::Elem
     method !setup-parents(PDF::XObject::Form $xobj) {
         my @parents = find-parents(self, $xobj);
         if @parents {
-            my UInt $idx := $.root.parent-tree.max-key + 1;
-            $.root.parent-tree[$idx] = [ @parents».cos ];
-            $xobj.StructParents = $idx;
+            $.root.protect: {
+                my UInt $idx := $.root.parent-tree.max-key + 1;
+                $.root.parent-tree[$idx] = [ @parents».cos ];
+                $xobj.StructParents = $idx;
+            }
         }
         else {
             Nil;
@@ -346,8 +350,10 @@ class PDF::Tags::Elem
         self.add-kid: :$cos;
 
         without $Obj.StructParent {
-            $_ = $.root.parent-tree.max-key + 1;
-            $.root.parent-tree[$_ + 0] = self.cos;
+            $.root.protect: {
+                $_ = $.root.parent-tree.max-key + 1;
+                $.root.parent-tree[$_ + 0] = self.cos;
+            }
         }
         self;
     }

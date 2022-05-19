@@ -8,6 +8,7 @@ role PDF::Tags::Node::Root {
     method class-map   {...}
     method role-map    {...}
     method parent-tree {...}
+    method protect     {...}
 }
 
 =begin pod
