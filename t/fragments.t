@@ -30,24 +30,40 @@ my @frags = (1..10).map: -> $chap-num {
     # also a chapter tag for later assembly
     my PDF::Tags::Elem $frag = $tags.fragment(Division);
     my PDF::Page $page = $pages.add-page;
-    my $p1 = $frag.Paragraph;
-    my $p2 = $frag.Paragraph;
+    my $p2;
 
     $page.graphics: -> $gfx {
-        $p1.mark: $gfx, {
-            .say('This para contained on first page.',
+        $frag.Header1: $gfx, {
+            .say("Chapter $chap-num",
+                 :font($hdr-font),
+                 :font-size(16),
+                 :position[50, 640]);
+        }
+        $frag.Paragraph: $gfx, {
+            .say("This para contained on first page of chapter $chap-num.",
                  :$font,
-                 :font-size(15),
+                 :font-size(12),
                  :position[50, 620]);
         };
 
-        $p2.mark: $gfx, {
-            .say('This para started on first page...',
+        $p2 = $frag.Paragraph: $gfx, {
+            .say("This para started on first page of chapter $chap-num...",
                  :$font,
-                 :font-size(15),
+                 :font-size(12),
                  :position[50, 600]);
         };
     }
+
+    $page = $pages.add-page;
+    $page.graphics: -> $gfx {
+        $p2.mark: $gfx, {
+        .say("...and finished on second page of chapter $chap-num",
+             :$font,
+             :font-size(12),
+             :position[50, 620]);
+        }
+    };
+
     %(:$pages, :$frag);
 }
 
