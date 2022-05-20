@@ -105,22 +105,21 @@ class PDF::Tags::Elem
     }
 
     method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
-        temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
-
-        my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
-        my PDF::Tags::Mark:D $mark = $elem.add-kid: :$cos;
-        $mark.actual-text = $gfx.actual-text;
-        # Register this mark in the parent tree
         $.root.protect: {
+            temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
+
+            my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
+            my PDF::Tags::Mark:D $mark = $elem.add-kid: :$cos;
+            $mark.actual-text = $gfx.actual-text;
+            # Register this mark in the parent tree
             given $gfx.canvas.StructParents -> $idx is rw {
                 $idx //= $.root.parent-tree.max-key + 1
                     if $gfx.canvas ~~ PDF::Page;
                 $.root.parent-tree[$_+0][$mark.mcid] //= $elem.cos
                     with $idx;
             }
+            $mark;
         }
-
-        $mark;
     }
 
     # combined add-kid + mark
