@@ -28,7 +28,7 @@ my @frags = (1..10).map: -> $chap-num {
     # create a multi-page fragment for later assembly
     my PDF::Content::PageTree $pages .= pages-fragment;
     # also a chapter tag for later assembly
-    my PDF::Tags::Elem $frag = $tags.fragment(:name(Division));
+    my PDF::Tags::Elem $frag = $tags.fragment(Division);
     my PDF::Page $page = $pages.add-page;
     my $p1 = $frag.Paragraph;
     my $p2 = $frag.Paragraph;

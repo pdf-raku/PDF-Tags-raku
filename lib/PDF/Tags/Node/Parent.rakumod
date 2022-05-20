@@ -97,7 +97,7 @@ class PDF::Tags::Node::Parent
         self!adopt-node($kid);
     }
 
-    method fragment(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
+    multi method fragment(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
         my PDF::StructElem() $cos = %(
             :Type( :name<StructElem> ),
             :S( :$name ),
@@ -105,6 +105,9 @@ class PDF::Tags::Node::Parent
         );
         my $parent = self.WHAT;
         self.build-kid($cos, :$parent, |%o);
+    }
+    multi method fragment(Str:D $name, *%o) {
+        self.fragment(:$name, |%o);
     }
 
     multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
