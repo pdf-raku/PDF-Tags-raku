@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.1.2  2022-05-29T10:33:54+12:00
   - PDF::Tags::XML-Writer now links to external DtD: http://pdf-raku.github.io/dtd/tagged-pdf.dtd
   - Add Elem fragment() method. To allow stand-alone sub-tree construction
   - Add some basic protection lock for thread safety fragment manipulation

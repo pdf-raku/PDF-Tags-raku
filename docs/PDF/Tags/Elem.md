@@ -22,7 +22,7 @@ Synopsis
     my PDF::Tags::Elem $doc = $tags.Document;
 
     my $page = $pdf.add-page;
-    my $font = $page.core-font: :family<Helvetica>, :weight<bold>;
+    my $font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
 
     $page.graphics: -> $gfx {
         my PDF::Tags::Elem $header = $doc.Header1;

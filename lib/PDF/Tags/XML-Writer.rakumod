@@ -15,8 +15,8 @@ use PDF::Content::Tag :Tags;
 
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
-has $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
-has $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
+has Str  $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
+has Str  $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
 has Bool $.style = True;
 has Bool $.valid = True;
 has Bool $.debug = False;
