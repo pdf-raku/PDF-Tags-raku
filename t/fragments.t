@@ -72,7 +72,7 @@ my $doc = $tags.Document;
 # final assembly of the document
 
 for @frags {
-    $pdf.add-page: .<pages>;
+    $pdf.Pages.add-pages: .<pages>;
     $doc.add-kid: :node(.<frag>);
 }
 

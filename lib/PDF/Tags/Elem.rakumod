@@ -149,7 +149,7 @@ class PDF::Tags::Elem
         my PDF::StructElem $from-cos = $from-elem.cos;
         my $S = $from-cos.S;
         my PDF::StructElem $P = $parent.cos;
-        my PDF::StructElem $to-cos .= COERCE: %(
+        my PDF::StructElem() $to-cos = %(
             :Type( :name<StructElem> ),
             :$S,
             :$P,
@@ -190,7 +190,7 @@ class PDF::Tags::Elem
 
     multi method do(PDF::Content $gfx, PDF::XObject::Form $xobj, *%o) {
 
-        if $xobj.StructParents.defined // self!setup-parents($xobj) {
+        if $.root.protect({$xobj.StructParents.defined || self!setup-parents($xobj)}) {
             my @rect = $gfx.do($xobj, %o);
             my PDF::Content::Canvas $canvas = $gfx.canvas;
             my PDF::Page $Pg = $canvas
@@ -244,15 +244,17 @@ class PDF::Tags::Elem
 
         given $xobj {
             when PDF::XObject::Form && !.StructParent.defined {
-                if .StructParents.defined {
-                    my PDF::Tags::Elem:D $parent = self.parent;
-                    my PDF::Tags::Node $node = self.copy-tree(:Stm($_), :$parent);
-                    $parent.add-kid: :$node;
-                }
-                else {
-                    # automatically create /StructParents or /StructParent entries
-                    self!setup-parents($_)
-                        // self.reference($gfx, $_);
+                $.root.protect: {
+                    if .StructParents.defined {
+                        my PDF::Tags::Elem:D $parent = self.parent;
+                        my PDF::Tags::Node $node = self.copy-tree(:Stm($_), :$parent);
+                        $parent.add-kid: :$node;
+                    }
+                    else {
+                        # automatically create /StructParents or /StructParent entries
+                        self!setup-parents($_)
+                            // self.reference($gfx, $_);
+                    }
                 }
             }
             default {
@@ -285,11 +287,9 @@ class PDF::Tags::Elem
     method !setup-parents(PDF::XObject::Form $xobj) {
         my @parents = find-parents(self, $xobj);
         if @parents {
-            $.root.protect: {
-                my UInt $idx := $.root.parent-tree.max-key + 1;
-                $.root.parent-tree[$idx] = [ @parents».cos ];
-                $xobj.StructParents = $idx;
-            }
+            my UInt $idx := $.root.parent-tree.max-key + 1;
+            $.root.parent-tree[$idx] = [ @parents».cos ];
+            $xobj.StructParents = $idx;
         }
         else {
             Nil;
@@ -339,7 +339,7 @@ class PDF::Tags::Elem
     }
 
     method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
-        my PDF::OBJR $cos .= COERCE: %(
+        my PDF::OBJR() $cos = %(
             :Type( :name<OBJR> ),
             :$Obj,
         );
@@ -349,8 +349,8 @@ class PDF::Tags::Elem
         }
         self.add-kid: :$cos;
 
-        without $Obj.StructParent {
-            $.root.protect: {
+        $.root.protect: {
+            without $Obj.StructParent {
                 $_ = $.root.parent-tree.max-key + 1;
                 $.root.parent-tree[$_ + 0] = self.cos;
             }

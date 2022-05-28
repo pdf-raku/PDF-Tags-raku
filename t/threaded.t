@@ -63,6 +63,7 @@ my @frags = (1..10).race(:batch(1)).map: -> $chap-num {
              :position[50, 620]);
         }
     };
+    $page.finish;
 
     %(:$pages, :$frag);
 }
@@ -72,7 +73,7 @@ my $doc = $tags.Document;
 # final assembly of the document
 
 for @frags {
-    $pdf.add-page: .<pages>;
+    $pdf.Pages.add-pages: .<pages>;
     $doc.add-kid: :node(.<frag>);
 }
 

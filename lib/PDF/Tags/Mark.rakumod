@@ -21,7 +21,7 @@ class PDF::Tags::Mark
     has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
     sub mcr(Int:D $MCID, :$Stm, :$Pg) {
-        my PDF::MCR $cos .= COERCE: %(
+        my PDF::MCR() $cos = %(
                                 :Type( :name<MCR> ),
                                 :$MCID,
                             );
