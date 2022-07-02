@@ -26,24 +26,4 @@ doc : $(DocLinker) docs/index.md docs/PDF/Tags.md docs/PDF/Tags/Attr.md docs/PDF
 docs/index.md : README.md
 	cp $< $@
 
-docs/PDF/Tags.md : lib/PDF/Tags.rakumod
-
-docs/PDF/Tags/Attr.md : lib/PDF/Tags/Attr.rakumod
-
-docs/PDF/Tags/Elem.md : lib/PDF/Tags/Elem.rakumod
-
-docs/PDF/Tags/Mark.md : lib/PDF/Tags/Mark.rakumod
-
-docs/PDF/Tags/ObjRef.md : lib/PDF/Tags/ObjRef.rakumod
-
-docs/PDF/Tags/Node.md : lib/PDF/Tags/Node.rakumod
-
-docs/PDF/Tags/Node/Parent.md : lib/PDF/Tags/Node/Parent.rakumod
-
-docs/PDF/Tags/Text.md : lib/PDF/Tags/Text.rakumod
-
-docs/PDF/Tags/XML-Writer.md : lib/PDF/Tags/XML-Writer.rakumod
-
-docs/PDF/Tags/XPath.md : lib/PDF/Tags/XPath.rakumod
-
 

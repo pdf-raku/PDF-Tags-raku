@@ -197,6 +197,20 @@ Classes in this Distribution
 - [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer) - XML Serializer
 - [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XPath) - XPath evaluation context
 
+Verification
+-----
+
+The `pdf-tag-dump.raku` script from the [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku) module
+can be used to view the logical content of PDF files as XML, for example:
+```
+$ pdf-tag-dump.raku my.pdf | less
+```
+The XML output from `pdf-tag-dump.raku` includes an [external DtD](http://pdf-raku.github.io/dtd/tagged-pdf.dtd) for basic validation purposes.
+
+For example, it can be piped to `xmllint`, from the `libxml2` package, to check the structure of the tags:
+
+$ pdf-tag-dump.raku my.pdf | xmllint --noout --valid -
+
 See Also
 ------
 

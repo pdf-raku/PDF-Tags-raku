@@ -199,14 +199,16 @@ class PDF::Tags::Elem
             given $xobj.StructParents {
                 # potentially lossy. parent-tree only includes
                 # marked content references
-                my Array $parents = self.root.parent-tree[$_+0];
+                $.root.protect: {
+                    my Array $parents = self.root.parent-tree[$_+0];
 
-                for $parents.keys {
-                    # copy sub-trees
-                    my PDF::StructElem $cos = $parents[$_];
-                    my PDF::Tags::Elem $elem = build-node($cos, :$.root, :$Pg, :parent(self));
-                    my PDF::Tags::Node $node = $elem.copy-tree(:Stm($xobj), :parent(self));
-                    self.add-kid: :$node;
+                    for $parents.keys {
+                        # copy sub-trees
+                        my PDF::StructElem $cos = $parents[$_];
+                        my PDF::Tags::Elem $elem = build-node($cos, :$.root, :$Pg, :parent(self));
+                        my PDF::Tags::Node $node = $elem.copy-tree(:Stm($xobj), :parent(self));
+                        self.add-kid: :$node;
+                    }
                 }
             }
             self!bbox($gfx, @rect);
