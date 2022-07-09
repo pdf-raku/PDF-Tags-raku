@@ -4,21 +4,25 @@
 PDF-Tags-raku
 ============
 
-A small DOM-like API for the creation of tagged PDF files.
+A small DOM-like API for the creation of tagged PDF files for accessibility purposes.
 
-This module enables PDF tagged content manipulation, with simple construction,
+This module enables PDF tagged content manipulation, construction,
 XPath queries and basic XML serialization.
+
+See also [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku), which is designed to read
+content from existing tagged PDF files.
 
 Synopsis
 --------
 
-```
+```raku
 use PDF::Tags;
 use PDF::Tags::Elem;
 
 # PDF::API6
 use PDF::API6;
 use PDF::Annot;
+use PDF::Destination :Fit;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
 
@@ -30,6 +34,8 @@ my PDF::Tags::Elem $root = $tags.Document;
 my $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
+
+$pdf.add-page; # blank second page, as a target
 
 $page.graphics: -> $gfx {
 
@@ -49,7 +55,7 @@ $page.graphics: -> $gfx {
     $root.Figure: $gfx, $img, :Alt('Incandescent apparatus');
 
     # add a marked link annotation
-    my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
+    my $destination = $pdf.destination( :name<sample-annot>, :page(2), :fit(FitWindow) );
     my PDF::Annot $annot = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
     $root.Link: $gfx, $annot;
@@ -74,7 +80,7 @@ $page.graphics: -> $gfx {
     $form-elem.do: $gfx, :position[150, 70];
 }
 
-$pdf.save-as: "/tmp/marked.pdf"
+$pdf.save-as: "/tmp/synopsis.pdf"
 
 ```
 
@@ -197,13 +203,68 @@ Classes in this Distribution
 - [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer) - XML Serializer
 - [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XPath) - XPath evaluation context
 
+Special Tags
+---
+
+### Artifact
+
+By convention, all content in the PDF should be tagged. Artifact tags are used for content that isn't part of the logical structure.  This typically includes pagination and other incidental background graphics.
+
+Artifact content does not form part of the Structure tree and is tagged using the `PDF::Content` `tag` method.
+
+For example:
+```raku
+$gfx.tag: Artifact, {
+    .say("Page $page-num", :$font, :position[ 250, 20 ]);
+}
+```
+### Span
+
+This tag is used to indicate attributes of enclosed text; similar to XHTML's `span` tag.
+
+It can tagged at the content level, similar to `Artifact`, or added to the structure tree as a normal
+element.
+
+```raku
+$gfx.tag: Span, :Lang<es-MX>, {
+    .say('Hasta la vista', :position[50, 80]);
+}
+```
+
+It can be used almost anywhere in the structure tree, or at the content level, as above.
+
 Verification
 -----
 
 The `pdf-tag-dump.raku` script from the [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku) module
 can be used to view the logical content of PDF files as XML, for example:
 ```
-$ pdf-tag-dump.raku my.pdf | less
+$ pdf-tag-dump.raku /tmp/synopsis.pdf
+```
+Produces
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Document SYSTEM "http://pdf-raku.github.io/dtd/tagged-pdf.dtd">
+<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>
+<Document>
+  <H1>
+    Marked Level 1 Header
+  </H1>
+  <P>
+    Marked paragraph text
+  </P>
+  <Figure BBox="0 0 19 19">
+  </Figure>
+  <Link href="#sample-annot"></Link>
+  <Form BBox="150 70 350 120">
+    <H2>
+      Tagged XObject header
+    </H2>
+    <P>
+      Some sample tagged text
+    </P>
+  </Form>
+</Document>
 ```
 The XML output from `pdf-tag-dump.raku` includes an [external DtD](http://pdf-raku.github.io/dtd/tagged-pdf.dtd) for basic validation purposes.
 
