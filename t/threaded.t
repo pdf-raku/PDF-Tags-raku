@@ -18,35 +18,38 @@ use PDF::Annot;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
 
+# up-font creation of PDF and font resources
 my PDF::Class $pdf .= new;
-my PDF::Tags $tags .= create: :$pdf;
-
 my PDF::Content::FontObj $font = $pdf.core-font: :family<Helvetica>;
 my PDF::Content::FontObj $hdr-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
 
-my @frags = (1..10).race(:batch(1)).map: -> $chap-num {
+my PDF::Tags $tags .= create: :$pdf;
+my @page-frags = (1..10).map: { PDF::Content::PageTree.pages-fragment() }
+my @struct-frags = (1..10).map: { $tags.fragment(Division) };
+
+(1..10).race(:batch(1)).map: -> $chap-num {
     # create a multi-page fragment for later assembly
-    my PDF::Content::PageTree $pages .= pages-fragment;
+    my PDF::Content::PageTree $pages = @page-frags[$chap-num-1];
     # also a chapter tag for later assembly
-    my PDF::Tags::Elem $frag = $tags.fragment(Division);
+    my PDF::Tags::Elem $div = @struct-frags[$chap-num-1];
     my PDF::Page $page = $pages.add-page;
     my $p2;
 
     $page.graphics: -> $gfx {
-        $frag.Header1: $gfx, {
+        $div.Header1: $gfx, {
             .say("Chapter $chap-num",
                  :font($hdr-font),
                  :font-size(16),
                  :position[50, 640]);
         }
-        $frag.Paragraph: $gfx, {
+        $div.Paragraph: $gfx, {
             .say("This para contained on first page of chapter $chap-num.",
                  :$font,
                  :font-size(12),
                  :position[50, 620]);
         };
 
-        $p2 = $frag.Paragraph: $gfx, {
+        $p2 = $div.Paragraph: $gfx, {
             .say("This para started on first page of chapter $chap-num...",
                  :$font,
                  :font-size(12),
@@ -64,22 +67,19 @@ my @frags = (1..10).race(:batch(1)).map: -> $chap-num {
         }
     };
     $page.finish;
-
-    %(:$pages, :$frag);
 }
 
-my $doc = $tags.Document;
+# top-down creation of PDF struct tree
+my PDF::Tags::Elem $doc = $tags.Document;
 
-# final assembly of the document
-
-for @frags {
-    $pdf.Pages.add-pages: .<pages>;
-    $doc.add-kid: :node(.<frag>);
-}
+# final sequential assembly of structural sub-trees.
+$pdf.Pages.add-pages($_) for @page-frags;
+$doc.add-kid(:node($_)) for @struct-frags;
 
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-lives-ok { $pdf.save-as: "t/threaded.pdf", :!info; }
+mkdir 'tmp';
+lives-ok { $pdf.save-as: "tmp/threaded.pdf", :!info; }
 
 done-testing;

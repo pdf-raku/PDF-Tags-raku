@@ -34,4 +34,5 @@ my $para = $doc.Paragraph;
 is $para.style.Str, "display:block; margin-bottom:1.12em; margin-top:1.12em; unicode-bidi:embed;", "Paragraph style";
 
 my $code-para = $para.Code;
-is $code-para.style.Str, "font-family:monospace;", "Paragraph/Code style";
+# 'white-space:pre' may be dropped in older versions of CSS::Properties
+is $code-para.style.Str, "font-family:monospace;"|"font-family:monospace; white-space:pre;", "Paragraph/Code style";

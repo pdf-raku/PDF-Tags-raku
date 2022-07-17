@@ -2,7 +2,7 @@ use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 
 #| Tagged PDF root node
-class PDF::Tags:ver<0.1.3>
+class PDF::Tags:ver<0.1.4>
     is PDF::Tags::Node::Parent
     does PDF::Tags::Node::Root {
 
@@ -61,6 +61,15 @@ class PDF::Tags:ver<0.1.3>
             .creator.push: "{self.^name}-{self.^ver}";
         }
         self.new: :$cos, :root(self.WHAT), :marks, |c
+    }
+
+    # Set the page to a given index.
+    # To create identical PDF files. Mostly for thread-testing purposes.
+    method set-page-index(PDF::Page:D $Pg, UInt:D $idx) {
+        self.protect: {
+            $Pg.StructParents = $idx;
+            $!parent-tree[$idx] //= [];
+        }
     }
 
     method canvas-tags(|) {
