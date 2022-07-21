@@ -14,13 +14,12 @@ use PDF::XObject::Image;
 use PDF::XObject::Form;
 
 my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf;
+my PDF::Tags::Elem $doc = $tags.Document;
 
 my PDF::Page $page = $pdf.add-page;
 my PDF::Content::FontObj $header-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
 my PDF::Content::FontObj $body-font = $pdf.core-font: :family<Helvetica>;
-
-my PDF::Tags $tags .= create: :$pdf;
-my PDF::Tags::Elem $doc = $tags.Document;
 
 $page.graphics: -> $gfx {
     my PDF::Tags::Elem $header = $doc.Header1: $gfx, {
@@ -77,7 +76,7 @@ $page.graphics: -> $gfx {
     is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-elem = $doc.Form;
+    my PDF::Tags::Elem $form-elem = $doc.Span;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
@@ -87,7 +86,7 @@ $page.graphics: -> $gfx {
         my $p = $form-elem.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
-        is $p.node-path, 'Document/Form[1]/P[1]';
+        is $p.node-path, 'Document/Span[1]/P[1]';
     }
 
     $form-elem.do($gfx, :position[150, 70]);
@@ -97,7 +96,7 @@ $page.graphics: -> $gfx {
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,Form,H2,P,Form,H2,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,Span,H2,P,Span,H2,P';
 
 lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 
