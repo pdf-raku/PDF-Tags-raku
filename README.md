@@ -60,7 +60,7 @@ $page.graphics: -> $gfx {
 
     $doc.Link: $gfx, $annot;
 
-    # tagged XObject Form (Experimental)
+    # XObject Form with marked content
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     my $form-elem = $doc.fragment: Form;
     $form.text: {

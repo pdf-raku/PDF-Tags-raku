@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+0.1.5  2022-07-23T10:27:29+12:00
+  - Changed do() method to accept a fragment option. Usage is now:
+    $elem.do($gfx, $frag, *%opt), which renders the xobject contained
+    in a document fragment and inserts a copy of the fragment sub-tree.
+
 0.1.4  2022-07-18T06:55:42+12:00
   - Fix t/style.t for latest CSS::Properties
 
