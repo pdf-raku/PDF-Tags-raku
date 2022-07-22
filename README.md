@@ -212,12 +212,12 @@ In the simple case, both [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Cla
 tagged as an atomic graphical element, typically tagged as `Figure` or `Form`:
 
 ```raku
- my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
+my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 
-    my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
+my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
 ```
 
-(Experimental) An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may include marked content, that is copied into the tree each time the form is inserted. The technique is demonstrated below:
+An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may include marked content, that is copied into the tree each time the form is inserted. The technique is demonstrated below:
 
 ```raku
 
@@ -236,7 +236,7 @@ $page.graphics: -> $gfx {
    }
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-elem = $doc.fragment: :name(Span);
+    my PDF::Tags::Elem $form-elem = $doc.fragment: Span;
 
     $form.text: {
         my $font-size = 12;
@@ -249,19 +249,19 @@ $page.graphics: -> $gfx {
         };
     }
 
-    # multiple insertion of the form
+    # multiple rendering of the form, and insertion of its structure tree
     $doc.do($gfx, $form-elem, :position[150, 70]);
     $doc.do($gfx, $form-elem, :position[150, 20]);
 }
 
 ```
 
-To insert a form that has marked content:
+To insert an XObject Form that has marked content:
 
 1. Create a fragment element to contain the tag. `Span` can be used
-if there is no other appropriate parent.
+if there is no other appropriate top-level tag.
 2. Create the Form XObject, marking content against the fragment
-3. The fragment can then be inserts one or more times into content
+3. The fragment can then be inserted one or more times into content
 streams using the `do` method, passing both a graphics object and form element.
 
 ## Graphics Content Tags

@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+0.1.6  2022-07-23T11:24:54+12:00
+  - Improvements and corrections to README
+
 0.1.5  2022-07-23T10:27:29+12:00
   - Changed do() method to accept a fragment option. Usage is now:
     $elem.do($gfx, $frag, *%opt), which renders the xobject contained
