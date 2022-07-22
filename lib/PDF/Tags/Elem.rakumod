@@ -153,7 +153,6 @@ class PDF::Tags::Elem
             :Type( :name<StructElem> ),
             :$S,
             :$P,
-            :$Stm,
         );
         for <A C T Lang Alt E ActualText> -> $k {
             $to-cos{$k} = $_ with $from-cos{$k};
@@ -236,35 +235,31 @@ class PDF::Tags::Elem
         }
     }
     # smart do on a sub-tree containing an x-object
-    multi method do(PDF::Content $gfx, *%o) {
-        my PDF::XObject @xobjects = find-xobjects([self]).unique
+    multi method do(PDF::Tags::Elem:D $parent: PDF::Content $gfx, PDF::Tags::Elem:D $frag, *%o) {
+        my PDF::XObject @xobjects = find-xobjects([$frag]).unique
             || die "no xobject found";
         die "element contains multiple xobjects" if @xobjects > 1;
-        my $xobj = @xobjects[0];
+        my PDF::XObject:D $Stm = @xobjects[0];
+        my PDF::Tags::Elem $node = $frag.copy-tree(:$Stm, :$parent);
+        $parent.add-kid: :$node;
 
-        my @rect = $gfx.do($xobj, |%o);
+        my @rect = $gfx.do($Stm, |%o);
 
-        given $xobj {
+        given $Stm {
             when PDF::XObject::Form && !.StructParent.defined {
                 $.root.protect: {
-                    if .StructParents.defined {
-                        my PDF::Tags::Elem:D $parent = self.parent;
-                        my PDF::Tags::Node $node = self.copy-tree(:Stm($_), :$parent);
-                        $parent.add-kid: :$node;
-                    }
-                    else {
-                        # automatically create /StructParents or /StructParent entries
-                        self!setup-parents($_)
-                            // self.reference($gfx, $_);
+                    unless .StructParents.defined {
+                        $node!setup-parents($_)
+                            // $node.reference($gfx, $_);
                     }
                 }
             }
             default {
-                self.reference($gfx, $_);
+                $node.reference($gfx, $_);
             }
         }
 
-        self!bbox($gfx, @rect);
+        $parent!bbox($gfx, @rect);
         @rect;
     }
 

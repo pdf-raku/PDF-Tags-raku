@@ -76,21 +76,21 @@ $page.graphics: -> $gfx {
     is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-elem = $doc.Span;
+    my PDF::Tags::Elem $form-frag = $doc.fragment: 'Span';
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.Header2: $_, {
+        $form-frag.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
         };
-        my $p = $form-elem.Paragraph: $_, {
+        my $p = $form-frag.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
-        is $p.node-path, 'Document/Span[1]/P[1]';
+        is $p.node-path, 'Span/P[1]';
     }
 
-    $form-elem.do($gfx, :position[150, 70]);
-    $form-elem.do($gfx, :position[150, 20]);
+    $doc.do($gfx, $form-frag, :position[150, 70]);
+    $doc.do($gfx, $form-frag, :position[150, 20]);
 }
 
 # ensure consistant document ID generation

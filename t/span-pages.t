@@ -10,8 +10,6 @@ use PDF::Tags::ObjRef;
 use PDF::Class;
 use PDF::Page;
 use PDF::Annot;
-use PDF::XObject::Image;
-use PDF::XObject::Form;
 
 my PDF::Class $pdf .= new;
 

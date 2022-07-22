@@ -29,7 +29,7 @@ use PDF::XObject::Form;
 my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
-my PDF::Tags::Elem $root = $tags.Document;
+my PDF::Tags::Elem $doc = $tags.Document;
 
 my $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
@@ -39,30 +39,30 @@ $pdf.add-page; # blank second page, as a target
 
 $page.graphics: -> $gfx {
 
-    $root.Header1: $gfx, {
+    $doc.Header1: $gfx, {
         .say('Marked Level 1 Header',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
     };
 
-    $root.Paragraph: $gfx, {
+    $doc.Paragraph: $gfx, {
         .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
     };
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $root.Figure: $gfx, $img, :Alt('Incandescent apparatus');
+    $doc.Figure: $gfx, $img, :Alt('Incandescent apparatus');
 
     # add a marked link annotation
     my $destination = $pdf.destination( :name<sample-annot>, :page(2), :fit(FitWindow) );
     my PDF::Annot $annot = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
-    $root.Link: $gfx, $annot;
+    $doc.Link: $gfx, $annot;
 
-    # tagged XObject Form
+    # tagged XObject Form (Experimental)
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $root.Form;
+    my $form-elem = $doc.fragment: Form;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
@@ -77,7 +77,7 @@ $page.graphics: -> $gfx {
     }
 
     # render the form contained in $form-elem
-    $form-elem.do: $gfx, :position[150, 70];
+    $doc.do: $gfx, $form-elem, :position[150, 70];
 }
 
 $pdf.save-as: "/tmp/synopsis.pdf"
@@ -203,14 +203,78 @@ Classes in this Distribution
 - [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer) - XML Serializer
 - [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XPath) - XPath evaluation context
 
-Special Tags
----
+Advanced Topics
+-----
+
+## Form and Image XObjects
+
+In the simple case, both [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form)'s and [PDF::XObject::Image](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Images)'s are inserted and externally
+tagged as an atomic graphical element, typically tagged as `Figure` or `Form`:
+
+```raku
+ my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
+
+    my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
+```
+
+(Experimental) An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may include marked content, that is copied into the tree each time the form is inserted. The technique is demonstrated below:
+
+```raku
+
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Class;
+use PDF::XObject::Form;
+my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf;
+my PDF::Tags::Elem $doc = $tags.Document;
+
+my PDF::Page $page = $pdf.add-page;
+$page.graphics: -> $gfx {
+   $doc.Header1: $gfx, {
+        .say('Header text');
+   }
+
+    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my PDF::Tags::Elem $form-elem = $doc.fragment: :name(Span);
+
+    $form.text: {
+        my $font-size = 12;
+        .text-position = [10, 38];
+        $form-elem.Header2: $_, {
+            .say: "Tagged XObject header";
+        };
+        my $p = $form-elem.Paragraph: $_, {
+            .say: "Some sample tagged text";
+        };
+    }
+
+    # multiple insertion of the form
+    $form-elem.do($gfx, :parent($doc), :position[150, 70]);
+    $form-elem.do($gfx, :parent($doc), :position[150, 20]);
+}
+
+```
+
+To insert a form that has marked content:
+
+1. Create a parent element to contain the tag. `Span` can be used
+if there is no other appropriate parent.
+2. Create the Form XObject content under the parent element
+3. Insert the XObject, one or more times, using the `do` method on
+the parent element and it's sub-tree is copied into the pa
+
+## Content Tags
+
+As a rule, all content doesn't have to form part of the structure tree, but should be tagged to meet accessibility guidelines.
+
+This sometimes requires tagging of incidental graphics. `PDF::Content` has a `tag()` method for this. The content is be tagged, but does not appear in the content stream.
+
+Some of the commonly used content tags are:
 
 ### Artifact
 
-By convention, all content in the PDF should be tagged. Artifact tags are used for content that isn't part of the logical structure.  This typically includes pagination and other incidental background graphics.
-
-Artifact content does not form part of the Structure tree and is tagged using the `PDF::Content` `tag` method.
+Artifact content forms part of the visual display, but does not belong in the Structure Tree and is tagged using the `PDF::Content` `tag` method.
 
 For example:
 ```raku
@@ -218,12 +282,40 @@ $gfx.tag: Artifact, {
     .say("Page $page-num", :$font, :position[ 250, 20 ]);
 }
 ```
+
+### Clipped
+
+A clipped region encompasses additional graphics that are being
+used as part of a clipping operation. The clipped area may include graphics that are part of the structure tree. For example:
+
+```raku
+use PDF::Class;
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Content::Tag :ContentTags, :ParagraphTags;
+
+my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf;
+# create the document root
+my PDF::Tags::Elem $doc = $tags.Document;
+
+$pdf.add-page.graphics: {
+    .tag: Clipped, {
+        .Rectangle: 100, 100, 125, 20;
+        .Clip;
+        .EndPath;
+        $doc.Paragraph: $_, {
+            .say: 'Clip me', :position[98, 98];
+        }
+    }
+}
+```
+The above example is setting up a clipping sequence. The clipped
+text is being inserted as a paragraph in the structure tree.
+
 ### Span
 
-This tag is used to indicate attributes of enclosed text; similar to XHTML's `span` tag.
-
-It can tagged at the content level, similar to `Artifact`, or added to the structure tree as a normal
-element.
+This tag may be used in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
 
 ```raku
 $gfx.tag: Span, :Lang<es-MX>, {
