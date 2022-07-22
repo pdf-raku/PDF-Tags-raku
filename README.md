@@ -250,21 +250,21 @@ $page.graphics: -> $gfx {
     }
 
     # multiple insertion of the form
-    $form-elem.do($gfx, :parent($doc), :position[150, 70]);
-    $form-elem.do($gfx, :parent($doc), :position[150, 20]);
+    $doc.do($gfx, $form-elem, :position[150, 70]);
+    $doc.do($gfx, $form-elem, :position[150, 20]);
 }
 
 ```
 
 To insert a form that has marked content:
 
-1. Create a parent element to contain the tag. `Span` can be used
+1. Create a fragment element to contain the tag. `Span` can be used
 if there is no other appropriate parent.
-2. Create the Form XObject content under the parent element
-3. Insert the XObject, one or more times, using the `do` method on
-the parent element and it's sub-tree is copied into the pa
+2. Create the Form XObject, marking content against the fragment
+3. The fragment can then be inserts one or more times into content
+streams using the `do` method, passing both a graphics object and form element.
 
-## Content Tags
+## Graphics Content Tags
 
 As a rule, all content doesn't have to form part of the structure tree, but should be tagged to meet accessibility guidelines.
 
