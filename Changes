@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - Allow fragments to contain multiple top-level elements.
+  - Fix t/write-tags.t to produce valid Tag structure #11
 
 0.1.6  2022-07-23T11:24:54+12:00
   - Improvements and corrections to README

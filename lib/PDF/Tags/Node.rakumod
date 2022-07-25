@@ -13,7 +13,7 @@ class PDF::Tags::Node {
     use Method::Also;
 
     my subset TagName of Str is export(:TagName)
-        where Str:U | /^<ident>$/;
+        where Str:U | /^<ident>$/ | '#frag';
 
     has PDF::Tags::Node::Root $.root is required;
     has PDF::Page $.Pg; # current page scope

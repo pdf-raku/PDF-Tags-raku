@@ -145,7 +145,7 @@ class PDF::Tags::Elem
     }
 
     # copy intermediate node and descendants
-    multi method copy-tree(PDF::Tags::Elem $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
+    multi method copy-tree(PDF::Tags::Elem:D $from-elem = self, PDF::XObject::Form:D :$Stm!, :$parent!) {
         my PDF::StructElem $from-cos = $from-elem.cos;
         my $S = $from-cos.S;
         my PDF::StructElem $P = $parent.cos;
@@ -241,7 +241,12 @@ class PDF::Tags::Elem
         die "element contains multiple xobjects" if @xobjects > 1;
         my PDF::XObject:D $Stm = @xobjects[0];
         my PDF::Tags::Elem $node = $frag.copy-tree(:$Stm, :$parent);
-        $parent.add-kid: :$node;
+        if $node.name eq '#frag' {
+            $parent.add-kid(:node($_)) for $node.kids;
+        }
+        else {
+            $parent.add-kid: :$node;
+        }
 
         my @rect = $gfx.do($Stm, |%o);
 

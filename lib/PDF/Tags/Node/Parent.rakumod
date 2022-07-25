@@ -53,12 +53,14 @@ class PDF::Tags::Node::Parent
 
     method !adopt-node($node) {
         # checks
+        die "unable to add fragment"
+            if $node.name eq '#frag';
         die "unable to add a node to itself"
             if $node === self || $node.cos === self.cos;
 
         with $node.parent {
             die "node already parented"
-                unless $_ === self;
+                unless $_ === self || .name eq '#frag';
         }
 
         # re-parent cos node
@@ -80,6 +82,7 @@ class PDF::Tags::Node::Parent
 
         $node;
     }
+
     multi method add-kid(PDF::Tags::Node:D :$node! --> PDF::Tags::Node:D) {
         self!adopt-node($node);
     }
@@ -106,7 +109,7 @@ class PDF::Tags::Node::Parent
         my $parent = self.WHAT;
         self.build-kid($cos, :$parent, |%o);
     }
-    multi method fragment(Str:D $name, *%o) {
+    multi method fragment(Str:D $name = '#frag', *%o) {
         self.fragment(:$name, |%o);
     }
 

@@ -76,7 +76,7 @@ $page.graphics: -> $gfx {
     is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-frag = $doc.fragment: 'Span';
+    my PDF::Tags::Elem $form-frag = $doc.fragment;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
@@ -86,7 +86,7 @@ $page.graphics: -> $gfx {
         my $p = $form-frag.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
-        is $p.node-path, 'Span/P[1]';
+        is $p.node-path, '#frag/P[1]';
     }
 
     $doc.do($gfx, $form-frag, :position[150, 70]);
@@ -96,7 +96,7 @@ $page.graphics: -> $gfx {
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,Span,H2,P,Span,H2,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,H2,P,H2,P';
 
 lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 

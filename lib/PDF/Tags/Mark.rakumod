@@ -133,7 +133,6 @@ class PDF::Tags::Mark
 
       note $mark.name.Str;         # 'P'
       note $mark.attributes<MCID>; # 0
-      note $mark.mcid;             # 0
       note $mark.value.gist;       # <P MCID="0"/>
       note $mark.parent.text;      # 'Marked paragraph text'
       note $mark.parent.xml;       # '<P>Marked paragraph text</P>'

@@ -4,77 +4,84 @@
 PDF-Tags-raku
 ============
 
-A small DOM-like API for the creation of tagged PDF files.
+A small DOM-like API for the creation of tagged PDF files for accessibility purposes.
 
-This module enables PDF tagged content manipulation, with simple construction,
+This module enables PDF tagged content manipulation, construction,
 XPath queries and basic XML serialization.
+
+See also [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku), which is designed to read
+content from existing tagged PDF files.
 
 Synopsis
 --------
 
-```
+```raku
 use PDF::Tags;
 use PDF::Tags::Elem;
 
 # PDF::API6
 use PDF::API6;
 use PDF::Annot;
+use PDF::Destination :Fit;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
 
 my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
-my PDF::Tags::Elem $root = $tags.Document;
+my PDF::Tags::Elem $doc = $tags.Document;
 
 my $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
 
+$pdf.add-page; # blank second page, as a target
+
 $page.graphics: -> $gfx {
 
-    $root.Header1: $gfx, {
+    $doc.Header1: $gfx, {
         .say('Marked Level 1 Header',
              :font($header-font),
              :font-size(15),
              :position[50, 120]);
     };
 
-    $root.Paragraph: $gfx, {
+    $doc.Paragraph: $gfx, {
         .say('Marked paragraph text', :position[50, 100], :font($body-font), :font-size(12));
     };
 
     # add a marked image
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
-    $root.Figure: $gfx, $img, :Alt('Incandescent apparatus');
+    $doc.Figure: $gfx, $img, :Alt('Incandescent apparatus');
 
     # add a marked link annotation
-    my $destination = $pdf.destination( :page(2), :fit(FitWindow) );
+    my $destination = $pdf.destination( :name<sample-annot>, :page(2), :fit(FitWindow) );
     my PDF::Annot $annot = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
 
-    $root.Link: $gfx, $annot;
+    $doc.Link: $gfx, $annot;
 
-    # tagged XObject Form
+    # XObject Form with marked content
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $root.Form;
+    my $form-frag = $doc.fragment;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
 
-        $form-elem.Header2: $_, {
+        $form-frag.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
         };
 
-        $form-elem.Paragraph: $_, {
+        $form-frag.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
     }
 
-    # render the form contained in $form-elem
-    $form-elem.do: $gfx, :position[150, 70];
+    # - render the form contained in $form-frag
+    # - copy the fragment into the structure tree
+    $doc.do: $gfx, $form-frag, :position[150, 70];
 }
 
-$pdf.save-as: "/tmp/marked.pdf"
+$pdf.save-as: "/tmp/synopsis.pdf"
 
 ```
 
@@ -197,13 +204,159 @@ Classes in this Distribution
 - [PDF::Tags::XML-Writer](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XML-Writer) - XML Serializer
 - [PDF::Tags::XPath](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/XPath) - XPath evaluation context
 
+Advanced Topics
+-----
+
+## Form and Image XObjects
+
+In the simple case, both [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form)'s and [PDF::XObject::Image](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Images)'s are inserted and externally
+tagged as an atomic graphical element, typically tagged as `Figure` or `Form`:
+
+```raku
+my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
+
+my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
+```
+
+An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may include marked content, that is copied into the tree each time the form is inserted. The technique is demonstrated below:
+
+```raku
+
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Class;
+use PDF::XObject::Form;
+my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf;
+my PDF::Tags::Elem $doc = $tags.Document;
+
+my PDF::Page $page = $pdf.add-page;
+$page.graphics: -> $gfx {
+   $doc.Header1: $gfx, {
+        .say('Header text');
+   }
+
+    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my PDF::Tags::Elem $form-frag = $doc.fragment;
+
+    $form.text: {
+        my $font-size = 12;
+        .text-position = [10, 38];
+        $form-frag.Header2: $_, {
+            .say: "Tagged XObject header";
+        };
+        my $p = $form-frag.Paragraph: $_, {
+            .say: "Some sample tagged text";
+        };
+    }
+
+    # multiple rendering of the form, and insertion of its structure tree
+    $doc.do($gfx, $form-frag, :position[150, 70]);
+    $doc.do($gfx, $form-frag, :position[150, 20]);
+}
+
+```
+
+To insert an XObject Form that has marked content:
+
+1. Create a new fragment element.
+2. Create the Form XObject, marking content against the fragment
+3. The `do` method can then be used to both render and insert
+a copy of the fragment into the structure tree.
+
+## Graphics Content Tags
+
+As a rule, all content doesn't have to form part of the structure tree, but should be tagged to meet accessibility guidelines.
+
+This sometimes requires tagging of incidental graphics. `PDF::Content` has a `tag()` method for this. The content is be tagged, but does not appear in the content stream.
+
+Some of the commonly used content tags are:
+
+### Artifact
+
+Artifact content forms part of the visual display, but does not belong in the Structure Tree and is tagged using the `PDF::Content` `tag` method.
+
+For example:
+```raku
+$gfx.tag: Artifact, {
+    .say("Page $page-num", :$font, :position[ 250, 20 ]);
+}
+```
+
+### Clipped
+
+A clipped region encompasses additional graphics that are being
+used as part of a clipping operation. The clipped area may include graphics that are part of the structure tree. For example:
+
+```raku
+use PDF::Class;
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Content::Tag :ContentTags, :ParagraphTags;
+
+my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf;
+# create the document root
+my PDF::Tags::Elem $doc = $tags.Document;
+
+$pdf.add-page.graphics: {
+    .tag: Clipped, {
+        .Rectangle: 100, 100, 125, 20;
+        .Clip;
+        .EndPath;
+        $doc.Paragraph: $_, {
+            .say: 'Clip me', :position[98, 98];
+        }
+    }
+}
+```
+The above example is setting up a clipping sequence. The clipped
+text is being inserted as a paragraph in the structure tree.
+
+### Span
+
+This tag may be used in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
+
+```raku
+$gfx.tag: Span, :Lang<es-MX>, {
+    .say('Hasta la vista', :position[50, 80]);
+}
+```
+
+It can be used almost anywhere in the structure tree, or at the content level, as above.
+
 Verification
 -----
 
 The `pdf-tag-dump.raku` script from the [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku) module
-can be used to view the logical content of PDF files as XML, e.g.:
+can be used to view the logical content of PDF files as XML, for example:
 ```
-$ pdf-tag-dump.raku my.pdf | less
+$ pdf-tag-dump.raku /tmp/synopsis.pdf
+```
+Produces
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Document SYSTEM "http://pdf-raku.github.io/dtd/tagged-pdf.dtd">
+<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>
+<Document>
+  <H1>
+    Marked Level 1 Header
+  </H1>
+  <P>
+    Marked paragraph text
+  </P>
+  <Figure BBox="0 0 19 19">
+  </Figure>
+  <Link href="#sample-annot"></Link>
+  <Form BBox="150 70 350 120">
+    <H2>
+      Tagged XObject header
+    </H2>
+    <P>
+      Some sample tagged text
+    </P>
+  </Form>
+</Document>
 ```
 The XML output from `pdf-tag-dump.raku` includes an [external DtD](http://pdf-raku.github.io/dtd/tagged-pdf.dtd) for basic validation purposes.
 

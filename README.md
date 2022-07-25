@@ -62,22 +62,23 @@ $page.graphics: -> $gfx {
 
     # XObject Form with marked content
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-elem = $doc.fragment: Form;
+    my $form-frag = $doc.fragment;
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
 
-        $form-elem.Header2: $_, {
+        $form-frag.Header2: $_, {
             .say: "Tagged XObject header", :font($header-font), :$font-size;
         };
 
-        $form-elem.Paragraph: $_, {
+        $form-frag.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
     }
 
-    # render the form contained in $form-elem
-    $doc.do: $gfx, $form-elem, :position[150, 70];
+    # - render the form contained in $form-frag
+    # - copy the fragment into the structure tree
+    $doc.do: $gfx, $form-frag, :position[150, 70];
 }
 
 $pdf.save-as: "/tmp/synopsis.pdf"
@@ -236,33 +237,32 @@ $page.graphics: -> $gfx {
    }
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my PDF::Tags::Elem $form-elem = $doc.fragment: Span;
+    my PDF::Tags::Elem $form-frag = $doc.fragment;
 
     $form.text: {
         my $font-size = 12;
         .text-position = [10, 38];
-        $form-elem.Header2: $_, {
+        $form-frag.Header2: $_, {
             .say: "Tagged XObject header";
         };
-        my $p = $form-elem.Paragraph: $_, {
+        my $p = $form-frag.Paragraph: $_, {
             .say: "Some sample tagged text";
         };
     }
 
     # multiple rendering of the form, and insertion of its structure tree
-    $doc.do($gfx, $form-elem, :position[150, 70]);
-    $doc.do($gfx, $form-elem, :position[150, 20]);
+    $doc.do($gfx, $form-frag, :position[150, 70]);
+    $doc.do($gfx, $form-frag, :position[150, 20]);
 }
 
 ```
 
 To insert an XObject Form that has marked content:
 
-1. Create a fragment element to contain the tag. `Span` can be used
-if there is no other appropriate top-level tag.
+1. Create a new fragment element.
 2. Create the Form XObject, marking content against the fragment
-3. The fragment can then be inserted one or more times into content
-streams using the `do` method, passing both a graphics object and form element.
+3. The `do` method can then be used to both render and insert
+a copy of the fragment into the structure tree.
 
 ## Graphics Content Tags
 
