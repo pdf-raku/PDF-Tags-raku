@@ -54,12 +54,6 @@ $page.graphics: -> $gfx {
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
     $doc.Figure: $gfx, $img, :Alt('Incandescent apparatus');
 
-    # add a marked link annotation
-    my $destination = $pdf.destination( :name<sample-annot>, :page(2), :fit(FitWindow) );
-    my PDF::Annot $annot = $pdf.annotation: :$page, :$destination, :rect[71, 717, 190, 734];
-
-    $doc.Link: $gfx, $annot;
-
     # XObject Form with marked content
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     my $form-frag = $doc.fragment;
@@ -263,6 +257,18 @@ To insert an XObject Form that has marked content:
 2. Create the Form XObject, marking content against the fragment
 3. The `do` method can then be used to both render and insert
 a copy of the fragment into the structure tree.
+
+## Links
+
+Links are usually contained in a block element, such as a `Paragraph`. If
+the link is internal, it should further be enclosed in a `Reference` element.
+
+Furthermore, if the link is in flowing text, such as a paragraph, the
+`mark` method may be needed to mark preceding text, the link, and
+following text.
+
+Please see [examples/link.raku](https://github.com/pdf-raku/PDF-Tags-raku/blob/master/examples/link.raku) which demonstrates adding an
+tagged internal link to a PDF.
 
 ## Graphics Content Tags
 
