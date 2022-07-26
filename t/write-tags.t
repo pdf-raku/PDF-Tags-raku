@@ -67,7 +67,7 @@ $page.graphics: -> $gfx {
     };
 
     my PDF::Tags::Elem $link;
-    lives-ok { $link = $doc.Link($gfx, $annot); }, 'add reference';
+    lives-ok { $link = $para.Reference.Link($gfx, $annot); }, 'add reference';
     # inspect COS objects
     my PDF::OBJR $obj-ref = $link.kids[0].cos;
     my $cos-obj = $obj-ref.object;
@@ -96,7 +96,7 @@ $page.graphics: -> $gfx {
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-is $tags.find('Document//*')>>.name.join(','), 'H1,P,Figure,Caption,Link,H2,P,H2,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Reference,Link,Figure,Caption,H2,P,H2,P';
 
 lives-ok { $pdf.save-as: "t/write-tags.pdf", :!info; }
 

@@ -50,11 +50,11 @@ $page.graphics: -> $gfx {
     }
 
     subtest 'marking at higher level', {
-        $section.mark: $gfx, {
-            .print: 'top level text', :position[50, 420];
+        $section.P.mark: $gfx, {
+            .say: 'Top level para.', :position[50, 480];
         }
 
-        is $section.text, "This paragraph links to http://google.com.\ntop level text";
+        is $section.text, "This paragraph links to http://google.com.\nTop level para.\n";
     }
 
     is $doc.xml, q{<Document>
@@ -62,7 +62,9 @@ $page.graphics: -> $gfx {
     <P>
       This paragraph links to <Link href="http://google.com">http://google.com</Link>.
     </P>
-    top level text
+    <P>
+      Top level para.
+    </P>
   </Sect>
 </Document>
 }, 'xml';
