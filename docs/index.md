@@ -19,23 +19,18 @@ Synopsis
 use PDF::Tags;
 use PDF::Tags::Elem;
 
-# PDF::API6
 use PDF::API6;
-use PDF::Annot;
-use PDF::Destination :Fit;
+use PDF::Page;
 use PDF::XObject::Image;
-use PDF::XObject::Form;
 
 my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
 my PDF::Tags::Elem $doc = $tags.Document;
 
-my $page = $pdf.add-page;
+my PDF::Page $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
 my $body-font = $page.core-font: :family<Helvetica>;
-
-$pdf.add-page; # blank second page, as a target
 
 $page.graphics: -> $gfx {
 
@@ -54,25 +49,6 @@ $page.graphics: -> $gfx {
     my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
     $doc.Figure: $gfx, $img, :Alt('Incandescent apparatus');
 
-    # XObject Form with marked content
-    my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
-    my $form-frag = $doc.fragment;
-    $form.text: {
-        my $font-size = 12;
-        .text-position = [10, 38];
-
-        $form-frag.Header2: $_, {
-            .say: "Tagged XObject header", :font($header-font), :$font-size;
-        };
-
-        $form-frag.Paragraph: $_, {
-            .say: "Some sample tagged text", :font($body-font), :$font-size;
-        };
-    }
-
-    # - render the form contained in $form-frag
-    # - copy the fragment into the structure tree
-    $doc.do: $gfx, $form-frag, :position[150, 70];
 }
 
 $pdf.save-as: "/tmp/synopsis.pdf"
@@ -353,22 +329,13 @@ Produces
   </P>
   <Figure BBox="0 0 19 19">
   </Figure>
-  <Link href="#sample-annot"></Link>
-  <Form BBox="150 70 350 120">
-    <H2>
-      Tagged XObject header
-    </H2>
-    <P>
-      Some sample tagged text
-    </P>
-  </Form>
 </Document>
 ```
 The XML output from `pdf-tag-dump.raku` includes an [external DtD](http://pdf-raku.github.io/dtd/tagged-pdf.dtd) for basic validation purposes.
 
 For example, it can be piped to `xmllint`, from the `libxml2` package, to check the structure of the tags:
 
-$ pdf-tag-dump.raku my.pdf | xmllint --noout --valid -
+$ pdf-tag-dump.raku /tmp/synopsis.pdf | xmllint --noout --valid -
 
 See Also
 ------
