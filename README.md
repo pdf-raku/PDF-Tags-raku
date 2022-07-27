@@ -307,6 +307,26 @@ $gfx.tag: Span, :Lang<es-MX>, {
 
 It can be used almost anywhere in the structure tree, or at the content level, as above.
 
+Tagging and Metadata
+----
+If a PDF document is tagged for accessibility, additional metadata usually also needs to be set-up; typically `Title`, `Author`, `Subject`, `Keywords` and language. For example:
+
+```raku
+use PDF::API6;
+use PDF::Info;
+my PDF::API6 $pdf .= open: "/tmp/synopsis.pdf";
+
+my PDF::Info $info = $pdf.Info //= {};
+$info.Title = 'PDF::Tags README Synopsis';
+$info.Subject = 'Sample Output PDF';
+$info.Author = 'David Warring';
+$info.Keywords = 'accessibility,pdf,tags';
+$pdf.catalog.Lang = 'en';
+$pdf.update;
+```
+
+Note that `PDF::API6` automatically fills in `Producer`, `Creator` and `CreationDate`.
+
 Verification
 -----
 
