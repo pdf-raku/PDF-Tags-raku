@@ -177,7 +177,7 @@ Classes in this Distribution
 Advanced Topics
 -----
 
-## Form and Image XObjects
+### Form and Image XObjects
 
 In the simple case, both [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form)'s and [PDF::XObject::Image](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Images)'s are inserted and externally
 tagged as an atomic graphical element, typically tagged as `Figure` or `Form`:
@@ -234,7 +234,7 @@ To insert an XObject Form that has marked content:
 3. The `do` method can then be used to both render and insert
 a copy of the fragment into the structure tree.
 
-## Links
+### Links
 
 Links are usually contained in a block element, such as a `Paragraph`. If
 the link is internal, it should further be enclosed in a `Reference` element.
@@ -246,7 +246,7 @@ following text.
 Please see [examples/link.raku](https://github.com/pdf-raku/PDF-Tags-raku/blob/master/examples/link.raku) which demonstrates adding an
 tagged internal link to a PDF.
 
-## Graphics Content Tags
+### Graphics Content Tags
 
 As a rule, all content doesn't have to form part of the structure tree, but should be tagged to meet accessibility guidelines.
 
@@ -254,7 +254,7 @@ This sometimes requires tagging of incidental graphics. `PDF::Content` has a `ta
 
 Some of the commonly used content tags are:
 
-### Artifact
+#### Artifact
 
 Artifact content forms part of the visual display, but does not belong in the Structure Tree and is tagged using the `PDF::Content` `tag` method.
 
@@ -265,7 +265,7 @@ $gfx.tag: Artifact, {
 }
 ```
 
-### Clipped
+#### Clipped
 
 A clipped region encompasses additional graphics that are being
 used as part of a clipping operation. The clipped area may include graphics that are part of the structure tree. For example:
@@ -295,7 +295,7 @@ $pdf.add-page.graphics: {
 The above example is setting up a clipping sequence. The clipped
 text is being inserted as a paragraph in the structure tree.
 
-### Span
+#### Span
 
 This tag may be used in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
 
@@ -307,8 +307,8 @@ $gfx.tag: Span, :Lang<es-MX>, {
 
 It can be used almost anywhere in the structure tree, or at the content level, as above.
 
-Tagging and Metadata
-----
+### Tagging and Metadata
+
 If a PDF document is tagged for accessibility, additional metadata usually also needs to be set-up; typically `Title`, `Author`, `Subject`, `Keywords` and language. For example:
 
 ```raku
@@ -327,8 +327,7 @@ $pdf.update;
 
 Note that `PDF::API6` automatically fills in `Producer`, `Creator` and `CreationDate`.
 
-Verification
------
+### Verification
 
 The `pdf-tag-dump.raku` script from the [PDF::Tags::Reader](https://pdf-raku.github.io/PDF-Tags-Reader-raku) module
 can be used to view the logical content of PDF files as XML, for example:
