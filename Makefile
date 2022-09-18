@@ -17,11 +17,15 @@ $(DocLinker) :
 	(cd .. && git clone $(DocRepo) $(DocProj))
 
 docs/%.md : lib/%.rakumod
+	@raku -I. -c $<
 	raku -I . --doc=Markdown $< \
 	|  TRAIL=$* raku -p -n $(DocLinker) \
         > $@
 
-doc : $(DocLinker) docs/index.md docs/PDF/Tags.md docs/PDF/Tags/Attr.md docs/PDF/Tags/Elem.md docs/PDF/Tags/Mark.md docs/PDF/Tags/ObjRef.md docs/PDF/Tags/Node.md docs/PDF/Tags/Node/Parent.md docs/PDF/Tags/Text.md docs/PDF/Tags/XML-Writer.md docs/PDF/Tags/XPath.md
+Pod-To-Markdown-installed :
+	@raku -M Pod::To::Markdown -c
+
+doc : $(DocLinker) Pod-To-Markdown-installed docs/index.md docs/PDF/Tags.md docs/PDF/Tags/Attr.md docs/PDF/Tags/Elem.md docs/PDF/Tags/Mark.md docs/PDF/Tags/ObjRef.md docs/PDF/Tags/Node.md docs/PDF/Tags/Node/Parent.md docs/PDF/Tags/Text.md docs/PDF/Tags/XML-Writer.md docs/PDF/Tags/XPath.md
 
 docs/index.md : README.md
 	cp $< $@
