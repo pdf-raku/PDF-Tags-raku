@@ -260,7 +260,7 @@ multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
 
 multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
     if $!debug {
-        self!line("<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R-->", $depth)
+        self!line("<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R -->", $depth)
             given $node.value;
     }
     if self!marked-content($node, :$depth) -> $text {

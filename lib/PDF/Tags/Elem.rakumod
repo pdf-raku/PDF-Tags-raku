@@ -45,7 +45,8 @@ class PDF::Tags::Elem
         if $a.Hash -> %a {
             my $owner = $a.owner;
             # guess owner, if not given
-            $owner //= att-owner($_) given %a.keys.head;
+            $owner //= att-owner($_).head
+                given %a.keys.head;
             if $owner ~~ 'Layout'|'List'|'PrintField'|'Table' {
                 # standard owners (Table 341) with mutually distinct attribute names
                 %atts{.key} = .value for %a;
