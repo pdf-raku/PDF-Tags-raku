@@ -188,7 +188,9 @@ my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
 ```
 
-An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may include marked content, that is copied into the tree each time the form is inserted. The technique is demonstrated below:
+An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may be associated with a marked content
+sub-tree. This may be achieved by marking the form against a document fragment, then calling `do` to repeatably insert
+the fragment, as demonstrated below:
 
 ```raku
 

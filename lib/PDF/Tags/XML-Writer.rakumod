@@ -130,6 +130,7 @@ sub find-href($node) {
     use PDF::Annot::Link;
     use PDF::Action::URI;
     use PDF::Action::GoTo;
+    use PDF::Action::GoToR;
     use PDF::Destination;
 
     my constant &object-refs = PDF::Tags::XPath.compile: 'descendant::object()';
@@ -147,6 +148,15 @@ sub find-href($node) {
                         given .<D> {
                             when Str {
                                 $href = '#' ~ $_;
+                                last;
+                            }
+                        }
+                    }
+                    when PDF::Action::GoToR {
+                        $href = 'file://' ~ (.UF // .F);
+                        given .<D> {
+                            when Str {
+                                $href ~= '#' ~ $_;
                                 last;
                             }
                         }
@@ -304,7 +314,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     use PDF::Class;
     use PDF::Tags;
     use PDF::Tags::XML-Writer;
-    my PDF::Class $pdf .= open: "t/pdf/write-tags.pdf";
+    my PDF::Class $pdf .= open: "t/write-tags.pdf";
     my PDF::Tags $tags .= read: :$pdf;
     my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
     # atomic write
@@ -312,7 +322,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     # streamed write
     $xml-writer.say($*OUT, $tags);
     # do our own streaming
-    for gather self.stream-xml($item) {
+    for gather $xml-writer.stream-xml($tags) {
         $*OUT.print($_);
     }
 

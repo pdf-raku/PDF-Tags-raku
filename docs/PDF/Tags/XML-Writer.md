@@ -14,7 +14,7 @@ Synopsis
     use PDF::Class;
     use PDF::Tags;
     use PDF::Tags::XML-Writer;
-    my PDF::Class $pdf .= open: "t/pdf/write-tags.pdf";
+    my PDF::Class $pdf .= open: "t/write-tags.pdf";
     my PDF::Tags $tags .= read: :$pdf;
     my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
     # atomic write
@@ -22,7 +22,7 @@ Synopsis
     # streamed write
     $xml-writer.say($*OUT, $tags);
     # do our own streaming
-    for gather self.stream-xml($item) {
+    for gather $xml-writer.stream-xml($tags) {
         $*OUT.print($_);
     }
 

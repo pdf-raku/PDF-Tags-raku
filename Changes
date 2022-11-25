@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - don't write XML dtd when :marks is set.
+  - fix buglet in computing attribute owner
 
 0.1.7  2022-07-26T11:38:35+12:00
   - Allow fragments to contain multiple top-level elements.
