@@ -112,12 +112,14 @@ class PDF::Tags::Node::Parent
     multi method fragment(Str:D $name = '#frag', *%o) {
         self.fragment(:$name, |%o);
     }
-
     multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
         self.add-kid(:$name, |c)
     }
     multi method FALLBACK(Str:D $_ where (%TagAliases{$_}:exists), |c) {
         my Str:D $name = %TagAliases{$_};
+        self.add-kid(:$name, |c)
+    }
+    multi method FALLBACK(Str:D $name where ($.role-map{$_}:exists), |c) {
         self.add-kid(:$name, |c)
     }
     method AT-POS(UInt $i) {
