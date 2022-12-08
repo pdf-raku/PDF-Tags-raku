@@ -1,9 +1,12 @@
 {{$NEXT}}
 
+0.1.9  2022-12-09T08:07:32+13:00
+  - Add support for role-maps.
+
 0.1.8  2022-11-25T15:31:14+13:00
-  - don't write XML dtd when :marks is set.
-  - fix buglet in computing attribute owner
-  - ensure tests produce valid document structure #11
+  - Don't write XML dtd when :marks is set.
+  - Fix buglet in computing attribute owner
+  - Ensure tests produce valid document structure #11
 
 0.1.7  2022-07-26T11:38:35+12:00
   - Allow fragments to contain multiple top-level elements.
