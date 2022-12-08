@@ -1,19 +1,15 @@
 use v6;
 use Test;
-plan 10;
+plan 11;
 
 use PDF::Content::FontObj;
+use PDF::Content::Tag :Tags;
 use PDF::Tags;
 use PDF::Tags::Elem;
-use PDF::Tags::Mark;
-use PDF::Tags::ObjRef;
 use PDF::Class;
 use PDF::Page;
-use PDF::Annot;
-use PDF::XObject::Image;
-use PDF::XObject::Form;
 
-enum RoleMap ( :Body<Sect>, :Footnote<Note>, :Book<Document> );
+enum RoleMap ( :Body<Section>, :Footnote<Note>, :Book<Document> );
 constant %role-map = RoleMap.enums.Hash;
 
 my PDF::Class $pdf .= new;
@@ -40,19 +36,27 @@ $page.graphics: -> $gfx {
     is $header.name, 'H1', 'parent elem name';
     is $header.text, "Header text\n", '$.ActualText()';
 
-    is $page.struct-parent, 0, '$page.struct-parent';
     my $para = $doc.Paragraph: $gfx, {
-        .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
+        .say: 'Some body text¹²', :position[50, 100], :font($body-font), :font-size(12);
     };
-    is $para.name, 'P', 'outer tag name';
-    is $para.kids[0].name, 'P', 'inner tag name';
+    my $fn1 = $doc.Footnote: $gfx, {
+        .print: '¹With a foot-note', :position[50, 50];
+    };
+    
+    is $fn1.name, 'Note';
+    is $fn1.attributes<role>, 'Footnote';
 
+    my $fn2 = $doc.add-kid: :name<Footnote>, $gfx, {
+        .print: '²And another foot-note', :position[50, 50];
+    };
+    is $fn2.name, 'Note';
+    is $fn2.attributes<role>, 'Footnote';
 }
 
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-is $tags.find('Document//*')>>.name.join(','), 'H1,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,Note,Note';
 
 lives-ok { $pdf.save-as: "t/role-maps.pdf", :!info }; 
 

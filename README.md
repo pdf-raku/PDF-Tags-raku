@@ -309,6 +309,43 @@ $gfx.tag: Span, :Lang<es-MX>, {
 
 It can be used almost anywhere in the structure tree, or at the content level, as above.
 
+### Role Maps
+
+The PDF standard allows user defined tags, which are mapped to
+standard tags via a role-map table. `PDF::Tags` supports this
+feature, via the `create` `:role-map` option. One declared,
+role-map entries, can be called as standard construction
+methods:
+
+```raku
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Class;
+use PDF::Page;
+
+enum RoleMap ( :Body<Section>, :Footnote<Note>, :Book<Document> );
+constant %role-map = RoleMap.enums.Hash;
+
+my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf, :%role-map;
+
+my PDF::Tags::Elem $doc = $tags.Book;
+my PDF::Page $page = $pdf.add-page;
+
+$page.graphics: -> $gfx {
+
+    $doc.Paragraph: $gfx, {
+        .say: 'Some body text¹', :position[50, 150];
+    };
+
+    $doc.Footnote: $gfx, {
+        .say: '¹With a foot-note', :position[50, 20];
+    };
+
+}
+
+```
+
 ### Tagging and Metadata
 
 If a PDF document is tagged for accessibility, additional metadata usually also needs to be set-up; typically `Title`, `Author`, `Subject`, `Keywords` and language. For example:

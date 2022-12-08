@@ -25,7 +25,7 @@ endobj
 endobj
 
 4 0 obj
-<< /Length 265 >> stream
+<< /Length 468 >> stream
 q
   /H1 << /MCID 0 >> BDC
     BT
@@ -40,9 +40,21 @@ q
     BT
       1 0 0 1 50 100 Tm
       /F2 12 Tf
-      (Some body text) Tj
+      (Some body text¹²) Tj
       13.2 TL
       T*
+    ET
+  EMC
+  /Note << /MCID 2 >> BDC
+    BT
+      1 0 0 1 50 50 Tm
+      (¹With a foot-note) Tj
+    ET
+  EMC
+  /Note << /MCID 3 >> BDC
+    BT
+      1 0 0 1 50 50 Tm
+      (²And another foot-note) Tj
     ET
   EMC
 Q
@@ -71,13 +83,18 @@ endobj
 <<
   /Type /StructTreeRoot
   /K [ 8 0 R ]
-  /ParentTree << /Nums [ 0 [ 9 0 R 10 0 R ] ] >>
-  /RoleMap << /Body /Sect /Book /Document /Footnote /Note >>
+  /ParentTree << /Nums [ 0 [ 9 0 R 10 0 R 11 0 R 12 0 R ] ] >>
+  /RoleMap << /Body /Section /Book /Document /Footnote /Note >>
 >>
 endobj
 
 8 0 obj
-<< /Type /StructElem /S /Book /K [ 9 0 R 10 0 R ] /P 7 0 R >>
+<<
+  /Type /StructElem
+  /S /Book
+  /K [ 9 0 R 10 0 R 11 0 R 12 0 R ]
+  /P 7 0 R
+>>
 endobj
 
 9 0 obj
@@ -88,21 +105,31 @@ endobj
 << /Type /StructElem /S /P /K [ 1 ] /P 8 0 R /Pg 3 0 R >>
 endobj
 
+11 0 obj
+<< /Type /StructElem /S /Footnote /K [ 2 ] /P 8 0 R /Pg 3 0 R >>
+endobj
+
+12 0 obj
+<< /Type /StructElem /S /Footnote /K [ 3 ] /P 8 0 R /Pg 3 0 R >>
+endobj
+
 xref
-0 11
+0 13
 0000000000 65535 f 
 0000000015 00000 n 
 0000000124 00000 n 
 0000000184 00000 n 
 0000000352 00000 n 
-0000000669 00000 n 
-0000000780 00000 n 
-0000000886 00000 n 
-0000001057 00000 n 
-0000001135 00000 n 
-0000001210 00000 n 
+0000000872 00000 n 
+0000000983 00000 n 
+0000001089 00000 n 
+0000001277 00000 n 
+0000001377 00000 n 
+0000001452 00000 n 
+0000001527 00000 n 
+0000001609 00000 n 
 trailer
-<< /ID [ (t/role-maps.t   ) (t/role-maps.t   ) ] /Root 1 0 R /Size 11 >>
+<< /ID [ (t/role-maps.t   ) (t/role-maps.t   ) ] /Root 1 0 R /Size 13 >>
 startxref
-1285
+1691
 %%EOF

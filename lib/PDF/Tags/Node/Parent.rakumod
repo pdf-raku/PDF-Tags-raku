@@ -122,6 +122,9 @@ class PDF::Tags::Node::Parent
     multi method FALLBACK(Str:D $name where ($.role-map{$_}:exists), |c) {
         self.add-kid(:$name, |c)
     }
+    multi method FALLBACK($name, $?) {
+        die "Unknown tag $name";
+    }
     method AT-POS(UInt $i) {
         fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
         @!kids[$i] //= self.build-kid($.cos.kids[$i]);
