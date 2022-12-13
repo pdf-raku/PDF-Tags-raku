@@ -1,5 +1,5 @@
 =begin pod
-This example demostrates adding a paragraph with an embedded link.
+This example demonstrates adding a paragraph with an embedded link.
 =end pod
 
 use PDF::Tags;

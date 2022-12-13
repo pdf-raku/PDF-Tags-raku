@@ -6,6 +6,7 @@ class PDF::Tags::Elem
 
     use PDF::COS;
     use PDF::COS::Dict;
+    use PDF::COS::Name;
     use PDF::COS::Stream;
     use PDF::Content;
     use PDF::Content::Canvas;
@@ -92,7 +93,7 @@ class PDF::Tags::Elem
 
     method text returns Str { self.cos.ActualText // $.kids».text.join }
 
-    submethod TWEAK(Str :$Alt) {
+    submethod TWEAK(Str :$Alt, Str :$class) {
         self.Pg = $_ with self.cos.Pg;
         my Str:D $tag = self.cos.tag;
         with self.root.role-map{$tag} {
@@ -103,6 +104,7 @@ class PDF::Tags::Elem
             $!name = $tag;
         }
         self.cos.Alt = $_ with $Alt;
+        self.cos.C = PDF::COS::Name.COERCE($_) with $class;
     }
 
     method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
@@ -125,8 +127,8 @@ class PDF::Tags::Elem
     }
 
     # combined add-kid + mark
-    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
-        given self.add-kid(:$name, :$Alt) {
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Str :$class, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt, :$class) {
             .mark($gfx, &action, |c);
             $_;
         }
@@ -428,7 +430,7 @@ Returns Attributes as a Hash. Attributes may be of various types. For example a 
 
 =head3 method set-attribute
 
-  method setattribute(Str $name, Any:D $value) returns Any:D;
+  method set-attribute(Str $name, Any:D $value) returns Any:D;
   $elem.set-attribute('BBox', [0, 0, 200, 50]);
 
 Set a single attribute by name and value.

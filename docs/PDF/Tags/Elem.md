@@ -65,7 +65,7 @@ Returns Attributes as a Hash. Attributes may be of various types. For example a 
 
 ### method set-attribute
 
-    method setattribute(Str $name, Any:D $value) returns Any:D;
+    method set-attribute(Str $name, Any:D $value) returns Any:D;
     $elem.set-attribute('BBox', [0, 0, 200, 50]);
 
 Set a single attribute by name and value.

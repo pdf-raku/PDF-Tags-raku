@@ -189,8 +189,8 @@ my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
 ```
 
 An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may be associated with a marked content
-sub-tree. This may be achieved by marking the form against a document fragment, then calling `do` to repeatably insert
-the fragment, as demonstrated below:
+sub-tree. This may be achieved by marking the form against a document fragment, then calling `do` to repeatably
+render the form, while inserting the fragment, as demonstrated below:
 
 ```raku
 
