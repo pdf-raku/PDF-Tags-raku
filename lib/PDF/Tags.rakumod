@@ -1,4 +1,4 @@
-use PDF::Tags::Node::Parent;
+use PDF::Tags::Node::Parent :&att-owner;
 use PDF::Tags::Node::Root;
 
 #| Tagged PDF root node
@@ -37,6 +37,33 @@ class PDF::Tags:ver<0.1.9>
         ::(Reader).read(|c);
     }
 
+    sub build-class-map($cos, %class-map) {
+        for %class-map {
+            my $class = .key;
+            my %attributes = .value;
+            my Hash %atts-by-owner;
+            for %attributes {
+                my :($owner, $key) := att-owner(.key);
+                %atts-by-owner{$owner}{$key} = .value;
+            }
+            my @atts = %atts-by-owner.keys.sort.map: -> $owner {
+                my %atts = %atts-by-owner{$owner};
+                %atts<O> = $owner;
+                PDF::Attributes.COERCE: %atts
+            }
+
+            if @atts {
+                $cos.ClassMap //= %();
+                if @atts == 1 {
+                    $cos.ClassMap{$class} = @atts[0];
+                }
+                else {
+                    $cos.ClassMap{$class} = @atts;
+                }
+            }
+        }
+    }
+
     method create(
         PDF::Class:D :$pdf,
         PDF::StructTreeRoot() :$cos = { :Type( :name<StructTreeRoot> )},
@@ -46,7 +73,8 @@ class PDF::Tags:ver<0.1.9>
         --> PDF::Tags:D
     ) {
         $cos.RoleMap = %role-map if %role-map;
-        $cos.ClassMap = %class-map if %class-map;
+        build-class-map($cos, %class-map)
+            if %class-map;
         $cos.check;
 
         given $pdf {

@@ -1,4 +1,5 @@
 {{$NEXT}}
+  - Add support for structure attributes
 
 0.1.9  2022-12-09T08:07:32+13:00
   - Add support for role-maps.

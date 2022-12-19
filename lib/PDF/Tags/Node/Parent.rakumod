@@ -186,6 +186,30 @@ class PDF::Tags::Node::Parent
 
 }
 
+constant ListAtts = set <ListNumbering>;
+constant PrintFieldAtts = set <Role checked Desc>;
+constant TableAtts = set <RowSpan ColSpan Headers Scope Summary>;
+constant LayoutAtts = set <BBox BackgroundColor BaselineShift BlockAlign BorderColor
+    BorderStyle BorderThickness Color ColumnCount ColumnGap
+    ColumnWidths EndIndent GlyphOrientationVertical Height
+    InlineAlign LineHeight Padding Placement RubyName RubyPosition
+    SpaceBefore StartIndent TBorderStyle TPadding TextAlign
+    TextDecorationColor TextDecorationThickness TextDecorationType
+    TextIndent Width WritingMode>;
+constant %Owner = %(
+    all(ListAtts.keys) => 'List',
+    all(PrintFieldAtts.keys) => 'PrintField',
+    all(TableAtts.keys) => 'Table',
+    all(LayoutAtts.keys) => 'Layout',
+);
+proto sub att-owner($) is export(:att-owner) {*}
+multi sub att-owner($_ where .contains(':')) {
+    .split(':')
+}
+multi sub att-owner($key) {
+    (%Owner{$key} // 'UserProperties', $key);
+}
+
 =begin pod
 
 =head2 Description
