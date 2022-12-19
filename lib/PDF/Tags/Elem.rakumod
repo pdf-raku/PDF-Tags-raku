@@ -16,10 +16,11 @@ class PDF::Tags::Elem
     use PDF::Tags::Text;
     # PDF:Class
     use PDF::Class::StructItem;
+    use PDF::Attributes;
     use PDF::MCR;
     use PDF::OBJR;
     use PDF::Page;
-    use PDF::StructElem :Attributes;
+    use PDF::StructElem;
     use PDF::XObject::Form;
     use PDF::XObject::Image;
     use PDF::XObject;
@@ -42,7 +43,7 @@ class PDF::Tags::Elem
         );
     }
 
-    sub merge-atts(%atts, Attributes $a) {
+    sub merge-atts(%atts, PDF::Attributes $a) {
         if $a.Hash -> %a {
             my $owner = $a.owner;
             # guess owner, if not given
@@ -61,13 +62,13 @@ class PDF::Tags::Elem
     method attributes {
         $!attributes //= do {
             my %atts;
-            for $.cos.attribute-dicts -> Attributes $atts {
+            for $.cos.attribute-dicts -> PDF::Attributes $atts {
                 merge-atts(%atts, $atts);
             }
 
             unless %atts {
                 for @.classes {
-                    with $.root.class-map{$_} -> Attributes $atts {
+                    with $.root.class-map{$_} -> PDF::Attributes $atts {
                         merge-atts(%atts, $atts);
                     }
                 }
@@ -93,7 +94,7 @@ class PDF::Tags::Elem
 
     method text returns Str { self.cos.ActualText // $.kids».text.join }
 
-    submethod TWEAK(Str :$Alt, Str :$class) {
+    submethod TWEAK(Str :$Alt, Str :$class, :%attributes) {
         self.Pg = $_ with self.cos.Pg;
         my Str:D $tag = self.cos.tag;
         with self.root.role-map{$tag} {
@@ -103,6 +104,8 @@ class PDF::Tags::Elem
         else {
             $!name = $tag;
         }
+        self.set-attributes(|%attributes)
+            if %attributes;
         self.cos.Alt = $_ with $Alt;
         self.cos.C = PDF::COS::Name.COERCE($_) with $class;
     }
@@ -127,8 +130,8 @@ class PDF::Tags::Elem
     }
 
     # combined add-kid + mark
-    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Str :$class, |c --> PDF::Tags::Elem:D) {
-        given self.add-kid(:$name, :$Alt, :$class) {
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Str :$class, :%attributes, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt, :$class, :%attributes) {
             .mark($gfx, &action, |c);
             $_;
         }
@@ -302,7 +305,7 @@ class PDF::Tags::Elem
     }
 
     constant ListAtts = set <ListNumbering>;
-    constant RoleAtts = set <Role checked Desc>;
+    constant PrintFieldAtts = set <Role checked Desc>;
     constant TableAtts = set <RowSpan ColSpan Headers Scope Summary>;
     constant LayoutAtts = set <BBox BackgroundColor BaselineShift BlockAlign BorderColor
 	BorderStyle BorderThickness Color ColumnCount ColumnGap
@@ -313,7 +316,7 @@ class PDF::Tags::Elem
 	TextIndent Width WritingMode>;
     constant %Owner = %(
         all(ListAtts.keys) => 'List',
-        all(RoleAtts.keys) => 'Role',
+        all(PrintFieldAtts.keys) => 'PrintField',
         all(TableAtts.keys) => 'Table',
         all(LayoutAtts.keys) => 'Layout',
     );
@@ -321,18 +324,30 @@ class PDF::Tags::Elem
         .split(':')
     }
     multi sub att-owner($key) {
-        (%Owner{$key}, $key);
+        (%Owner{$key} // 'UserProperties', $key);
     }
 
-    has Bool $!atts-reset;
     method set-attribute(Str() $key, Any:D $val) {
-        my ($owner, $att) = att-owner($key);
+        my :($owner, $att) := att-owner($key);
         fail "unable to determine owner for attribute: $key"
             unless $owner;
         $.cos.vivify-attributes(:$owner).set-attribute($att, $val);
         self.attributes{$key} = $val;
         callsame();
-     }
+    }
+    method set-attributes(*%attributes) {
+        my Hash %atts-by-owner;
+        for %attributes {
+            my :($owner, $key) := att-owner(.key);
+            %atts-by-owner{$owner}{$key} = .value;
+        }
+        for %atts-by-owner.keys.sort -> $owner {
+            my $atts = $.cos.vivify-attributes(:$owner);
+            $atts.set-attribute(.key, .value)
+                for %atts-by-owner{$owner}.pairs;
+        }
+        $!attributes = Nil; # regen on next access
+    }
 
     method !bbox($gfx, @rect) {
         self.set-bbox($gfx, @rect)
