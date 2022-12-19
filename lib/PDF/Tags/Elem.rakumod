@@ -305,7 +305,8 @@ class PDF::Tags::Elem
     }
 
     method set-attribute(Str() $key, Any:D $val) {
-        my :($owner, $att) := att-owner($key);
+        #Raku 2022.06+ my :($owner, $att) := att-owner($key);
+        my ($owner, $att) = att-owner($key);
         fail "unable to determine owner for attribute: $key"
             unless $owner;
         $.cos.vivify-attributes(:$owner).set-attribute($att, $val);
@@ -315,7 +316,8 @@ class PDF::Tags::Elem
     method set-attributes(*%attributes) {
         my Hash %atts-by-owner;
         for %attributes {
-            my :($owner, $key) := att-owner(.key);
+            #Raku 2022.06+ my :($owner, $key) := att-owner(.key);
+            my ($owner, $key) = att-owner(.key);
             %atts-by-owner{$owner}{$key} = .value;
         }
         for %atts-by-owner.keys.sort -> $owner {

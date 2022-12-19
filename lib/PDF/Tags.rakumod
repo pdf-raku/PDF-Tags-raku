@@ -43,7 +43,8 @@ class PDF::Tags:ver<0.1.9>
             my %attributes = .value;
             my Hash %atts-by-owner;
             for %attributes {
-                my :($owner, $key) := att-owner(.key);
+                #Raku 2022.06+ my :($owner, $key) := att-owner(.key);
+                my ($owner, $key) = att-owner(.key);
                 %atts-by-owner{$owner}{$key} = .value;
             }
             my @atts = %atts-by-owner.keys.sort.map: -> $owner {
