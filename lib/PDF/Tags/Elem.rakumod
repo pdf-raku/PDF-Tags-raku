@@ -147,7 +147,7 @@ class PDF::Tags::Elem
 
     # combined add-kid + reference
     multi method add-kid(PDF::Content:D $gfx, PDF::Class::StructItem:D $obj, :$name!, Str :$Alt, |c --> PDF::Tags::Elem:D) {
-        self.add-kid(:$name, :$Alt).reference($gfx, $obj, |c);
+        self.add-kid(:$name, :$Alt).reference($obj, :$gfx, |c);
     }
 
     # copy intermediate node and descendants
@@ -184,7 +184,7 @@ class PDF::Tags::Elem
 
     method !do-reference(PDF::Content $gfx, PDF::XObject $xobj, |c) {
         my @rect = $gfx.do($xobj, |c);
-        self.reference($gfx, $xobj);
+        self.reference($xobj, :$gfx);
         self!bbox($gfx, @rect);
         @rect;
     }
@@ -202,8 +202,7 @@ class PDF::Tags::Elem
                if $canvas ~~ PDF::Page;
 
             given $xobj.StructParents {
-                # potentially lossy. parent-tree only includes
-                # marked content references
+                # potentially lossy. parent-tree only includes marked content references
                 $.root.protect: {
                     my Array $parents = self.root.parent-tree[$_+0];
 
@@ -261,12 +260,12 @@ class PDF::Tags::Elem
                 $.root.protect: {
                     unless .StructParents.defined {
                         $node!setup-parents($_)
-                            // $node.reference($gfx, $_);
+                            // $node.reference($_, :$gfx);
                     }
                 }
             }
             default {
-                $node.reference($gfx, $_);
+                $node.reference($_, :$gfx);
             }
         }
 
@@ -337,15 +336,23 @@ class PDF::Tags::Elem
         self.set-attribute('BBox', $gfx.base-coords(@rect).Array);
     }
 
-    method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) {
+    multi method reference(PDF::Content $gfx, PDF::Class::StructItem $Obj) is DEPRECATED('reference($Obj, :$gfx)') {
+        $.reference($Obj, :$gfx);
+    }
+    multi method reference(PDF::Class::StructItem $Obj, PDF::Content:D :$gfx! ) {
+        my PDF::Page $Pg;
+        given $gfx.canvas {
+            when PDF::Page { $Pg = $_ }
+        }
+        $.reference($Obj, :$Pg);
+    }
+    multi method reference(PDF::Class::StructItem $Obj, PDF::Page :$Pg!) {
         my PDF::OBJR() $cos = %(
             :Type( :name<OBJR> ),
             :$Obj,
+            ($Pg ?? :$Pg !! ()),
         );
 
-        given $gfx.canvas {
-            when PDF::Page { $cos<Pg> = $_ }
-        }
         self.add-kid: :$cos;
 
         $.root.protect: {

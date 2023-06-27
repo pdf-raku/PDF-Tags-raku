@@ -83,7 +83,7 @@ class PDF::Tags::XPath::Actions {
 
     method node-test:sym<tag>($/) {
         my $name := ~$<tag>;
-        make -> Node $_ { .name eq $name }
+        make -> Node $_ {.name eq $name || ($_ ~~ Elem && .role ~~ $name) }
     }
     method node-test:sym<elem>($/)   { make -> Node $_ { $_ ~~ Elem} }
     method node-test:sym<node>($/)   { make -> Node $_ { True } }

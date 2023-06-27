@@ -1,10 +1,11 @@
-use PDF::Tags::Node::Parent :&att-owner;
-use PDF::Tags::Node::Root;
-
 #| Tagged PDF root node
-class PDF::Tags:ver<0.1.10>
-    is PDF::Tags::Node::Parent
-    does PDF::Tags::Node::Root {
+class PDF::Tags:ver<0.1.10> {
+
+    use PDF::Tags::Node::Parent :&att-owner;
+    also is PDF::Tags::Node::Parent;
+
+    use PDF::Tags::Node::Root;
+    also does PDF::Tags::Node::Root;
 
     use PDF::Class:ver<0.4.10+>;
     use PDF::NumberTree :NumberTree;
@@ -19,9 +20,10 @@ class PDF::Tags:ver<0.1.10>
     method root { self }
     method marks { True }
 
-    submethod TWEAK(PDF::StructTreeRoot :$cos!) {
+    submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {
         $!class-map = $_ with $cos.ClassMap;
         $!role-map = $_ with $cos.RoleMap;
+        self.set-role(.key, .value) for %role-map.pairs;
         $!parent-tree = .number-tree
             given $cos.ParentTree //= { :Nums[] };
     }
@@ -35,6 +37,18 @@ class PDF::Tags:ver<0.1.10>
         }
         require ::(Reader);
         ::(Reader).read(|c);
+    }
+
+    method set-role(Str:D $role, Str:D $base) {
+        $!role-map //= {};
+        with $!role-map{$role} {
+            warn "role mapping $role => $base conflicts with $role => $_"
+                unless $base eq $_;
+        }
+        else {
+            warn "setting role $role => $base";
+            $_ = $base;
+        }
     }
 
     sub build-class-map($cos, %class-map) {

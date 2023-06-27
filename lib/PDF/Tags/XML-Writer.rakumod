@@ -15,12 +15,14 @@ use PDF::Content::Tag :Tags;
 
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
+has Bool $.roles;
 has Str  $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
 has Str  $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
 has Bool $.style = True;
 has Bool $.debug = False;
 has Bool $.marks;
-has Bool $.valid = !$!marks;
+has Bool $.fields = True;
+has Bool $.valid = !$!marks && !$!roles;
 has Str  $.omit;
 has Str  $.root-tag;
 has Bool $!got-nl = True;
@@ -197,10 +199,14 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             given $node.cos;
     }
     my $name = $node.name;
+    my $role = $node.role if $!roles;
     my $actual-text = self!actual-text($node);
     my $*inline = inlined-tag($name);
     my $att = do if $!atts {
         my %attributes = $node.attributes;
+        if $role {
+            %attributes<role>:delete;
+        }
         if $!marks {
             %attributes<ActualText> = $_ with $actual-text;
         }
@@ -210,11 +216,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         }
         atts-str(%attributes);
     }
-    else {
-        $name = $_
-            with $node.root.class-map{$name};
-        ''
-    }
+    $name = $_ with $role;
     my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
@@ -266,6 +268,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
     self!line("<!-- OBJR {.cos.Obj.obj-num} {.cos.Obj.gen-num} R -->", $depth)
         if $!debug;
+    if $!fields {
+        given .value {
+            when PDF::Field { self!chunk($_, $depth) with .value }
+        }
+    }
 }
 
 multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {

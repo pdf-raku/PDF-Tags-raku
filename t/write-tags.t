@@ -34,9 +34,9 @@ $page.graphics: -> $gfx {
     my PDF::Tags::Mark:D $mark = $header.kids[0];
     is $mark.name, 'H1', 'mark tag name';
     is $mark.mcid, 0, 'mark tag mcid';
-    ok defined($header.Pg), 'Element has Pg defined...'; 
-    ok ($header.Pg === $page), '...and Element Pg references this page'; 
-    ok ($header.cos.Pg === $page), '...and Element.cos Pg references this page';
+    ok defined($header.Pg), 'Element has Pg defined...';
+    cmp-ok $header.Pg, '===', $page, '...and Element Pg references this page';
+    cmp-ok $header.cos.Pg, '===', $page, '...and Element.cos Pg references this page';
 
     is $page.struct-parent, 0, '$page.struct-parent';
     is-deeply $tags.parent-tree[0][0], $mark.parent.cos, 'parent-tree entry';
@@ -51,7 +51,7 @@ $page.graphics: -> $gfx {
     my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
     is $img.struct-parent, 1, '$img.struct-parent';
     my PDF::Tags::ObjRef $ref = $figure.kids[0];
-    ok $ref.value === $img, '$ref.value';
+    cmp-ok $ref.value, '===', $img, '$ref.value';
 
     $doc.Caption: $gfx, {
         .say: "Eureka!", :position[40, 60];
@@ -73,7 +73,7 @@ $page.graphics: -> $gfx {
     my $cos-obj = $obj-ref.object;
     isa-ok $cos-obj, "PDF::Annot::Link", '$obj-ref.object';
     is $cos-obj.struct-parent, 2, '$obj-ref.object.struct-parent';
-    is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry'; 
+    is-deeply $tags.parent-tree[2], $link.cos, 'parent-tree entry';
 
     my PDF::XObject::Form $form = $page.xobject-form: :BBox[0, 0, 200, 50];
     my PDF::Tags::Elem $form-frag = $doc.fragment;
