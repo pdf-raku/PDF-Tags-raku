@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 11;
+plan 13;
 
 use PDF::Content::FontObj;
 use PDF::Content::Tag :Tags;
@@ -46,6 +46,9 @@ $page.graphics: -> $gfx {
     is $fn1.name, 'Note';
     is $fn1.attributes<role>, 'Footnote';
 
+    is $fn1.xml.lines.map(*.trim).join, '<Note role="Footnote">¹With a foot-note</Note>';
+    is $fn1.xml(:roles).lines.map(*.trim).join, '<Footnote>¹With a foot-note</Footnote>';
+
     my $fn2 = $doc.add-kid: :name<Footnote>, $gfx, {
         .print: '²And another foot-note', :position[50, 50];
     };
@@ -58,6 +61,6 @@ $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
 is $tags.find('Document//*')>>.name.join(','), 'H1,P,Note,Note';
 
-lives-ok { $pdf.save-as: "t/role-maps.pdf", :!info }; 
+lives-ok { $pdf.save-as: "t/role-maps.pdf", :!info };
 
 done-testing;

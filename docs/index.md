@@ -189,7 +189,7 @@ my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
 ```
 
 An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may be associated with a marked content
-sub-tree. This may be achieved by marking the form against a document fragment, then calling `do` to repeatably
+sub-tree. This is achieved by marking the form against a document fragment, then calling `do` to repeatably
 render the form, while inserting the fragment, as demonstrated below:
 
 ```raku
@@ -239,7 +239,7 @@ a copy of the fragment into the structure tree.
 ### Links
 
 Links are usually contained in a block element, such as a `Paragraph`. If
-the link is internal, it should further be enclosed in a `Reference` element.
+the link is internal, it should be further enclosed in a `Reference` element.
 
 Furthermore, if the link is in flowing text, such as a paragraph, the
 `mark` method may be needed to mark preceding text, the link, and

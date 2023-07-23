@@ -46,7 +46,6 @@ class PDF::Tags:ver<0.1.10> {
                 unless $base eq $_;
         }
         else {
-            warn "setting role $role => $base";
             $_ = $base;
         }
     }
