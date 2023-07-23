@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - Add xml(:roles) options - dereference role-map when writing XML tags
+  - Add dereferencing of field values in XML content
 
 0.1.10  2022-12-20T11:31:44+13:00
   - Add support for structure attributes
