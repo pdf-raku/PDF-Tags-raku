@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.1.11  2023-07-24T11:39:08+12:00
   - Add xml(:roles) options - dereference role-map when writing XML tags
   - Add dereferencing of field values in XML content
 

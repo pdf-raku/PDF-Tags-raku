@@ -1,5 +1,5 @@
 #| Tagged PDF root node
-class PDF::Tags:ver<0.1.10> {
+class PDF::Tags:ver<0.1.11> {
 
     use PDF::Tags::Node::Parent :&att-owner;
     also is PDF::Tags::Node::Parent;
