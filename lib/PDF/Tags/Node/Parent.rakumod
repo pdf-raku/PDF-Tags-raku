@@ -16,7 +16,7 @@ class PDF::Tags::Node::Parent
     has UInt $!elems;
     has      $.style is rw; # Computed CSS style
 
-    method elems is also<Numeric> {
+    method elems(::?CLASS:D:) is also<Numeric> {
         $!elems //= do with $.cos.kids {
             when Hash { 1 }
             default { .elems }

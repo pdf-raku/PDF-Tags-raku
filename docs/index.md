@@ -188,12 +188,10 @@ my PDF::XObject::Image $img .= open: "t/images/lightbulb.gif";
 my $figure = $doc.Figure: $gfx, $img, :position[50, 70], :Alt("A light-bulb");
 ```
 
-An [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may be associated with a marked content
-sub-tree. This is achieved by marking the form against a document fragment, then calling `do` to repeatably
-render the form, while inserting the fragment, as demonstrated below:
+A [PDF::XObject::Form](https://pdf-raku.github.io/PDF-Class-raku/PDF/XObject/Form) may be associated with a document fragment. The
+form can then be rendered, and the fragment inserted into the document, by repeatedly calling `do` on the fragment, as demonstrated below:
 
 ```raku
-
 use PDF::Tags;
 use PDF::Tags::Elem;
 use PDF::Class;
@@ -222,20 +220,11 @@ $page.graphics: -> $gfx {
         };
     }
 
-    # multiple rendering of the form, and insertion of its structure tree
+    # multiple rendering of the form, and insertion into the structure tree
     $doc.do($gfx, $form-frag, :position[150, 70]);
     $doc.do($gfx, $form-frag, :position[150, 20]);
 }
-
 ```
-
-To insert an XObject Form that has marked content:
-
-1. Create a new fragment element.
-2. Create the Form XObject, marking content against the fragment
-3. The `do` method can then be used to both render and insert
-a copy of the fragment into the structure tree.
-
 ### Links
 
 Links are usually contained in a block element, such as a `Paragraph`. If

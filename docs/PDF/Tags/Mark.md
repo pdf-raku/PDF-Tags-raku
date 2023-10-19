@@ -92,7 +92,7 @@ The Marked Content ID within the content stream. These are usually numbered in s
 
     method value() returns PDF::Content::Tag
 
-The low-level [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku) object, which contains further details on the tag:
+The low-level [PDF::Content::Tag](https://pdf-raku.github.io/PDF-Content-raku/PDF/Content/Tag) object, which contains further details on the tag:
 
   * `canvas` - The owner of the content stream; a PDF::Page or PDF::XObject::Form object.
 

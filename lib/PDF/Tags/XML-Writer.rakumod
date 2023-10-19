@@ -49,16 +49,15 @@ method !chunk(Str $s is copy, UInt $depth = 0) {
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
 method !frag(|c) { $*inline ?? self!chunk(|c) !! self!line(|c) }
 
-sub html-escape(Str $_) {
+sub xml-escape(Str $_) {
     .trans:
         /\&/ => '&amp;',
         /\</ => '&lt;',
         /\>/ => '&gt;',
-        
 }
 multi sub str-escape(@a) { @a.map(&str-escape).join: ' '; }
 multi sub str-escape(Str $_) {
-    html-escape($_).trans: /\"/ => '&quote;';
+    xml-escape($_).trans: /\"/ => '&quote;';
 }
 multi sub str-escape(Pair $_) { str-escape(.value) }
 multi sub str-escape($_) is default { str-escape(.Str) }
@@ -233,7 +232,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 }
             }
             
-            given html-escape($_) {
+            given xml-escape($_) {
                 my $frag = do {
                     when $omit-tag.so { $_ }
                     when .so { '<%s%s>%s</%s>'.sprintf($name, $att, $_, $name) }
@@ -287,7 +286,7 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
 
 multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
     if .Str -> $text {
-        self!chunk(html-escape($text), $depth);
+        self!chunk(xml-escape($text), $depth);
     }
 }
 
@@ -297,7 +296,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
             when PDF::Tags::Mark {
                 my $text = self!marked-content($_, :$depth);
             }
-            when PDF::Tags::Text { html-escape(.Str) }
+            when PDF::Tags::Text { xml-escape(.Str) }
             default { die "unhandled tagged content: {.WHAT.raku}"; }
         }
         @text.join;
@@ -319,10 +318,10 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
 =head2 Synopsis
 
     use PDF::Class;
-    use PDF::Tags;
+    use PDF::Tags::Reader;
     use PDF::Tags::XML-Writer;
     my PDF::Class $pdf .= open: "t/write-tags.pdf";
-    my PDF::Tags $tags .= read: :$pdf;
+    my PDF::Tags::Reader $tags .= read: :$pdf;
     my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
     # atomic write
     say $xml-writer.Str($tags);

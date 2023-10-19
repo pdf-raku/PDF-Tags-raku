@@ -13,7 +13,7 @@ Methods
 
 ### method cos
 
-Returns the underlying [PDF::Class](https://pdf-raku.github.io/PDF-Class-raku) or [PDF::Content](https://pdf-raku.github.io/PDF-Content-raku) object. The [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node) subclass and [PDF::COS](https://pdf-raku.github.io/PDF-raku) type are mapped as follows:
+Returns the underlying [PDF::Class](https://pdf-raku.github.io/PDF-Class-raku) or [PDF::Content](https://pdf-raku.github.io/PDF-Content-raku/PDF/Content) object. The [PDF::Tags::Node](https://pdf-raku.github.io/PDF-Tags-raku/PDF/Tags/Node) subclass and [PDF::COS](https://pdf-raku.github.io/PDF-raku) type are mapped as follows:
 
 <table class="pod-table">
 <thead><tr>

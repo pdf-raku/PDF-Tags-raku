@@ -76,7 +76,7 @@ class PDF::Tags::Node {
 Returns the underlying L<PDF::Class> or L<PDF::Content> object. The L<PDF::Tags::Node> subclass and L<PDF::COS> type are mapped as follows:
 
 =begin table
-PDF::Tags::Node object | PDF::Class object |Base class | Notes
+PDF::Tags::Node object | PDF::Class object  |Base class | Notes
 =================================================
 PDF::Tags | PDF::StructTreeRoot | PDF::Tags::Node::Parent | PDF structure tree root
 PDF::Tags::Elem | PDF::StructElem | PDF::Tags::Node::Parent | Intermediate structure element node

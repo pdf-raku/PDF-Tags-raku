@@ -12,10 +12,10 @@ Synopsis
 --------
 
     use PDF::Class;
-    use PDF::Tags;
+    use PDF::Tags::Reader;
     use PDF::Tags::XML-Writer;
     my PDF::Class $pdf .= open: "t/write-tags.pdf";
-    my PDF::Tags $tags .= read: :$pdf;
+    my PDF::Tags::Reader $tags .= read: :$pdf;
     my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
     # atomic write
     say $xml-writer.Str($tags);

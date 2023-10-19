@@ -84,13 +84,23 @@ class PDF::Tags::Mark
         fail "todo: update marked content attributes";
         callsame();
     }
+
+    sub sanitize(Str $_) {
+        # actual text sometimes have backspaces, etc?
+        .subst(
+            /<[ \x0..\x8 ]>/,
+            '',
+            :g
+        );
+    }
+
     method ActualText {
         $.attributes unless $!atts-built;
-        $!actual-text //= PDF::COS::TextString.COERCE: $_
+        $!actual-text //= sanitize PDF::COS::TextString.COERCE: $_
             with %!attributes<ActualText>;
         $!actual-text;
     }
-    method remove-actual-text {
+    method remove-actual-text is DEPRECATED {
         with $.ActualText {
             $!actual-text = Nil;
             $!value.attributes<ActualText>:delete;
