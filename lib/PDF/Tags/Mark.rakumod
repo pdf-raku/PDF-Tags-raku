@@ -31,6 +31,7 @@ class PDF::Tags::Mark
     }
 
     method set-cos($!value) {
+        $!atts-built = False;
         my $cos;
         with $.mcid -> UInt $MCID {
             $cos = $MCID;

@@ -25,7 +25,7 @@ class PDF::Tags::Elem
     use PDF::XObject::Image;
     use PDF::XObject;
 
-    method cos(--> PDF::StructElem) handles <ActualText Alt> { callsame() }
+    method cos(--> PDF::StructElem) handles <ActualText Alt Lang> { callsame() }
     has PDF::Tags::Node::Parent $.parent is rw = self.root;
     has Hash $!attributes;
     has TagName $.name is built;
@@ -82,7 +82,7 @@ class PDF::Tags::Elem
 
     method build-kid($) {
         given callsame() {
-            if ! $.root.marks && $_ ~~ PDF::Tags::Mark {
+            if ! $.root.marks && $_ ~~ PDF::Tags::Mark && !.attributes<Lang> {
                 # dereference marked content tags. just get the aggregate text
                 $.build-kid(.text);
             }
@@ -94,20 +94,24 @@ class PDF::Tags::Elem
 
     method text returns Str { self.cos.ActualText // $.kids».text.join }
 
-    submethod TWEAK(Str :$Alt, Str :$class, :%attributes) {
-        self.Pg = $_ with self.cos.Pg;
-        my Str:D $tag = self.cos.tag;
-        with self.root.role-map{$tag} {
-            $!role = $tag;
-            $!name = $_;
-        }
-        else {
-            $!name = $tag;
-        }
+    submethod TWEAK(Str :$Alt, Str :$ActualText, Str :$Lang, Str :$class, :%attributes) {
         self.set-attributes(|%attributes)
             if %attributes;
-        self.cos.Alt = $_ with $Alt;
-        self.cos.C = PDF::COS::Name.COERCE($_) with $class;
+        given self.cos -> $cos {
+            self.Pg = $_ with $cos.Pg;
+            $cos.Alt = $_ with $Alt;
+            $cos.ActualText = $_ with $ActualText;
+            $cos.Lang = $_ with $Lang;
+            $cos.C = PDF::COS::Name.COERCE($_) with $class;
+            my Str:D $tag = $cos.tag;
+            with self.root.role-map{$tag} {
+                $!role = $tag;
+                $!name = $_;
+            }
+            else {
+                $!name = $tag;
+            }
+        }
     }
 
     method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
@@ -130,8 +134,8 @@ class PDF::Tags::Elem
     }
 
     # combined add-kid + mark
-    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Str :$class, :%attributes, |c --> PDF::Tags::Elem:D) {
-        given self.add-kid(:$name, :$Alt, :$class, :%attributes) {
+    multi method add-kid(PDF::Content:D $gfx, &action, :$name!, Str :$Alt, Str :$Lang, Str :$ActualText, Str :$class, :%attributes, |c --> PDF::Tags::Elem:D) {
+        given self.add-kid(:$name, :$Alt, :$Lang, :$ActualText, :$class, :%attributes) {
             .mark($gfx, &action, |c);
             $_;
         }

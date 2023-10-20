@@ -209,6 +209,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         if $!marks {
             %attributes<ActualText> = $_ with $actual-text;
         }
+        %attributes<Lang> = $_ with $node.Lang;
 
         if $name eq 'Link' {
             %attributes<href> = $_ with find-href($node);
@@ -305,11 +306,19 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
     if $omit-tag {
+        if $!atts {
+            # try to retain content-level language tags
+            my $Lang := .<Lang>
+                with $node.attributes;
+            if $Lang {
+                $text = sprintf('<Span Lang="%s">%s</Span>', xml-escape($Lang), $text);
+            }
+        }
         $text;
     }
     else {
-        my $atts := atts-str($node.attributes);
-        "\<$name$atts" ~ ($text ?? "\>$text\</$name\>" !! '/>');
+        my $atts-str := $!atts ?? atts-str($node.attributes) !! '';
+        "\<$name$atts-str" ~ ($text ?? "\>$text\</$name\>" !! '/>');
     }
 }
 
