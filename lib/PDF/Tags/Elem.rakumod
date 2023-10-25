@@ -250,7 +250,7 @@ class PDF::Tags::Elem
         die "element contains multiple xobjects" if @xobjects > 1;
         my PDF::XObject:D $Stm = @xobjects[0];
         my PDF::Tags::Elem $node = $frag.copy-tree(:$Stm, :$parent);
-        if $node.name eq '#frag' {
+        if $node.name eq 'DocumentFragment' {
             $parent.add-kid(:node($_)) for $node.kids;
         }
         else {

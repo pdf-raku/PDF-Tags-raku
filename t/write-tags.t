@@ -86,7 +86,7 @@ $page.graphics: -> $gfx {
         my $p = $form-frag.Paragraph: $_, {
             .say: "Some sample tagged text", :font($body-font), :$font-size;
         };
-        is $p.node-path, '#frag/P[1]';
+        is $p.node-path, 'DocumentFragment/P[1]';
     }
 
     $doc.do($gfx, $form-frag, :position[150, 70]);
