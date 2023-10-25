@@ -306,7 +306,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
     if $omit-tag {
-        if $!atts {
+        if $!atts && $!omit !~~ 'Span' {
             # try to retain content-level language tags
             my $Lang := .<Lang>
                 with $node.attributes;
