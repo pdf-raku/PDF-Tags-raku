@@ -1,6 +1,10 @@
 {{$NEXT}}
+
+0.1.13  2023-10-27T07:31:38+13:00
   - Use 'DocumentFragment' to name document fragments. It's the
     official name in PDF 2.0
+  - Remove some leaked <Span Lang=...>...</Span> tags when using
+    --omit=Span option; introduced in v0.1.12
 
 0.1.12  2023-10-21T09:20:59+13:00
   - Add support for Lang attribute in XML and element construction 
