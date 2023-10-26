@@ -99,6 +99,11 @@ TOCI | TableOfContentsItem | Table of contents (leaf) item
 Index | | An index of keywords and topics, usually at the end of the document (text with accompanying Reference content)
 NonStruct | NonStructural | non-structural grouping element (element itself not intended to be exported to other formats like HTML, but 'transparent' to its content which is processed normally)
 Private | | Content only meaningful to the creator (element and its content not intended to be exported to other formats like HTML)
+DocumentFragment | | A partial document fragment (PDF 2.0)
+Aside | | Distinct side content (PDF 2.0)
+Sub | Subdivision | A subdivision (PDF 2.0)
+Title | | Encloses a title of a document or section (PDF 2.0)
+FENote | | Used to markup end notes and footnotes (PDF 2.0)
 
 ### "Block" elements:
 
@@ -144,6 +149,8 @@ RP | RubyPunctuation |
 Warichu | | Japanese/Chinese longer description
 WT | WarichuText
 WP | WarichuPunctuation
+Emphasis | Em | (PDF 2.0)
+Strong | | (PDF 2.0)
 
 ### "Illustration" elements (should have Alt and/or ActualText set):
 
