@@ -27,15 +27,17 @@ has Str  $.omit;
 has Str  $.root-tag;
 has Bool $!got-nl = True;
 has Bool $!feed;
-has Bool $!first = True;
+has Bool $!snug = True;
+has Int $!n = 0;
 
 method !chunk(Str $s is copy, UInt $depth = 0) {
     if $s {
+        $!n++;
         if $!feed || $!got-nl {
-            take "\n" ~ ('  ' x $depth) unless $!first--;
+            take "\n" ~ ('  ' x $depth) unless $!snug--;
             $!feed = False;
         }
-        if $*inline {
+        if $*inline && $s {
             take $s
         }
         else {
@@ -44,6 +46,12 @@ method !chunk(Str $s is copy, UInt $depth = 0) {
             take $s.subst(/\n/, { "\n" ~ ( '  ' x $depth)}, :g);
         }
     }
+}
+
+method !no-output(&action --> Bool) {
+    my $n0 = $!n;
+    &action();
+    $!n == $n0;
 }
 
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
@@ -248,12 +256,12 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             if $elems {
                 self!frag("<$name$att>", $depth++)
                     unless $omit-tag;
-
-                for ^$elems {
-                    my $kid = $node.kids[$_];
-                    self.stream-xml($kid, :$depth);
+                temp $!snug = self!no-output: {
+                    for ^$elems {
+                        my $kid = $node.kids[$_];
+                        self.stream-xml($kid, :$depth);
+                    }
                 }
-
                 self!frag("</$name>", --$depth)
                      unless $omit-tag;
             }
@@ -306,7 +314,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
     if $omit-tag {
-        if $!atts && $!omit !~~ 'Span' {
+        if $!atts && $omit-tag !~~ 'Span' {
             # try to retain content-level language tags
             my $Lang := .<Lang>
                 with $node.attributes;
