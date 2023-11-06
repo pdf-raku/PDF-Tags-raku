@@ -265,7 +265,7 @@ Returns an XPath expression to locate the node in the document tree.
 Returns a Hash of child nodes (arrays of lists) and attributes (prefixed by '@')
 
    say $tags.first('Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
-   say $tags.first('Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
+   say $tags.first('Document/L[1]').Hash<@ListNumbering>; # list numbering attribute
 
 =head3 Alias methods
 
@@ -289,17 +289,16 @@ List(L), ListItem(LI), Label(Lbl), ListBody(LBody),
 
 =head4 Table Tags
 
-Table,  TableRow(TR),     TableHeader(TH),
+Table, TableRow(TR), TableHeader(TH),
 TableData(TD), TableBody(TBody), TableFooter(TFoot),
 
 =head4 Inline Element Tags
 
 Span, Quotation(Quote), Note, Reference,
 BibliographyEntry(BibEntry), Code, Link,
-Annotation(Annot),
+Annotation(Annot), Artifact,
 Ruby, RubyPunctutation(RP), RubyBaseText(RB), RubyText(RT),
 Warichu, WarichuPunctutation(RP), WarichuText(RT),
-Artifact,
 
 =head4 Illustration Tags
 

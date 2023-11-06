@@ -1,14 +1,15 @@
 DocProj=pdf-raku.github.io
 DocRepo=https://github.com/pdf-raku/$(DocProj)
 DocLinker=../$(DocProj)/etc/resolve-links.raku
+TEST_JOBS ?= 6
 
 all : doc
 
 test :
-	@prove -e"raku -I ." t
+	@prove6 -I . -j $(TEST_JOBS) t
 
 loudtest :
-	@prove -e"raku -I ." -v t
+	@prove6 -I . -v t
 
 clean :
 	@rm -f docs/Tags.md docs/Tags/*.md docs/Tags/*/*.md
