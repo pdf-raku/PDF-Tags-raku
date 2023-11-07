@@ -136,7 +136,7 @@ class PDF::Tags:ver<0.1.14> {
   my $body-font = $pdf.core-font: :family<Helvetica>;
 
   my PDF::Tags $tags .= create: :$pdf;
-  my PDF::Tags::Elem $doc = $tags.Document;
+  my PDF::Tags::Elem $doc = $tags.Document: :Lang<en-NZ>;
 
   $page.graphics: -> $gfx {
       $doc.Paragraph: $gfx, {

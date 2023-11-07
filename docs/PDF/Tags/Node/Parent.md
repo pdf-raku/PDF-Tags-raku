@@ -60,7 +60,7 @@ Returns an XPath expression to locate the node in the document tree.
 Returns a Hash of child nodes (arrays of lists) and attributes (prefixed by '@')
 
     say $tags.first('Document/L[1]').Hash<LBody>[0].text;  # text of first list-item
-    say $tags.first('Document/L[1]').Hash<@ListNumbering>; # lit numbering attribute
+    say $tags.first('Document/L[1]').Hash<@ListNumbering>; # list numbering attribute
 
 ### Alias methods
 
@@ -84,7 +84,7 @@ Table, TableRow(TR), TableHeader(TH), TableData(TD), TableBody(TBody), TableFoot
 
 #### Inline Element Tags
 
-Span, Quotation(Quote), Note, Reference, BibliographyEntry(BibEntry), Code, Link, Annotation(Annot), Ruby, RubyPunctutation(RP), RubyBaseText(RB), RubyText(RT), Warichu, WarichuPunctutation(RP), WarichuText(RT), Artifact,
+Span, Quotation(Quote), Note, Reference, BibliographyEntry(BibEntry), Code, Link, Annotation(Annot), Artifact, Ruby, RubyPunctutation(RP), RubyBaseText(RB), RubyText(RT), Warichu, WarichuPunctutation(RP), WarichuText(RT),
 
 #### Illustration Tags
 
