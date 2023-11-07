@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 6;
+plan 7;
 
 use PDF::Content::FontObj;
 use PDF::Tags;
@@ -11,7 +11,9 @@ use PDF::COS::Name;
 
 my PDF::Class $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
-my PDF::Tags::Elem $doc = $tags.Document;
+my PDF::Tags::Elem $doc = $tags.Document: :Lang<en-NZ>;
+my $lang = $doc.Lang;
+is $doc.Lang, 'en-NZ';
 
 my PDF::Page $page = $pdf.add-page;
 my PDF::Content::FontObj $header-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;

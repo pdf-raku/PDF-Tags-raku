@@ -26,7 +26,7 @@ use PDF::XObject::Image;
 my PDF::API6 $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf;
 # create the document root
-my PDF::Tags::Elem $doc = $tags.Document;
+my PDF::Tags::Elem $doc = $tags.Document: :Lang<en-NZ>;
 
 my PDF::Page $page = $pdf.add-page;
 my $header-font = $page.core-font: :family<Helvetica>, :weight<bold>;
