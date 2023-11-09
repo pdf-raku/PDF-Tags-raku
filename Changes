@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.1.15  2023-11-10T08:07:05+13:00
   - more fixes to XML :omit option
   - document some PDF 2.0 tags
   - add :Lang to root element in doco and tests
