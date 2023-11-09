@@ -57,8 +57,9 @@ class PDF::Tags::XPath::Actions {
         make -> @set {
             my @step;
             for @set {
-                my @group = &axis($_).grep(&node-test);
-                @group = ($_)(@group) with &predicate;
+                my @group = .&axis.grep(&node-test);
+                @group .= &predicate
+                    if &predicate.defined;
                 @step.append: @group;
             }
             @step;
@@ -75,7 +76,7 @@ class PDF::Tags::XPath::Actions {
                     ++$*position;
                     my $v := &expr();
                     take $_ if ($v ~~ Bool && $v)
-                       || ($v ~~ Int &&  $v == $*position);
+                       || ($v ~~ Int && $v == $*position);
                 }
             }
         }

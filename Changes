@@ -1,4 +1,7 @@
 {{$NEXT}}
+  - more fixes to XML :omit option
+  - document some PDF 2.0 tags
+  - add :Lang to root element in doco and tests
 
 0.1.14  2023-10-28T14:27:41+13:00
   - Avoid whitespace in some tag XML serialization e.g.
