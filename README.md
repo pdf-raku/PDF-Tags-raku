@@ -298,7 +298,7 @@ text is being inserted as a paragraph in the structure tree.
 This tag may be used in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
 
 ```raku
-$gfx.tag: Span, :Lang<es-MX>, {
+$gfx.tag: Span: :Lang<es-MX>, {
     .say('Hasta la vista', :position[50, 80]);
 }
 ```
