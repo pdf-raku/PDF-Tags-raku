@@ -98,19 +98,15 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     self!line($!css) if $!style;
+    $!root-tag //= 'DocumentFragment' if .elems != 1;
 
     self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
 
     if .elems {
-        die "Tagged PDF has multiple top-level tags; no :root-tag given"
-            if .elems > 1 && ! $!root-tag.defined;
         self.stream-xml($_, :$depth) for .kids;
     }
-    else {
-        warn "Tagged PDF has no content and no :root-tag has been given"
-            unless $!root-tag.defined;
-    }
+
     self!line('</' ~ $_ ~ '>', --$depth)
         with $!root-tag;
 }
