@@ -25,6 +25,7 @@ has Bool $.fields = True;
 has Bool $.valid = !$!marks && !$!roles;
 has Str  $.omit;
 has Str  $.root-tag;
+has Bool $.artifacts = False;
 has Bool $!got-nl = True;
 has Bool $!feed;
 has Bool $!snug = True;
@@ -221,6 +222,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         atts-str(%attributes);
     } // '';
     $name = $_ with $role;
+    return if $name eq 'Artifact' && !$!artifacts;
     my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
