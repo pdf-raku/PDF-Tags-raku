@@ -298,6 +298,8 @@ multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
 }
 
 method !marked-content(PDF::Tags::Mark $node, :$depth!) {
+    my $name := $node.name;
+    return '' if $name eq 'Artifact' && !$!artifacts;
     my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
             when PDF::Tags::Mark {
@@ -308,7 +310,6 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
         }
         @text.join;
     }
-    my $name := $node.name;
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
     if $omit-tag {
