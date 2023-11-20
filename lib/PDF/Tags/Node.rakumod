@@ -15,7 +15,7 @@ class PDF::Tags::Node {
     my subset TagName of Str is export(:TagName)
         where Str:U | /^<ident>$/;
 
-    has PDF::Tags::Node::Root $.root is required handles<role-map>;
+    has PDF::Tags::Node::Root $.root is required handles<role-map artifacts>;
     has PDF::Page $.Pg; # current page scope
     has $.cos is required;
     method set-cos($!cos) { }

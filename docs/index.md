@@ -298,7 +298,7 @@ text is being inserted as a paragraph in the structure tree.
 This tag may be used in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
 
 ```raku
-$gfx.tag: Span, :Lang<es-MX>, {
+$gfx.tag: Span: :Lang<es-MX>, {
     .say('Hasta la vista', :position[50, 80]);
 }
 ```
@@ -340,6 +340,51 @@ $page.graphics: -> $gfx {
 
 }
 
+```
+
+### Content Continuation
+
+Content sometimes needs to be continued across graphics objects, such as a paragraph that
+spans multiple pages. The `mark` method may be called repeatably to achieve this:
+
+```raku
+use PDF::Class;
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Page;
+use PDF::Content::FontObj;
+
+my PDF::Class $pdf .= new;
+my PDF::Tags $tags .= create: :$pdf;
+my PDF::Tags::Elem $doc = $tags.Document;
+my PDF::Page $page = $pdf.add-page;
+my PDF::Content::FontObj $font = $pdf.core-font: :family<Helvetica>;
+my PDF::Tags::Elem $para = $doc.Paragraph;
+
+$page.graphics: -> $gfx {
+
+    $para.mark: $gfx, {
+        .say('This paragraph starts on first page...',
+             :$font,
+             :font-size(15),
+             :position[50, 600]);
+    };
+
+}
+
+$page = $pdf.add-page;
+$page.graphics: -> $gfx {
+
+    $para.mark: $gfx, {
+        .say('...and finishes on the second page',
+             :$font,
+             :font-size(15),
+             :position[50, 600]);
+    };
+
+}
+
+$pdf.save-as: "span.pdf";
 ```
 
 ### Tagging and Metadata

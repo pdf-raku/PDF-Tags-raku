@@ -92,6 +92,7 @@ method say(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
 
 multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     self!line('<?xml version="1.0" encoding="UTF-8"?>');
+    $!root-tag //= 'DocumentFragment' if .elems != 1;
     if $!dtd && $!valid {
         my $doctype = $!root-tag;
         $doctype //= .name with .kids.head;
@@ -99,7 +100,6 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     self!line($!css) if $!style;
-    $!root-tag //= 'DocumentFragment' if .elems != 1;
 
     self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
@@ -211,9 +211,6 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         if $role {
             %attributes<role>:delete;
         }
-        if $!marks {
-            %attributes<ActualText> = $_ with $actual-text;
-        }
         %attributes<Lang> = $_ with $node.Lang;
 
         if $name eq 'Link' {
@@ -303,7 +300,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
             when PDF::Tags::Mark {
-                my $text = self!marked-content($_, :$depth);
+                self!marked-content($_, :$depth);
             }
             when PDF::Tags::Text { xml-escape(.Str) }
             default { die "unhandled tagged content: {.WHAT.raku}"; }
@@ -338,7 +335,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     use PDF::Tags::XML-Writer;
     my PDF::Class $pdf .= open: "t/write-tags.pdf";
     my PDF::Tags::Reader $tags .= read: :$pdf;
-    my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
+    my PDF::Tags::XML-Writer $xml-writer .= new: :debug;
     # atomic write
     say $xml-writer.Str($tags);
     # streamed write

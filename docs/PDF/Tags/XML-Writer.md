@@ -16,7 +16,7 @@ Synopsis
     use PDF::Tags::XML-Writer;
     my PDF::Class $pdf .= open: "t/write-tags.pdf";
     my PDF::Tags::Reader $tags .= read: :$pdf;
-    my PDF::Tags::XML-Writer $xml-writer .= new: :debug, :root-tag<Docs>;
+    my PDF::Tags::XML-Writer $xml-writer .= new: :debug;
     # atomic write
     say $xml-writer.Str($tags);
     # streamed write

@@ -1,7 +1,9 @@
 {{$NEXT}}
+  - Fix setting of DOCTYPE in external Dtd
 
 0.1.16  2023-11-15T10:09:02+13:00
-  - Always wrap XML content with 0 or root elements in a DocumentFragment
+  - Always wrap XML content with 0 or many root elements in a
+    DocumentFragment to ensure validity
   - Handle 'Artifact' tags in the structure tree
 
 0.1.15  2023-11-10T08:07:05+13:00
