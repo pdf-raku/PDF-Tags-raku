@@ -6,22 +6,17 @@ use PDF::Tags::Node;
 sub child(PDF::Tags::Node:D $_) is export { .?kids // [] }
 
 sub ancestor-or-self(PDF::Tags::Node:D $_) is export {
-    my @nodes = ancestor-or-self($_)
-        with .?parent;
-    @nodes.push: $_;
+    ancestor($_).push: $_;
  }
 
 sub ancestor(PDF::Tags::Node:D $_) is export {
     my @nodes = ancestor-or-self($_)
         with .?parent;
-    @nodes;
+    @nodes
 }
 
 sub descendant-or-self(PDF::Tags::Node:D $_) is export {
-    my @nodes = $_;
-    @nodes.append: descendant-or-self($_)
-        for .?kids // [];
-    @nodes;
+    descendant($_).unshift: $_;
 }
 
 sub descendant(PDF::Tags::Node:D $_) is export {
@@ -82,7 +77,7 @@ sub preceding-sibling(PDF::Tags::Node:D $item) is export {
 }
 
 sub parent(PDF::Tags::Node:D $_) is export {
-    with .?parent { [ $_ ] } else { [] }
+    .?parent // [];
 }
 
 sub self(PDF::Tags::Node:D $_) is export {

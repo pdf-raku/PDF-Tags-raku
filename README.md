@@ -65,7 +65,7 @@ PDF tagging may assist PDF readers and other automated tools in reading PDF
 documents and locating content such as text and images.
 
 This module provides a DOM  like interface for creating and traversing PDF structure and
-content via tags. It also an XPath like search capability. It is designed for use in
+content via tags. It also has an XPath like search capability. It is designed for use in
 conjunction with PDF::Class or PDF::API6.
 
 Standard Tags
@@ -344,7 +344,7 @@ $page.graphics: -> $gfx {
 
 ### Content Continuation
 
-Content sometimes needs to be continued across graphics objects, such as a paragraph that
+Content sometimes needs to be continued across graphics elements, such as a paragraph that
 spans multiple pages. The `mark` method may be called repeatably to achieve this:
 
 ```raku

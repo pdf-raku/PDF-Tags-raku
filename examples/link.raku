@@ -39,7 +39,7 @@ $page.graphics: -> $gfx {
 
     # Use PDF::API6 to create the link
     my $link-text ='Sample Annot';
-    my $destination = $pdf.destination( :name<sample-annot>, :page(2), :fit(FitWindow) );
+    my DestRef $destination = $pdf.destination( :name<sample-annot>, :page(2), :fit(FitWindow) );
     my PDF::Action $action = PDF::API6.action: :$destination;
     my PDF::Annot::Link $href = $pdf.annotation: :$page, :$action, :content($link-text), :Border[0,0,0], :rect[0 xx 4];
 
