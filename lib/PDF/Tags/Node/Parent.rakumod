@@ -1,189 +1,188 @@
-use PDF::Tags::Node :&node-class, :&build-node, :TagName;
-
 #| Abstract non-leaf node
-class PDF::Tags::Node::Parent
-    is PDF::Tags::Node {
+unit class PDF::Tags::Node::Parent;
 
-    use Method::Also;
-    use PDF::COS;
-    use PDF::StructElem;
-    use PDF::Content::Tag :TagSet, :%TagAliases;
+use PDF::Tags::Node :&node-class, :&build-node, :TagName;
+also is PDF::Tags::Node;
 
-    has PDF::Tags::Node @.kids;
-    method kids-raw { @!kids }
-    has Hash $!store;
-    has Bool $!reified;
-    has UInt $!elems;
-    has      $.style is rw; # Computed CSS style
+use Method::Also;
+use PDF::COS;
+use PDF::StructElem;
+use PDF::Content::Tag :TagSet, :%TagAliases;
 
-    method elems(::?CLASS:D:) is also<Numeric> {
-        $!elems //= do with $.cos.kids {
-            when Hash { 1 }
-            default { .elems }
-        } // 0;
-    }
+has PDF::Tags::Node @.kids;
+method kids-raw { @!kids }
+has Hash $!store;
+has Bool $!reified;
+has UInt $!elems;
+has      $.style is rw; # Computed CSS style
 
-    method node-path {
-        my $name  = self.name;
-        my $xpath = $name;
+method elems(::?CLASS:D:) is also<Numeric> {
+    $!elems //= do with $.cos.kids {
+        when Hash { 1 }
+        default { .elems }
+    } // 0;
+}
 
-        with self.parent {
-            $xpath = .node-path ~ '/' ~ $xpath
-                unless .name eq '#root';
-            unless .kids == 1 {
-                # add [n] index
-                my Int $nth;
-                for .kids {
-                    if .name eq $name {
-                        $nth++;
-                        if $_ === self {
-                            $xpath ~= '[' ~ $nth ~ ']';
-                            last;
-                        }
+method node-path {
+    my $name  = self.name;
+    my $xpath = $name;
+
+    with self.parent {
+        $xpath = .node-path ~ '/' ~ $xpath
+            unless .name eq '#root';
+        unless .kids == 1 {
+            # add [n] index
+            my Int $nth;
+            for .kids {
+                if .name eq $name {
+                    $nth++;
+                    if $_ === self {
+                        $xpath ~= '[' ~ $nth ~ ']';
+                        last;
                     }
                 }
             }
         }
-        $xpath;
+    }
+    $xpath;
+}
+
+method build-kid(::?CLASS:D: $cos, :$parent=self, :$Pg = $.Pg, |c) {
+    build-node($cos, :$parent, :$Pg, :$.root, |c);
+}
+
+method !adopt-node($node) {
+    # checks
+    die "unable to add fragment"
+        if $node.name eq 'DocumentFragment';
+    die "unable to add a node to itself"
+        if $node === self || $node.cos === self.cos;
+
+    with $node.parent {
+        die "node already parented"
+            unless $_ === self || .name eq 'DocumentFragment';
     }
 
-    method build-kid(::?CLASS:D: $cos, :$parent=self, :$Pg = $.Pg, |c) {
-        build-node($cos, :$parent, :$Pg, :$.root, |c);
+    # re-parent cos node
+    given self.cos.kids //= [] {
+        $_ = [$_] unless $_ ~~ List;
+        $node.cos.P = self.cos
+            if $node.cos ~~ PDF::StructElem;
+        .push($node.cos);
     }
 
-    method !adopt-node($node) {
-        # checks
-        die "unable to add fragment"
-            if $node.name eq 'DocumentFragment';
-        die "unable to add a node to itself"
-            if $node === self || $node.cos === self.cos;
+    # re-parent dom node
+    $node.parent = self;
+    @!kids.push: $node;
 
-        with $node.parent {
-            die "node already parented"
-                unless $_ === self || .name eq 'DocumentFragment';
+    # update caches
+    $!elems = Nil;
+    self.AT-POS($.elems-1) if $!reified;
+    .{$node.name}.push: $node with $!store;
+
+    $node;
+}
+
+multi method add-kid(PDF::Tags::Node:D :$node! --> PDF::Tags::Node:D) {
+    self!adopt-node($node);
+}
+multi method add-kid(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
+    my $P := self.cos;
+    my PDF::StructElem() $cos = %(
+        :Type( :name<StructElem> ),
+        :S( :$name ),
+        :$P,
+    );
+    self.add-kid(:$cos, |%o)
+}
+multi method add-kid(:$cos!, *%o --> PDF::Tags::Node:D) {
+    my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
+    self!adopt-node($kid);
+}
+
+multi method fragment(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
+    my PDF::StructElem() $cos = %(
+        :Type( :name<StructElem> ),
+        :S( :$name ),
+        :P(Any), # tba
+    );
+    my $parent = self.WHAT;
+    self.build-kid($cos, :$parent, |%o);
+}
+multi method fragment(Str:D $name = 'DocumentFragment', *%o) {
+    self.fragment(:$name, |%o);
+}
+
+multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
+    self.add-kid(:$name, |c)
+}
+multi method FALLBACK(Str:D $_ where (%TagAliases{$_}:exists), |c) {
+    my Str:D $name = %TagAliases{$_};
+    self.add-kid(:$name, |c)
+}
+multi method FALLBACK(Str:D $name where ($.role-map{$_}:exists), |c) {
+    self.add-kid(:$name, |c)
+}
+multi method FALLBACK($name, $?) {
+    die "Unknown tag $name";
+}
+method AT-POS(UInt $i) {
+    fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
+    @!kids[$i] //= self.build-kid($.cos.kids[$i]);
+}
+method Array {
+    $!reified ||= do {
+        self.AT-POS($_) for ^$.elems;
+        True;
+    }
+    @!kids;
+}
+method Hash handles <keys pairs> {
+    $!store //= do {
+        my %h;
+        %h{.name}.push: $_ for self.Array;
+        if self.can('attributes') {
+            %h{'@' ~ .key} = .value
+               for self.attributes.pairs;
         }
+        %h;
+    }
+}
+method set-attribute(Str $key, $val) {
+    fail "attributes not applicable to objects of type {self.WHAT.raku}"
+        unless self.can('attributes');
+    .{$key} = $val with $!store;
+    $val;
+}
+multi method AT-KEY(TagName:D $name) {
+    # tag name
+    @(self.Hash{$name} // []);
+}
+multi method AT-KEY(Str:D $xpath) is default {
+    $.xpath-context.AT-KEY($xpath);
+}
 
-        # re-parent cos node
-        given self.cos.kids //= [] {
-            $_ = [$_] unless $_ ~~ List;
-            $node.cos.P = self.cos
-                if $node.cos ~~ PDF::StructElem;
-            .push($node.cos);
-        }
-
-        # re-parent dom node
-        $node.parent = self;
-        @!kids.push: $node;
-
-        # update caches
-        $!elems = Nil;
-        self.AT-POS($.elems-1) if $!reified;
-        .{$node.name}.push: $node with $!store;
-
-        $node;
-    }
-
-    multi method add-kid(PDF::Tags::Node:D :$node! --> PDF::Tags::Node:D) {
-        self!adopt-node($node);
-    }
-    multi method add-kid(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
-        my $P := self.cos;
-        my PDF::StructElem() $cos = %(
-            :Type( :name<StructElem> ),
-            :S( :$name ),
-            :$P,
-        );
-        self.add-kid(:$cos, |%o)
-    }
-    multi method add-kid(:$cos!, *%o --> PDF::Tags::Node:D) {
-        my PDF::Tags::Node $kid := self.build-kid($cos, |%o);
-        self!adopt-node($kid);
-    }
-
-    multi method fragment(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
-        my PDF::StructElem() $cos = %(
-            :Type( :name<StructElem> ),
-            :S( :$name ),
-            :P(Any), # tba
-        );
-        my $parent = self.WHAT;
-        self.build-kid($cos, :$parent, |%o);
-    }
-    multi method fragment(Str:D $name = 'DocumentFragment', *%o) {
-        self.fragment(:$name, |%o);
-    }
-    multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
-        self.add-kid(:$name, |c)
-    }
-    multi method FALLBACK(Str:D $_ where (%TagAliases{$_}:exists), |c) {
-        my Str:D $name = %TagAliases{$_};
-        self.add-kid(:$name, |c)
-    }
-    multi method FALLBACK(Str:D $name where ($.role-map{$_}:exists), |c) {
-        self.add-kid(:$name, |c)
-    }
-    multi method FALLBACK($name, $?) {
-        die "Unknown tag $name";
-    }
-    method AT-POS(UInt $i) {
-        fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        @!kids[$i] //= self.build-kid($.cos.kids[$i]);
-    }
-    method Array {
-        $!reified ||= do {
-            self.AT-POS($_) for ^$.elems;
-            True;
-        }
-        @!kids;
-    }
-    method Hash handles <keys pairs> {
-        $!store //= do {
-            my %h;
-            %h{.name}.push: $_ for self.Array;
-            if self.can('attributes') {
-                %h{'@' ~ .key} = .value
-                   for self.attributes.pairs;
-            }
-            %h;
-        }
-    }
-    method set-attribute(Str $key, $val) {
-        fail "attributes not applicable to objects of type {self.WHAT.raku}"
-            unless self.can('attributes');
-        .{$key} = $val with $!store;
-        $val;
-    }
-    multi method AT-KEY(TagName:D $name) {
-        # tag name
-        @(self.Hash{$name} // []);
-    }
-    multi method AT-KEY(Str:D $xpath) is default {
-        $.xpath-context.AT-KEY($xpath);
-    }
-
-    method kids {
-        my class Kids does Iterable does Positional {
-            has PDF::Tags::Node $.node is required handles<elems AT-POS Numeric>;
-            method Array handles<List list values map grep> { $!node.Array }
-            method iterator {
-                class Iteration does Iterator {
-                    has UInt $!idx = 0;
-                    has PDF::Tags::Node::Parent $.node is required;
-                    method pull-one {
-                        if $!idx < $!node.elems {
-                            $!node.AT-POS($!idx++);
-                        }
-                        else {
-                            IterationEnd;
-                        }
+method kids {
+    my class Kids does Iterable does Positional {
+        has PDF::Tags::Node $.node is required handles<elems AT-POS Numeric>;
+        method Array handles<List list values map grep> { $!node.Array }
+        method iterator {
+            class Iteration does Iterator {
+                has UInt $!idx = 0;
+                has PDF::Tags::Node::Parent $.node is required;
+                method pull-one {
+                    if $!idx < $!node.elems {
+                        $!node.AT-POS($!idx++);
+                    }
+                    else {
+                        IterationEnd;
                     }
                 }
-                Iteration.new: :$.node;
             }
+            Iteration.new: :$.node;
         }
-        Kids.new: :node(self);
     }
-
+    Kids.new: :node(self);
 }
 
 constant ListAtts = set <ListNumbering>;

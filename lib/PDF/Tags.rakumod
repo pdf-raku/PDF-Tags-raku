@@ -60,10 +60,10 @@ class PDF::Tags:ver<0.1.16> {
                 my ($owner, $key) = att-owner(.key);
                 %atts-by-owner{$owner}{$key} = .value;
             }
-            my @atts = %atts-by-owner.keys.sort.map: -> $owner {
+            my PDF::Attributes() @atts = %atts-by-owner.keys.sort.map: -> $owner {
                 my %atts = %atts-by-owner{$owner};
                 %atts<O> = $owner;
-                PDF::Attributes.COERCE: %atts
+                %atts;
             }
 
             if @atts {
@@ -79,7 +79,7 @@ class PDF::Tags:ver<0.1.16> {
     }
 
     method create(
-        PDF::Class:D :$pdf,
+        PDF::Class:D :$pdf!,
         PDF::StructTreeRoot() :$cos = { :Type( :name<StructTreeRoot> )},
         :%role-map,
         :%class-map,

@@ -24,10 +24,10 @@ my PDF::Content::FontObj $font = $pdf.core-font: :family<Helvetica>;
 my PDF::Content::FontObj $hdr-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
 
 my PDF::Tags $tags .= create: :$pdf;
-my @page-frags = (1..10).map: { PDF::Content::PageTree.pages-fragment() }
-my @struct-frags = (1..10).map: { $tags.fragment(Division) };
+my @page-frags = (1..30).map: { PDF::Content::PageTree.pages-fragment() }
+my @struct-frags = (1..30).map: { $tags.fragment(Division) };
 
-(1..10).race(:batch(1)).map: -> $chap-num {
+(1..30).race(:batch(1)).map: -> $chap-num {
     # create a multi-page fragment for later assembly
     my PDF::Content::PageTree $pages = @page-frags[$chap-num-1];
     # also a chapter tag for later assembly

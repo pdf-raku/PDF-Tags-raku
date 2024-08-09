@@ -1,28 +1,28 @@
-use PDF::Tags::Node :&build-node;
-
 #| Tagged object reference
-class PDF::Tags::ObjRef
-    is PDF::Tags::Node {
-    use PDF::OBJR;
-    use PDF::StructElem;
-    use PDF::Tags::Node::Parent;
-    use PDF::Class::StructItem;
+unit class PDF::Tags::ObjRef;
 
-    submethod TWEAK {
-        self.Pg = $_ with self.cos.Pg;
-    }
-    has PDF::Tags::Node::Parent $.parent is rw;
-    has PDF::Tags::Node::Parent $!struct-parent;
-    method struct-parent {
-        $!struct-parent //= do with $.cos.object.struct-parent {
-            build-node($.root.parent-tree[$_+0], :$.Pg, :parent($.root));
-        }
-    }
-    method cos(--> PDF::OBJR) { callsame() }
+use PDF::Tags::Node :&build-node;
+also is PDF::Tags::Node;
 
-    method name { '#ref' }
-    method value(--> PDF::Class::StructItem) { $.cos.object }
+use PDF::OBJR;
+use PDF::StructElem;
+use PDF::Tags::Node::Parent;
+use PDF::Class::StructItem;
+
+submethod TWEAK {
+    self.Pg = $_ with self.cos.Pg;
 }
+has PDF::Tags::Node::Parent $.parent is rw;
+has PDF::Tags::Node::Parent $!struct-parent;
+method struct-parent {
+    $!struct-parent //= do with $.cos.object.struct-parent {
+        build-node($.root.parent-tree[$_+0], :$.Pg, :parent($.root));
+    }
+}
+method cos(--> PDF::OBJR) { callsame() }
+
+method name { '#ref' }
+method value(--> PDF::Class::StructItem) { $.cos.object }
 
 =begin pod
 

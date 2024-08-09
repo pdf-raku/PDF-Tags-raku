@@ -1,27 +1,29 @@
-use PDF::Tags::Node;
 #| Attribute node
-class PDF::Tags::Attr
-    is PDF::Tags::Node {
-    use PDF::Tags::Node::Parent;
-    use Method::Also;
+unit class PDF::Tags::Attr;
 
-    has PDF::Tags::Node::Parent $.parent is rw;
-    submethod TWEAK(Pair :$cos!) {
-        self.set-cos($cos);
-    }
-    method xpath {
-        my Str $xpath = .xpath  with $!parent;
-        $xpath ~= '@' ~ self.name;
-        $xpath;
-    }
-    multi sub to-str(@a) { @a».Str.join: ' '}
-    multi sub to-str($_) { .Str}
-    method name { $.cos.key }
-    method value { $.cos.value }
-    method text is also<Str> { to-str($.value) }
-    method gist { [~] '@', $.cos.key, '=', $.text }
-    method cos(--> Pair) is also<kv> { callsame() }
+use PDF::Tags::Node;
+also is PDF::Tags::Node;
+
+use PDF::Tags::Node::Parent;
+use Method::Also;
+
+has PDF::Tags::Node::Parent $.parent is rw;
+submethod TWEAK(Pair :$cos!) {
+    self.set-cos($cos);
 }
+method xpath {
+    my Str $xpath = .xpath  with $!parent;
+    $xpath ~= '@' ~ self.name;
+    $xpath;
+}
+multi sub to-str(@a) { @a».Str.join: ' '}
+multi sub to-str($_) { .Str}
+method name { $.cos.key }
+method value { $.cos.value }
+method text is also<Str> { to-str($.value) }
+method gist { [~] '@', $.cos.key, '=', $.text }
+method cos(--> Pair) is also<kv> { callsame() }
+
 
 =begin pod
 

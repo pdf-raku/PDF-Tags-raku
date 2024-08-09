@@ -1,119 +1,118 @@
-use PDF::Tags::Node::Parent;
-
 #| Marked content reference
-class PDF::Tags::Mark
-    is PDF::Tags::Node::Parent {
+unit class PDF::Tags::Mark;
 
-    use PDF::COS;
-    use PDF::COS::TextString;
-    use PDF::Content::Tag;
-    use PDF::Content::Canvas;
-    # PDF::Class
-    use PDF::Page;
-    use PDF::MCR;
-    use PDF::XObject::Form;
+use PDF::Tags::Node::Parent;
+also is PDF::Tags::Node::Parent;
 
-    has PDF::Tags::Node::Parent $.parent is rw;
-    has %!attributes;
-    has Bool $!atts-built;
-    has Str $.actual-text is rw;
-    has PDF::Content::Canvas $.Stm;
-    has PDF::Content::Tag $.value is built handles<name mcid elems>;
+use PDF::COS;
+use PDF::COS::TextString;
+use PDF::Content::Tag;
+use PDF::Content::Canvas;
+# PDF::Class
+use PDF::Page;
+use PDF::MCR;
+use PDF::XObject::Form;
 
-    sub mcr(Int:D $MCID, :$Stm, :$Pg) {
-        my PDF::MCR() $cos = %(
-                                :Type( :name<MCR> ),
-                                :$MCID,
-                            );
-        $cos<Stm> = $_ with $Stm;
-        $cos<Pg>  = $_ with $Pg;
-        $cos;
-    }
+has PDF::Tags::Node::Parent $.parent is rw;
+has %!attributes;
+has Bool $!atts-built;
+has Str $.actual-text is rw;
+has PDF::Content::Canvas $.Stm;
+has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
-    method set-cos($!value) {
-        $!atts-built = False;
-        my $cos;
-        with $.mcid -> UInt $MCID {
-            $cos = $MCID;
-            my $referrer;
-            given $!value.canvas {
-                when PDF::XObject::Form {
-                    $!Stm = $_;
-                    $cos = mcr($MCID, :$!Stm, :$.Pg);
-                }
-                when PDF::Page {
-                    my $Pg = $_;
-                    with self.parent.Pg {
-                        $cos = mcr($MCID, :$Pg)
-                            unless $_ === $Pg;
-                    }
-                    else {
-                        $_ = $Pg;
-                    }
-                }
-                # unlikely
-                default { warn "can mark object of type {.WHAT.raku}"; }
+sub mcr(Int:D $MCID, :$Stm, :$Pg) {
+    my PDF::MCR() $cos = %(
+                            :Type( :name<MCR> ),
+                            :$MCID,
+                        );
+    $cos<Stm> = $_ with $Stm;
+    $cos<Pg>  = $_ with $Pg;
+    $cos;
+}
+
+method set-cos($!value) {
+    $!atts-built = False;
+    my $cos;
+    with $.mcid -> UInt $MCID {
+        $cos = $MCID;
+        my $referrer;
+        given $!value.canvas {
+            when PDF::XObject::Form {
+                $!Stm = $_;
+                $cos = mcr($MCID, :$!Stm, :$.Pg);
             }
+            when PDF::Page {
+                my $Pg = $_;
+                with self.parent.Pg {
+                    $cos = mcr($MCID, :$Pg)
+                        unless $_ === $Pg;
+                }
+                else {
+                    $_ = $Pg;
+                }
+            }
+            # unlikely
+            default { warn "can mark object of type {.WHAT.raku}"; }
         }
-        callwith($cos);
     }
+    callwith($cos);
+}
 
-    multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!, Str :$!actual-text) {
-        self.set-cos($_);
-    }
-    multi submethod TWEAK(UInt:D :cos($mcid)!) {
-        with self.Stm // self.Pg -> PDF::Content::Canvas $_ {
-            with self.root.canvas-tags($_){$mcid} {
-                self.set-cos($_);
-            }
-            else {
-                die "unable to resolve MCID: $mcid";
-            }
+multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!, Str :$!actual-text) {
+    self.set-cos($_);
+}
+multi submethod TWEAK(UInt:D :cos($mcid)!) {
+    with self.Stm // self.Pg -> PDF::Content::Canvas $_ {
+        with self.root.canvas-tags($_){$mcid} {
+            self.set-cos($_);
         }
         else {
-            die "no current marked-content page";
+            die "unable to resolve MCID: $mcid";
         }
     }
-    method attributes {
-        $!atts-built ||= do {
-            %!attributes = $!value.attributes;
-            True;
-        }
-        %!attributes;
+    else {
+        die "no current marked-content page";
     }
-    method set-attribute(Str() $key, $val) {
-        fail "todo: update marked content attributes";
-        callsame();
+}
+method attributes {
+    $!atts-built ||= do {
+        %!attributes = $!value.attributes;
+        True;
     }
+    %!attributes;
+}
+method set-attribute(Str() $key, $val) {
+    fail "todo: update marked content attributes";
+    callsame();
+}
 
-    sub sanitize(Str $_) {
-        # actual text sometimes have backspaces, etc?
-        .subst(
-            /<[ \x0..\x8 ]>/,
-            '',
-            :g
-        );
-    }
+sub sanitize(Str $_) {
+    # actual text sometimes have backspaces, etc?
+    .subst(
+        /<[ \x0..\x8 ]>/,
+        '',
+        :g
+    );
+}
 
-    method ActualText {
-        $.attributes unless $!atts-built;
-        $!actual-text //= sanitize PDF::COS::TextString.COERCE: $_
-            with %!attributes<ActualText>;
-        $!actual-text;
+method ActualText {
+    $.attributes unless $!atts-built;
+    $!actual-text //= sanitize PDF::COS::TextString.COERCE: $_
+        with %!attributes<ActualText>;
+    $!actual-text;
+}
+method remove-actual-text is DEPRECATED {
+    with $.ActualText {
+        $!actual-text = Nil;
+        $!value.attributes<ActualText>:delete;
+        %!attributes<ActualText>:delete;
+        $_;
     }
-    method remove-actual-text is DEPRECATED {
-        with $.ActualText {
-            $!actual-text = Nil;
-            $!value.attributes<ActualText>:delete;
-            %!attributes<ActualText>:delete;
-            $_;
-        }
-    }
-    method text { $.ActualText // $.kids».text.join }
-    method AT-POS(UInt $i) {
-        fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-        self.kids-raw[$i] //= self.build-kid($!value.kids[$i]);
-    }
+}
+method text { $.ActualText // $.kids».text.join }
+method AT-POS(UInt $i) {
+    fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
+    self.kids-raw[$i] //= self.build-kid($!value.kids[$i]);
 }
 
 =begin pod

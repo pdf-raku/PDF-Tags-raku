@@ -1,26 +1,28 @@
-use PDF::Tags::Node;
 #| Derived Text node
-class PDF::Tags::Text
-    is PDF::Tags::Node {
-    use PDF::Tags::Node::Parent;
-    use Method::Also;
+unit class PDF::Tags::Text;
 
-    =head2 Description
-    =para Objects of this class hold derived text.
-    =head2 Attributes and Methods
+use PDF::Tags::Node;
+also is PDF::Tags::Node;
 
-    submethod TWEAK(Str:D :$cos!) {
-        self.set-cos($cos);
-    }
+use PDF::Tags::Node::Parent;
+use Method::Also;
 
-    #| The parent node
-    has PDF::Tags::Node::Parent $.parent is rw;
-    =para of type PDF::Tags::Elem, or PDF::Tags::Mark
+=head2 Description
+=para Objects of this class hold derived text.
+=head2 Attributes and Methods
 
-    #| Node name (always '#text')
-    method name { '#text' }
-
-    #| Text content
-    method Str(--> Str) is also<gist text value ActualText> { $.cos() }
+submethod TWEAK(Str:D :$cos!) {
+    self.set-cos($cos);
 }
+
+#| The parent node
+has PDF::Tags::Node::Parent $.parent is rw;
+=para of type PDF::Tags::Elem, or PDF::Tags::Mark
+
+#| Node name (always '#text')
+method name { '#text' }
+
+#| Text content
+method Str(--> Str) is also<gist text value ActualText> { $.cos() }
+
 
