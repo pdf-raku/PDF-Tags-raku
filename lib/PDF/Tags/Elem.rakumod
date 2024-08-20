@@ -117,7 +117,7 @@ submethod TWEAK(Str :$Alt, Str :$ActualText, Str :$Lang, Str :$class, :%attribut
 method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
     temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
 
-    my PDF::Content::Tag $cos = $gfx.tag($name, &action, :mark, |c);
+    my PDF::Content::Tag $cos = $gfx.tag($name.fmt, &action, :mark, |c);
     my PDF::Tags::Mark:D $mark = $elem.add-kid: :$cos;
     $mark.actual-text = $gfx.actual-text;
     # Register this mark in the parent tree
