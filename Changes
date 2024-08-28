@@ -1,5 +1,10 @@
 {{$NEXT}}
+
+0.1.17  2024-08-29T06:53:12+12:00
   - Fix setting of DOCTYPE in external Dtd
+  - Refactor ancestor-or-self and descendant-or-self axes
+  - Fix tag method for Pod::To::PDF::API6::Async
+  - Fix style inheritance on root node
 
 0.1.16  2023-11-15T10:09:02+13:00
   - Always wrap XML content with 0 or many root elements in a
