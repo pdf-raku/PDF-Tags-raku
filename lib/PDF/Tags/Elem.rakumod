@@ -371,8 +371,10 @@ multi method reference(PDF::Class::StructItem $Obj, PDF::Page :$Pg!) {
 method style {
     callsame() //= do {
         my $s = $.root.styler.tag-style($!name, |$.attributes);
-        $s.inherit($_)
-            with self.parent.?style;
+        with self.parent {
+            $s.inherit($_)
+               with .style;
+        }
         $s;
     }
 }
