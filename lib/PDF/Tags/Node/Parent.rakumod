@@ -112,7 +112,6 @@ multi method fragment(Str:D :$name!, *%o --> PDF::Tags::Node:D) {
 multi method fragment(Str:D $name = 'DocumentFragment', *%o) {
     self.fragment(:$name, |%o);
 }
-
 multi method FALLBACK(Str:D $name where $_ ∈ TagSet, |c) {
     self.add-kid(:$name, |c)
 }

@@ -248,13 +248,13 @@ tagged internal link to a PDF.
 
 As a rule, all content doesn't have to form part of the structure tree, but should be tagged to meet accessibility guidelines.
 
-This sometimes requires tagging of incidental graphics. `PDF::Content` has a `tag()` method for this. The content is be tagged, but does not appear in the content stream.
+This sometimes requires tagging of incidental graphics. `PDF::Content` has a `tag()` method for this. The content is tagged, but does not appear in the structure tree.
 
 Some of the commonly used content tags are:
 
 #### Artifact
 
-Artifact content forms part of the visual display, but does not belong in the Structure Tree and is tagged using the `PDF::Content` `tag` method.
+Artifact content forms part of the visual display, but does not belong in the structure Tree.
 
 For example:
 ```raku
@@ -295,15 +295,13 @@ text is being inserted as a paragraph in the structure tree.
 
 #### Span
 
-This tag may be used in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
+This tag may be used either in the structure tree, or at the content level to defined attributes of a graphics sequence. Its usage is similar to the XHTML `span` tag.
 
 ```raku
 $gfx.tag: Span: :Lang<es-MX>, {
     .say('Hasta la vista', :position[50, 80]);
 }
 ```
-
-It can be used almost anywhere in the structure tree, or at the content level, as above.
 
 ### Role Maps
 
@@ -319,8 +317,8 @@ use PDF::Tags::Elem;
 use PDF::Class;
 use PDF::Page;
 
-enum RoleMap ( :Body<Section>, :Footnote<Note>, :Book<Document> );
-constant %role-map = RoleMap.enums.Hash;
+enum Roles ( :Book<Document>, :FootNote<Note> );
+constant %role-map = Roles.enums.Hash;
 
 my PDF::Class $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf, :%role-map;
@@ -334,7 +332,7 @@ $page.graphics: -> $gfx {
         .say: 'Some body text¹', :position[50, 150];
     };
 
-    $doc.Footnote: $gfx, {
+    $doc.FootNote: $gfx, {
         .say: '¹With a foot-note', :position[50, 20];
     };
 

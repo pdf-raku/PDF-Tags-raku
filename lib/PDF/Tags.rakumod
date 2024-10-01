@@ -1,122 +1,121 @@
 #| Tagged PDF root node
-class PDF::Tags:ver<0.1.17> {
+unit class PDF::Tags:ver<0.1.17>;
 
-    use PDF::Tags::Node::Parent :&att-owner;
-    also is PDF::Tags::Node::Parent;
+use PDF::Tags::Node::Parent :&att-owner;
+also is PDF::Tags::Node::Parent;
 
-    use PDF::Tags::Node::Root;
-    also does PDF::Tags::Node::Root;
+use PDF::Tags::Node::Root;
+also does PDF::Tags::Node::Root;
 
-    use PDF::Class:ver<0.4.10+>;
-    use PDF::NumberTree :NumberTree;
-    use PDF::StructElem;
-    use PDF::StructTreeRoot;
+use PDF::Class:ver<0.4.10+>;
+use PDF::NumberTree :NumberTree;
+use PDF::StructElem;
+use PDF::StructTreeRoot;
 
-    has Hash $.class-map         is built;
-    has Hash $.role-map          is built;
-    has NumberTree $.parent-tree is built;
-    has      $.styler;
-    has Lock $!lock handles<protect> .= new;
-    method root { self }
-    method marks { True }
+has Hash $.class-map         is built;
+has Hash $.role-map          is built;
+has NumberTree $.parent-tree is built;
+has      $.styler;
+has Lock $!lock handles<protect> .= new;
+method root { self }
+method marks { True }
 
-    submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {
-        $!class-map = $_ with $cos.ClassMap;
-        $!role-map = $_ with $cos.RoleMap;
-        self.set-role(.key, .value) for %role-map.pairs;
-        $!parent-tree = .number-tree
-            given $cos.ParentTree //= { :Nums[] };
-    }
+submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {
+    $!class-map = $_ with $cos.ClassMap;
+    $!role-map = $_ with $cos.RoleMap;
+    self.set-role(.key, .value) for %role-map.pairs;
+    $!parent-tree = .number-tree
+        given $cos.ParentTree //= { :Nums[] };
+}
 
-    method read(|c) {
-        my constant Reader = 'PDF::Tags::Reader';
-        CATCH {
-            when X::CompUnit::UnsatisfiedDependency {
-                fail "{Reader.raku} needs to be installed to read tagged PDF files";
-            }
-        }
-        require ::(Reader);
-        ::(Reader).read(|c);
-    }
-
-    method set-role(Str:D $role, Str:D $base) {
-        $!role-map //= {};
-        with $!role-map{$role} {
-            warn "role mapping $role => $base conflicts with $role => $_"
-                unless $base eq $_;
-        }
-        else {
-            $_ = $base;
+method read(|c) {
+    my constant Reader = 'PDF::Tags::Reader';
+    CATCH {
+        when X::CompUnit::UnsatisfiedDependency {
+            fail "{Reader.raku} needs to be installed to read tagged PDF files";
         }
     }
+    require ::(Reader);
+    ::(Reader).read(|c);
+}
 
-    sub build-class-map($cos, %class-map) {
-        for %class-map {
-            my $class = .key;
-            my %attributes = .value;
-            my Hash %atts-by-owner;
-            for %attributes {
-                #Raku 2022.06+ my :($owner, $key) := att-owner(.key);
-                my ($owner, $key) = att-owner(.key);
-                %atts-by-owner{$owner}{$key} = .value;
-            }
-            my PDF::Attributes() @atts = %atts-by-owner.keys.sort.map: -> $owner {
-                my %atts = %atts-by-owner{$owner};
-                %atts<O> = $owner;
-                %atts;
-            }
-
-            if @atts {
-                $cos.ClassMap //= %();
-                if @atts == 1 {
-                    $cos.ClassMap{$class} = @atts[0];
-                }
-                else {
-                    $cos.ClassMap{$class} = @atts;
-                }
-            }
-        }
+method set-role(Str:D $role, Str:D $base) {
+    $!role-map //= {};
+    with $!role-map{$role} {
+        warn "role mapping $role => $base conflicts with $role => $_"
+            unless $base eq $_;
     }
+    else {
+        $_ = $base;
+    }
+}
 
-    method create(
-        PDF::Class:D :$pdf!,
-        PDF::StructTreeRoot() :$cos = { :Type( :name<StructTreeRoot> )},
-        :%role-map,
-        :%class-map,
-        |c
-        --> PDF::Tags:D
-    ) {
-        $cos.RoleMap = %role-map if %role-map;
-        build-class-map($cos, %class-map)
-            if %class-map;
-        $cos.check;
+sub build-class-map($cos, %class-map) {
+    for %class-map {
+        my $class = .key;
+        my %attributes = .value;
+        my Hash %atts-by-owner;
+        for %attributes {
+            #Raku 2022.06+ my :($owner, $key) := att-owner(.key);
+            my ($owner, $key) = att-owner(.key);
+            %atts-by-owner{$owner}{$key} = .value;
+        }
+        my PDF::Attributes() @atts = %atts-by-owner.keys.sort.map: -> $owner {
+            my %atts = %atts-by-owner{$owner};
+            %atts<O> = $owner;
+            %atts;
+        }
 
-        given $pdf {
-            with .catalog.StructTreeRoot {
-                fail "document already contains marked content";
+        if @atts {
+            $cos.ClassMap //= %();
+            if @atts == 1 {
+                $cos.ClassMap{$class} = @atts[0];
             }
             else {
-                $_ = $cos;
+                $cos.ClassMap{$class} = @atts;
             }
-            .<Marked> = True
-                given .Root<MarkInfo> //= {};
-            .creator.push: "{self.^name}-{self.^ver}";
-        }
-        self.new: :$cos, :root(self.WHAT), :marks, |c
-    }
-
-    # Set the page to a given index.
-    # To create identical PDF files. Mostly for thread-testing purposes.
-    method set-page-index(PDF::Page:D $Pg, UInt:D $idx) {
-        self.protect: {
-            $Pg.StructParents = $idx;
-            $!parent-tree[$idx] //= [];
         }
     }
+}
 
-    method canvas-tags(|) {
-        fail "PDF::Tags::Reader is required to read PDF tags";
+method create(
+    PDF::Class:D :$pdf!,
+    PDF::StructTreeRoot() :$cos = { :Type( :name<StructTreeRoot> )},
+    :%role-map,
+    :%class-map,
+    |c
+    --> PDF::Tags:D
+) {
+    $cos.RoleMap = %role-map if %role-map;
+    build-class-map($cos, %class-map)
+        if %class-map;
+    $cos.check;
+
+    given $pdf {
+        with .catalog.StructTreeRoot {
+            fail "document already contains marked content";
+        }
+        else {
+            $_ = $cos;
+        }
+        .<Marked> = True
+            given .Root<MarkInfo> //= {};
+        .creator.push: "{self.^name}-{self.^ver}";
     }
+    self.new: :$cos, :root(self.WHAT), :marks, |c
+}
+
+# Set the page to a given index.
+# To create identical PDF files. Mostly for thread-testing purposes.
+method set-page-index(PDF::Page:D $Pg, UInt:D $idx) {
+    self.protect: {
+        $Pg.StructParents = $idx;
+        $!parent-tree[$idx] //= [];
+    }
+}
+
+method canvas-tags(|) {
+    fail "PDF::Tags::Reader is required to read PDF tags";
 }
 
 =begin pod
