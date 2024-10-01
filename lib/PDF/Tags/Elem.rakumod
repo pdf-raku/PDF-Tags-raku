@@ -45,7 +45,7 @@ method name is rw {
 
 sub merge-atts(%atts, PDF::Attributes $a) {
     if $a.Hash -> %a {
-        my $owner = $a.owner;
+        my $owner = $a<O>;
         # guess owner, if not given
         $owner //= att-owner($_).head
             given %a.keys.head;
