@@ -128,8 +128,12 @@ method !actual-text($node) {
     $actual-text;
 }
 
-multi sub inlined-tag(Str $t) {
-    InlineElemTags($t).so;
+multi sub inlined-elem(Str $name, %atts) {
+    with %atts<Placement> {
+        when 'Inline' { return True }
+        when 'Block'  { return False }
+    }
+    InlineElemTags($name).so;
 }
 
 sub find-href($node) {
@@ -205,9 +209,9 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my $name = $node.name;
     my $role = $node.role if $!roles;
     my $actual-text = self!actual-text($node);
-    my $*inline = inlined-tag($name);
+    my %attributes;
     my $att = do if $!atts {
-        my %attributes = $node.attributes;
+        %attributes = $node.attributes;
         if $role {
             %attributes<role>:delete;
         }
@@ -218,6 +222,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         }
         atts-str(%attributes);
     } // '';
+    my $*inline = inlined-elem($name, %attributes);
     $name = $_ with $role;
     return if $name eq 'Artifact' && !$!artifacts;
     my $omit-tag = $name ~~ $_ with $!omit;
