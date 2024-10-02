@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+0.1.18  2024-10-02T13:15:18+13:00
+  - Relax type-checking on Attributes /O (owner) entry.
+  - Use 'Placement' attribute for 'Block' vs 'Inline' elements in
+    XML serialization
+
 0.1.17  2024-08-29T06:53:12+12:00
   - Fix setting of DOCTYPE in external Dtd
   - Refactor ancestor-or-self and descendant-or-self axes
@@ -12,9 +17,9 @@
   - Handle 'Artifact' tags in the structure tree
 
 0.1.15  2023-11-10T08:07:05+13:00
-  - more fixes to XML :omit option
-  - document some PDF 2.0 tags
-  - add :Lang to root element in doco and tests
+  - More fixes to XML :omit option
+  - Document some PDF 2.0 tags
+  - Add :Lang to root element in doco and tests
 
 0.1.14  2023-10-28T14:27:41+13:00
   - Avoid whitespace in some tag XML serialization e.g.
