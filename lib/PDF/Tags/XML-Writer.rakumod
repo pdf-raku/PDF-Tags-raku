@@ -130,10 +130,15 @@ method !actual-text($node) {
 
 multi sub inlined-elem(Str $name, %atts) {
     with %atts<Placement> {
-        when 'Inline' { return True }
-        when 'Block'  { return False }
+        # From PDF 2.0 Table 387 Standard layout attributes common to all standard structure types,
+        # regarding 'Placement':
+        #     "When applied to an ILSE, any value except Inline shall cause the
+        #      element to be treated as a BLSE instead"
+        $_ eq 'Inline'
     }
-    InlineElemTags($name).so;
+    else {
+        InlineElemTags($name).so;
+    }
 }
 
 sub find-href($node) {
