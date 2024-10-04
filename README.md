@@ -453,7 +453,7 @@ Further Work
   - Security settings must allow assistive technology access to the content
   - Fonts must be embedded, and text mapped to Unicode
 
-The PDF accessibility standard ISO 14289-1 cannot be distributed and needs to be [purchased from ISO](https://www.iso.org/standard/64599.html).
+A personal copy of the PDF accessibility standard [ISO 14289-1](https://pdfa.org/resource/iso-14289-pdfua/) is available from the [PDF Association Website](https://www.iso.org/).
 
 - Editing. Currently the API doesn't readily support editing tags into existing content. More work is also
 needed in the PDF::Content module to support content editing.
