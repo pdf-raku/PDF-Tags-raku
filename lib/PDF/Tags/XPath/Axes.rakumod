@@ -19,9 +19,14 @@ sub descendant-or-self(PDF::Tags::Node:D $_) is export {
     descendant($_).unshift: $_;
 }
 
+sub attempt(&action) is hidden-from-backtrace {
+    CATCH { default { warn $_ } }
+    &action();
+}
+
 sub descendant(PDF::Tags::Node:D $_) is export {
     my @nodes;
-    @nodes.append: descendant-or-self($_)
+     attempt({@nodes.append: descendant-or-self($_)})
         for .?kids // [];
     @nodes;
 }

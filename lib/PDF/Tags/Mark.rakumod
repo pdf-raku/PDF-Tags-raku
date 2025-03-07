@@ -22,9 +22,9 @@ has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
 sub mcr(Int:D $MCID, :$Stm, :$Pg) {
     my PDF::MCR() $cos = %(
-                            :Type( :name<MCR> ),
-                            :$MCID,
-                        );
+        :Type( :name<MCR> ),
+        :$MCID,
+    );
     $cos<Stm> = $_ with $Stm;
     $cos<Pg>  = $_ with $Pg;
     $cos;
@@ -52,7 +52,7 @@ method set-cos($!value) {
                 }
             }
             # unlikely
-            default { warn "can mark object of type {.WHAT.raku}"; }
+            default { warn "can't mark object of type {.WHAT.raku}"; }
         }
     }
     callwith($cos);
@@ -62,8 +62,8 @@ multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!, Str :$!actual-text) {
     self.set-cos($_);
 }
 multi submethod TWEAK(UInt:D :cos($mcid)!) {
-    with self.Stm // self.Pg -> PDF::Content::Canvas $_ {
-        with self.root.canvas-tags($_){$mcid} {
+    with self.Stm // self.Pg -> PDF::Content::Canvas $canvas {
+        with self.root.canvas-tags($canvas){$mcid} {
             self.set-cos($_);
         }
         else {

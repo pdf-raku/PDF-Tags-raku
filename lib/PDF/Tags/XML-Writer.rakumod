@@ -50,6 +50,7 @@ method !chunk(Str $s is copy, UInt $depth = 0) {
 }
 
 method !no-output(&action --> Bool) {
+    CATCH { default { warn $_ } }
     my $n0 = $!n;
     &action();
     $!n == $n0;

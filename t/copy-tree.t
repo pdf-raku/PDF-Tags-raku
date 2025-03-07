@@ -31,7 +31,7 @@ $page.graphics: -> $gfx {
              :font-size(15),
              :position[50, 120]);
     }
-    my  PDF::XObject $Stm = $page.xobject-form: :BBox[0, 0, 200, 50];
+    my PDF::XObject $Stm = $page.xobject-form: :BBox[0, 0, 200, 50];
 
     is $mark.xml().trim, 'Header text';
     is $header.text, "Header text";
