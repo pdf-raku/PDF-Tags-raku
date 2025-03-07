@@ -275,11 +275,13 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
 }
 
-multi method stream-xml(PDF::Tags::ObjRef $_, :$depth!) {
-    self!line("<!-- OBJR {.cos.Obj.obj-num} {.cos.Obj.gen-num} R -->", $depth)
-        if $!debug;
+multi method stream-xml(PDF::Tags::ObjRef $node, :$depth!) {
+    if $!debug {
+        self!line("<!-- OBJR {.cos.Obj.obj-num} {.cos.Obj.gen-num} R -->", $depth)
+            given $node;
+    }
     if $!fields {
-        given .value {
+        given $node.value {
             when PDF::Field { self!chunk($_, $depth) with .value }
         }
     }
@@ -295,8 +297,8 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
     }
 }
 
-multi method stream-xml(PDF::Tags::Text $_, :$depth!) {
-    if .Str -> $text {
+multi method stream-xml(PDF::Tags::Text $node, :$depth!) {
+    if $node.Str -> $text {
         self!chunk(xml-escape($text), $depth);
     }
 }
