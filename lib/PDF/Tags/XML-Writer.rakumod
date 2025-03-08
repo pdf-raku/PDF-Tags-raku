@@ -55,7 +55,7 @@ method !no-output(&action --> Bool) {
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
 method !frag(|c) { $*inline ?? self!chunk(|c) !! self!line(|c) }
 
-sub xml-escape(Str $_) {
+sub xml-escape(Str:D $_) {
     .trans:
         /\&/ => '&amp;',
         /\</ => '&lt;',
@@ -63,7 +63,7 @@ sub xml-escape(Str $_) {
 }
 multi sub str-escape(@a) { @a.map(&str-escape).join: ' '; }
 multi sub str-escape(Str $_) {
-    xml-escape($_).trans: /\"/ => '&quote;';
+    .&xml-escape.trans: /\"/ => '&quote;';
 }
 multi sub str-escape(Pair $_) { str-escape(.value) }
 multi sub str-escape($_) is default { str-escape(.Str) }
@@ -243,7 +243,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 }
             }
             
-            given xml-escape($_) {
+            given .&xml-escape {
                 my $frag = do {
                     when $omit-tag.so { $_ }
                     when .so { '<%s%s>%s</%s>'.sprintf($name, $att, $_, $name) }
@@ -299,7 +299,7 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
 
 multi method stream-xml(PDF::Tags::Text $node, :$depth!) {
     if $node.Str -> $text {
-        self!chunk(xml-escape($text), $depth);
+        self!chunk($text.&xml-escape, $depth);
     }
 }
 
@@ -311,7 +311,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
             when PDF::Tags::Mark {
                 self!marked-content($_, :$depth);
             }
-            when PDF::Tags::Text { xml-escape(.Str) }
+            when PDF::Tags::Text { .Str.&xml-escape }
             default { die "unhandled tagged content: {.WHAT.raku}"; }
         }
         @text.join;
@@ -324,7 +324,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
             my $Lang := .<Lang>
                 with $node.attributes;
             if $Lang {
-                $text = sprintf('<Span Lang="%s">%s</Span>', xml-escape($Lang), $text);
+                $text = sprintf('<Span Lang="%s">%s</Span>', $Lang.&xml-escape, $text);
             }
         }
         $text;

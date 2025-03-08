@@ -67,7 +67,7 @@ multi submethod TWEAK(UInt:D :cos($mcid)!) {
             self.set-cos($_);
         }
         else {
-            die "unable to resolve MCID: $mcid";
+            die "unable to resolve MCID $mcid on canvas {$canvas.obj-num} {$canvas.gen-num} R";
         }
     }
     else {
