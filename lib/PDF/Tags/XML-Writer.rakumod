@@ -29,9 +29,11 @@ has Bool $.artifacts = False;
 has Bool $!got-nl = True;
 has Bool $!feed;
 has Bool $!snug = True;
+has Int $!n = 0;
 
 method !chunk(Str $s is copy, UInt $depth = 0) {
     if $s {
+        $!n++;
         if $!feed || $!got-nl {
             take "\n" ~ ('  ' x $depth) unless $!snug--;
             $!feed = False;
@@ -49,7 +51,9 @@ method !chunk(Str $s is copy, UInt $depth = 0) {
 
 method !no-output(&action --> Bool) {
     CATCH { default { warn $_ } }
+    my $n0 = $!n;
     &action();
+    $!n == $n0;
 }
 
 method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
@@ -319,7 +323,7 @@ method !marked-content(PDF::Tags::Mark $node, :$depth!) {
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
     if $omit-tag {
-        if $!atts && $!omit !~~ 'Span' {
+        if $!atts && !($!omit ~~ 'Span') {
             # try to retain content-level language tags
             my $Lang := .<Lang>
                 with $node.attributes;
