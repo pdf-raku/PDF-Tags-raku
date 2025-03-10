@@ -1,10 +1,11 @@
 use v6;
 use Test;
-plan 7;
+plan 9;
 
 use PDF::Content::FontObj;
 use PDF::Tags;
 use PDF::Tags::Elem;
+use PDF::Tags::Mark;
 use PDF::Class;
 use PDF::Page;
 use PDF::COS::Name;
@@ -37,12 +38,21 @@ $page.graphics: -> $gfx {
     my $para = $doc.Paragraph: $gfx, {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
     };
+    my  $p = $doc.Paragraph;
+    $p.mark: $gfx, :Lang<en>, {
+        .text: {
+            .print: "content tagged english.", :position[50, 83];
+        }
+    }
+    my PDF::Tags::Mark:D $mark = $p.kids[0];
+    is $mark.attributes<Lang>, 'en';
+    is $mark.xml.chomp, '<Span Lang="en">content tagged english.</Span>';
 }
 
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
 
-is $tags.find('Document//*')>>.name.join(','), 'H1,P';
+is $tags.find('Document//*')>>.name.join(','), 'H1,P,P';
 
 lives-ok { $pdf.save-as: "t/attributes.pdf", :!info; }
 
