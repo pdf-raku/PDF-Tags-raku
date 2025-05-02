@@ -77,7 +77,7 @@ $pdf.Pages.add-pages($_) for @page-frags;
 $doc.add-kid(:node($_)) for @struct-frags;
 
 # ensure consistant document ID generation
-$pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
+$pdf.id =  $*PROGRAM.basename.fmt('%-16.16s');
 
 mkdir 'tmp';
 lives-ok { $pdf.save-as: "tmp/threaded.pdf", :!info; }

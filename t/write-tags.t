@@ -94,7 +94,7 @@ $page.graphics: -> $gfx {
 }
 
 # ensure consistant document ID generation
-$pdf.id =  $*PROGRAM-NAME.fmt('%-16.16s');
+$pdf.id =  $*PROGRAM.basename.fmt('%-16.16s');
 
 is $tags.find('Document//*')>>.name.join(','), 'H1,P,Reference,Link,Figure,Caption,H2,P,H2,P';
 
