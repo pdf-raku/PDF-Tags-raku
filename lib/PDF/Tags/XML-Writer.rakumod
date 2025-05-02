@@ -29,7 +29,7 @@ has Bool $.artifacts = False;
 has Bool $!got-nl = True;
 has Bool $!feed;
 has Bool $!snug = True;
-has Int $!n = 0;
+has Int  $!n = 0;
 
 method !chunk(Str $s is copy, UInt $depth = 0) {
     if $s {
@@ -117,7 +117,7 @@ method !actual-text($node) {
     my $actual-text;
     if $node ~~ PDF::Tags::Node::Parent|PDF::Tags::Text {
         $actual-text = $node.ActualText;
-        with $!omit {
+        if $!omit {
             without $actual-text {
                 # flatten child elements if they are all omitted and have actual text
                 $_ = $node.kids.map({ .ActualText }).join
@@ -269,7 +269,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                     }
                 }
                 self!frag("</$name>", --$depth)
-                     unless $omit-tag;
+                    unless $omit-tag;
             }
             else {
                 self!chunk("<$name$att/>", $depth)

@@ -372,8 +372,7 @@ method style {
     callsame() //= do {
         my $s = $.root.styler.tag-style($!name, |$.attributes);
         with self.parent {
-            $s.inherit($_)
-               with .style;
+            .inherit($_) with .style;
         }
         $s;
     }
