@@ -239,8 +239,10 @@ Unlike the `Array` and `Hash` methods `kids` does not cache child elements
 and may be more efficient for one-off traversal of larger DOMs.
 
 =head3 method add-kid
-  multi method add-kid(Str :$name!, *%atts) returns PDF::Tags::Node:D;
-  multi method add-kid(PDF::Tags::Node:D :$node!) returns PDF::Tags::Node:D;
+=begin code :lang<raku>
+multi method add-kid(Str :$name!, *%atts) returns PDF::Tags::Node:D;
+multi method add-kid(PDF::Tags::Node:D :$node!) returns PDF::Tags::Node:D;
+=end code
 
 Adds the node as a child of the current node.
 
