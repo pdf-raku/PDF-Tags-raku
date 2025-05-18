@@ -1,4 +1,9 @@
 {{$NEXT}}
+   - Document mnemonics: /Code as CODE and /L and LIST. These have been
+     upper-cased in PDF::Content to avoid colliding with standard Raku
+     data-types.
+   - Improved robustness of XML serialization; warn rather than dying. This
+     allows more liberal reading of some real-world non-conformant PDF files.
 
 0.1.18  2024-10-02T13:15:18+13:00
   - Relax type-checking on Attributes /O (owner) entry.

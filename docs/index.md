@@ -113,7 +113,7 @@ Tag | Mnemonic | Description
 H | Heading | Nested section heading (not recommended)
 H1 - H6 | Heading1 - Heading6 | The title or heading of a section within the text content
 P | Paragraph | A distinct section of a piece of writing, usually dealing with a single theme
-L | List | A group of similar items that are related to each other. Should include optional Caption, and list items
+L | LIST | A group of similar items that are related to each other. Should include optional Caption, and list items
 LI | ListItem | A Single list element. Should contain Lbl and/or LBody
 Lbl | Label | Bullet, number, or "dictionary headword"
 LBody | ListBody | Description of the item; may have nested lists or other blocks
@@ -139,7 +139,7 @@ Quote | | Inline text referencing content from another source
 Note | | End-note or footnote; may have a Lbl (see "block" elements)
 Reference | | Content in a document that refers to other content (e.g. page number in an index)
 BibEntry | BibliographyEntry | Text referring the user to source of cited text. May have a Lbl (see "block" elements)
-Code | | Computer code
+Code | CODE | Computer code
 Link | | hyperlink; should contain a link annotation
 Annot | Annotation | annotation (other than a link)
 Ruby | | Chinese/Japanese pronunciation/explanation

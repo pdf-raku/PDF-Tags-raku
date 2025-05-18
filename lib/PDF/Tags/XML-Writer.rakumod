@@ -114,7 +114,7 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
 }
 
 method !actual-text($node) {
-    my $actual-text;
+    my Str $actual-text;
     if $node ~~ PDF::Tags::Node::Parent|PDF::Tags::Text {
         $actual-text = $node.ActualText;
         if $!omit {
