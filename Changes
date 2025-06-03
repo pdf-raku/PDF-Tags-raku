@@ -4,6 +4,10 @@
      data-types.
    - Improved robustness of XML serialization; warn rather than dying. This
      allows more liberal reading of some real-world non-conformant PDF files.
+   - Add node-class PDF::Content::Tag. This is both a stand-alone class and
+     a base class for existing PDF::Content::Mark.
+   - XML serializer now emits <Mark>...</Mark> when descending into marked
+      content.
 
 0.1.18  2024-10-02T13:15:18+13:00
   - Relax type-checking on Attributes /O (owner) entry.

@@ -114,7 +114,7 @@ submethod TWEAK(Str :$Alt, Str :$ActualText, Str :$Lang, Str :$class, :%attribut
     }
 }
 
-method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name, |c --> PDF::Tags::Mark:D) {
+method mark(PDF::Tags::Elem:D $elem: PDF::Content $gfx, &action, :$name = self.name,|c --> PDF::Tags::Mark:D) {
     temp $gfx.actual-text = ''; # Populated by PDF::Content.print()
 
     my PDF::Content::Tag $cos = $gfx.tag($name.fmt, &action, :mark, |c);
@@ -371,8 +371,9 @@ multi method reference(PDF::Class::StructItem $Obj, PDF::Page :$Pg!) {
 method style {
     callsame() //= do {
         my $s = $.root.styler.tag-style($!name, |$.attributes);
-        $s.inherit: .style
-            with self.parent;
+        with self.parent {
+            .inherit($_) with .style;
+        }
 
         $s;
     }

@@ -254,10 +254,22 @@ Some of the commonly used content tags are:
 
 #### Artifact
 
-Artifact content forms part of the visual display, but does not belong in the structure Tree.
+Artifact content forms part of the visual display, but does form part of the accessibility content.
+
+Artifacts may either form part of the structure tree, or be tagged at the graphical level.
 
 For example:
 ```raku
+# Artifact in content stream and in the structure tree
+$elem.Artifact, $gfx, {
+    .say("Page $page-num", :$font, :position[ 250, 20 ]);
+}
+```
+
+or
+
+```raku
+# Artifact in content stream only
 $gfx.tag: Artifact, {
     .say("Page $page-num", :$font, :position[ 250, 20 ]);
 }

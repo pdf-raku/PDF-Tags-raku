@@ -16,6 +16,8 @@ has Bool $!reified;
 has UInt $!elems;
 has      $.style is rw; # Computed CSS style
 
+method parent { ... }
+
 method elems(::?CLASS:D:) is also<Numeric> {
     $!elems //= do with $.cos.kids {
         when Hash { 1 }

@@ -1,8 +1,8 @@
 #| Marked content reference
 unit class PDF::Tags::Mark;
 
-use PDF::Tags::Node::Parent;
-also is PDF::Tags::Node::Parent;
+use PDF::Tags::Tag;
+also is PDF::Tags::Tag;
 
 use PDF::COS;
 use PDF::COS::TextString;
@@ -14,11 +14,7 @@ use PDF::MCR;
 use PDF::XObject::Form;
 
 has PDF::Tags::Node::Parent $.parent is rw;
-has %!attributes;
-has Bool $!atts-built;
-has Str $.actual-text is rw;
 has PDF::Content::Canvas $.Stm;
-has PDF::Content::Tag $.value is built handles<name mcid elems>;
 
 sub mcr(Int:D $MCID, :$Stm, :$Pg) {
     my PDF::MCR() $cos = %(
@@ -30,13 +26,11 @@ sub mcr(Int:D $MCID, :$Stm, :$Pg) {
     $cos;
 }
 
-method set-cos($!value) {
-    $!atts-built = False;
-    my $cos;
-    with $.mcid -> UInt $MCID {
-        $cos = $MCID;
-        my $referrer;
-        given $!value.canvas {
+method set-cos($value) {
+    self.set-value($value);
+    given $.mcid -> UInt:D $MCID {
+        my $cos = $MCID;
+        given $value.canvas {
             when PDF::XObject::Form {
                 $!Stm = $_;
                 $cos = mcr($MCID, :$!Stm, :$.Pg);
@@ -54,13 +48,14 @@ method set-cos($!value) {
             # unlikely
             default { warn "can't mark object of type {.WHAT.raku}"; }
         }
+        callwith($cos);
     }
-    callwith($cos);
 }
 
-multi submethod TWEAK(PDF::Content::Tag:D :cos($_)!, Str :$!actual-text) {
-    self.set-cos($_);
+multi submethod TWEAK(PDF::Content::Tag:D :$cos!) {
+    self.set-cos($cos);
 }
+ 
 multi submethod TWEAK(UInt:D :cos($mcid)!) {
     with self.Stm // self.Pg -> PDF::Content::Canvas $canvas {
         with self.root.canvas-tags($canvas){$mcid} {
@@ -74,45 +69,10 @@ multi submethod TWEAK(UInt:D :cos($mcid)!) {
         die "no current marked-content page";
     }
 }
-method attributes {
-    $!atts-built ||= do {
-        %!attributes = $!value.attributes;
-        True;
-    }
-    %!attributes;
-}
+
 method set-attribute(Str() $key, $val) {
     fail "todo: update marked content attributes";
     callsame();
-}
-
-sub sanitize(Str $_) {
-    # actual text sometimes have backspaces, etc?
-    .subst(
-        /<[ \x0..\x8 ]>/,
-        '',
-        :g
-    );
-}
-
-method ActualText {
-    $.attributes unless $!atts-built;
-    $!actual-text //= sanitize PDF::COS::TextString.COERCE: $_
-        with %!attributes<ActualText>;
-    $!actual-text;
-}
-method remove-actual-text is DEPRECATED {
-    with $.ActualText {
-        $!actual-text = Nil;
-        $!value.attributes<ActualText>:delete;
-        %!attributes<ActualText>:delete;
-        $_;
-    }
-}
-method text { $.ActualText // $.kids».text.join }
-method AT-POS(UInt $i) {
-    fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
-    self.kids-raw[$i] //= self.build-kid($!value.kids[$i]);
 }
 
 =begin pod

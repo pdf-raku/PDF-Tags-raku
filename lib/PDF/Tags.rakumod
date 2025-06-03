@@ -32,7 +32,7 @@ method read(|c) {
     my constant Reader = 'PDF::Tags::Reader';
     CATCH {
         when X::CompUnit::UnsatisfiedDependency {
-            fail "{Reader.raku} needs to be installed to read tagged PDF files";
+            fail "{Reader} needs to be installed to read tagged PDF files";
         }
     }
     require ::(Reader);
@@ -56,8 +56,7 @@ sub build-class-map($cos, %class-map) {
         my %attributes = .value;
         my Hash %atts-by-owner;
         for %attributes {
-            #Raku 2022.06+ my :($owner, $key) := att-owner(.key);
-            my ($owner, $key) = att-owner(.key);
+            my :($owner, $key) := att-owner(.key);
             %atts-by-owner{$owner}{$key} = .value;
         }
         my PDF::Attributes() @atts = %atts-by-owner.keys.sort.map: -> $owner {

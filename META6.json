@@ -24,6 +24,7 @@
     "PDF::Tags::Node::Parent": "lib/PDF/Tags/Node/Parent.rakumod",
     "PDF::Tags::Node::Root": "lib/PDF/Tags/Node/Root.rakumod",
     "PDF::Tags::ObjRef": "lib/PDF/Tags/ObjRef.rakumod",
+    "PDF::Tags::Tag": "lib/PDF/Tags/Tag.rakumod",
     "PDF::Tags::Text": "lib/PDF/Tags/Text.rakumod",
     "PDF::Tags::XML-Writer": "lib/PDF/Tags/XML-Writer.rakumod",
     "PDF::Tags::XPath": "lib/PDF/Tags/XPath.rakumod",

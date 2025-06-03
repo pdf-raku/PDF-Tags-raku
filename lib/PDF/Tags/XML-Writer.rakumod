@@ -8,6 +8,7 @@ use PDF::Tags::ObjRef;
 use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
 use PDF::Tags::Mark;
+use PDF::Tags::Tag;
 use PDF::Tags::Text;
 use PDF::Tags::XPath;
 use PDF::Class::StructItem;
@@ -296,7 +297,7 @@ multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
         self!line("<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R -->", $depth)
             given $node.value;
     }
-    if self!marked-content($node, :$depth) -> $text {
+    if self!tagged-content($node, :$depth) -> $text {
         self!chunk($text, $depth);
     }
 }
@@ -307,36 +308,42 @@ multi method stream-xml(PDF::Tags::Text $node, :$depth!) {
     }
 }
 
-method !marked-content(PDF::Tags::Mark $node, :$depth!) {
+method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
     my $name := $node.name;
     return '' if $name eq 'Artifact' && !$!artifacts;
     my $text = $node.actual-text // do {
         my @text = $node.kids.map: {
-            when PDF::Tags::Mark {
-                self!marked-content($_, :$depth);
+            when PDF::Tags::Tag {
+                self!tagged-content($_, :$depth);
             }
             when PDF::Tags::Text { .Str.&xml-escape }
             default { die "unhandled tagged content: {.WHAT.raku}"; }
         }
         @text.join;
     }
+    my $tag-atts = '';
+    if ($!atts) {
+        $tag-atts  = .&atts-str() with $node.attributes;
+    }
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
-    if $omit-tag {
-        if $!atts && !($!omit ~~ 'Span') {
-            # try to retain content-level language tags
-            my $Lang := .<Lang>
-                with $node.attributes;
-            if $Lang {
-                $text = sprintf('<Span Lang="%s">%s</Span>', $Lang.&xml-escape, $text);
+
+    if $omit-tag && $tag-atts && !($!omit ~~ 'Span') {
+        $name = 'Span';
+        $omit-tag = False;
+    }
+    $text = '<' ~ $name ~ $tag-atts ~ ($text ?? "\>$text\</$name\>" !! '/>')
+        unless $omit-tag;
+
+    if $!marks {
+        with $node.mcid {
+            unless $!omit ~~ 'Mark' {
+                my $mark-atts = %(MCID => $_).&atts-str();
+                $text = '<Mark%s'.sprintf($mark-atts) ~ ($text ?? "\>$text\</Mark\>" !! '/>');
             }
         }
-        $text;
     }
-    else {
-        my $atts-str := $!atts ?? atts-str($node.attributes) !! '';
-        "\<$name$atts-str" ~ ($text ?? "\>$text\</$name\>" !! '/>');
-    }
+    $text
 }
 
 =begin pod

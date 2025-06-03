@@ -34,7 +34,10 @@ multi sub node-class(PDF::StructElem)     { require ::('PDF::Tags::Elem') }
 multi sub node-class(PDF::OBJR)           { require ::('PDF::Tags::ObjRef') }
 multi sub node-class(PDF::MCR)            { require ::('PDF::Tags::Mark') }
 multi sub node-class(UInt)                { require ::('PDF::Tags::Mark') }
-multi sub node-class(PDF::Content::Tag)   { require ::('PDF::Tags::Mark') }
+multi sub node-class(PDF::Content::Tag:D $_ where .mcid.defined) {
+    require ::('PDF::Tags::Mark')
+}
+multi sub node-class(PDF::Content::Tag)   { require ::('PDF::Tags::Tag') }
 multi sub node-class(Str)                 { require ::('PDF::Tags::Text') }
 multi sub node-class(Pair)                { require ::('PDF::Tags::Attr') }
 
