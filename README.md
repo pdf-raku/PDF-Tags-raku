@@ -260,7 +260,7 @@ Artifacts may either form part of the structure tree, or be tagged at the graphi
 
 For example:
 ```raku
-# Artifact in content stream and in the structure tree
+# Artifact in marked content and in the structure tree
 $elem.Artifact, $gfx, {
     .say("Page $page-num", :$font, :position[ 250, 20 ]);
 }

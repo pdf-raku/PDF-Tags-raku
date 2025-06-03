@@ -293,10 +293,6 @@ multi method stream-xml(PDF::Tags::ObjRef $node, :$depth!) {
 }
 
 multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
-    if $!debug {
-        self!line("<!-- mark MCID:{.mcid} Pg:{.canvas.obj-num} {.canvas.gen-num} R -->", $depth)
-            given $node.value;
-    }
     if self!tagged-content($node, :$depth) -> $text {
         self!chunk($text, $depth);
     }
@@ -338,8 +334,10 @@ method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
     if $!marks {
         with $node.mcid {
             unless $!omit ~~ 'Mark' {
-                my $mark-atts = %(MCID => $_).&atts-str();
-                $text = '<Mark%s'.sprintf($mark-atts) ~ ($text ?? "\>$text\</Mark\>" !! '/>');
+                my $canvas = $node.value.canvas;
+                my %atts = :MCID($_);
+                %atts<Pg> = "{$canvas.obj-num} {$canvas.gen-num} R" if $!debug;
+                $text = '<Mark%s'.sprintf(%atts.&atts-str) ~ ($text ?? "\>$text\</Mark\>" !! '/>');
             }
         }
     }

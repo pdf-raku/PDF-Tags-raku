@@ -8,6 +8,8 @@
      a base class for existing PDF::Content::Mark.
    - XML serializer now emits <Mark>...</Mark> when descending into marked
       content.
+   - Improve Artifact documentation. These may be used in both the structure
+     tree and content stream
 
 0.1.18  2024-10-02T13:15:18+13:00
   - Relax type-checking on Attributes /O (owner) entry.
