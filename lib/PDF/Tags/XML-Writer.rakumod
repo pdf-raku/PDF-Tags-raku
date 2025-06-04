@@ -307,7 +307,7 @@ multi method stream-xml(PDF::Tags::Text $node, :$depth!) {
 method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
     my $name := $node.name;
     return '' if $name eq 'Artifact' && !$!artifacts;
-    my $text = $node.actual-text // do {
+    my $text = xml-escape $node.actual-text // do {
         my @text = $node.kids.map: {
             when PDF::Tags::Tag {
                 self!tagged-content($_, :$depth);
