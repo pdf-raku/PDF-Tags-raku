@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.2.0  2025-06-04T12:53:05+12:00
    - Document mnemonics: /Code as CODE and /L and LIST. These have been
      upper-cased in PDF::Content to avoid colliding with standard Raku
      data-types.
@@ -7,7 +9,7 @@
    - Add node-class PDF::Content::Tag. This is both a stand-alone class and
      a base class for existing PDF::Content::Mark.
    - XML serializer now emits <Mark>...</Mark> when descending into marked
-      content.
+     content.
    - Improve Artifact documentation. These may be used in both the structure
      tree and content stream
 
