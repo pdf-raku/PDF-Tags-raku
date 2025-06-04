@@ -307,7 +307,8 @@ multi method stream-xml(PDF::Tags::Text $node, :$depth!) {
 method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
     my $name := $node.name;
     return '' if $name eq 'Artifact' && !$!artifacts;
-    my $text = xml-escape $node.actual-text // do {
+    my Str $text = .&xml-escape() with $node.actual-text;
+    $text //= do {
         my @text = $node.kids.map: {
             when PDF::Tags::Tag {
                 self!tagged-content($_, :$depth);
@@ -331,15 +332,13 @@ method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
     $text = '<' ~ $name ~ $tag-atts ~ ($text ?? "\>$text\</$name\>" !! '/>')
         unless $omit-tag;
 
-    if $!marks {
-        with $node.mcid {
-            unless $!omit ~~ 'Mark' {
-                my $canvas = $node.value.canvas;
-                my %atts = :MCID($_);
-                %atts<Pg> = "{$canvas.obj-num} {$canvas.gen-num} R" if $!debug;
-                $text = '<Mark%s'.sprintf(%atts.&atts-str) ~ ($text ?? "\>$text\</Mark\>" !! '/>');
-            }
+    if $!marks && $node.isa(PDF::Tags::Mark) && !($!omit ~~ 'Mark') {
+        my %atts = :MCID($node.mcid);
+        if $!debug {
+            %atts<Pg> = "{.obj-num} {.gen-num} R"
+                with $node.value.canvas;
         }
+        $text = '<Mark%s'.sprintf(%atts.&atts-str) ~ ($text ?? "\>$text\</Mark\>" !! '/>');
     }
     $text
 }
