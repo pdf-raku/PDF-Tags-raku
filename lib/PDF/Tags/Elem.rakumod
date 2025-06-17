@@ -308,8 +308,7 @@ method !setup-parents(PDF::XObject::Form $xobj) {
 }
 
 method set-attribute(Str() $key, Any:D $val) {
-    #Raku 2022.06+ my :($owner, $att) := att-owner($key);
-    my ($owner, $att) = att-owner($key);
+    my :($owner, $att) := att-owner($key);
     fail "unable to determine owner for attribute: $key"
         unless $owner;
     $.cos.vivify-attributes(:$owner).set-attribute($att, $val);
@@ -319,8 +318,7 @@ method set-attribute(Str() $key, Any:D $val) {
 method set-attributes(*%attributes) {
     my Hash %atts-by-owner;
     for %attributes {
-        #Raku 2022.06+ my :($owner, $key) := att-owner(.key);
-        my ($owner, $key) = att-owner(.key);
+        my :($owner, $key) := att-owner(.key);
         %atts-by-owner{$owner}{$key} = .value;
     }
     for %atts-by-owner.keys.sort -> $owner {

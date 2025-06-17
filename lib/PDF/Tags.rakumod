@@ -23,7 +23,7 @@ method marks { True }
 submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {
     $!class-map = $_ with $cos.ClassMap;
     $!role-map = $_ with $cos.RoleMap;
-    self.set-role(.key, .value) for %role-map.pairs;
+    self.set-role: $_  for %role-map.pairs;
     $!parent-tree = .number-tree
         given $cos.ParentTree //= { :Nums[] };
 }
@@ -39,8 +39,10 @@ method read(|c) {
     ::(Reader).read(|c);
 }
 
-method set-role(Str:D $role, Str:D $base) {
-    $!role-map //= {};
+multi method set-role(Pair:D $_) { self.set-role: .key, .value }
+
+multi method set-role(Str:D $role, Str:D $base) {
+    $!role-map //= ($.cos.RoleMap //= {});
     with $!role-map{$role} {
         warn "role mapping $role => $base conflicts with $role => $_"
             unless $base eq $_;
