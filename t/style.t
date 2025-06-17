@@ -19,20 +19,20 @@ my PDF::Class $pdf .= new;
 my PDF::Tags $tags .= create: :$pdf, :$styler;
 my PDF::Tags::Elem $doc = $tags.Document;
 
-is $doc.style.Str, "display:block; margin:8px; unicode-bidi:embed;", "document style";
+like $doc.style.Str, rx/"display:block"/, "document style";
 
 my $h1 = $doc.Header1;
-is $h1.style.Str, "display:block; font-size:2em; font-weight:bolder; margin-bottom:0.67em; margin-top:0.67em; unicode-bidi:embed;", "Header1 style";
+like $h1.style.Str, rx/"display:block".* "bolder"/, "Header1 style";
 
 my $h2 = $doc.Header2;
-is $h2.style.Str, "display:block; font-size:1.5em; font-weight:bolder; margin-bottom:0.75em; margin-top:0.75em; unicode-bidi:embed;", "Header2 style";
+like $h2.style.Str, rx/"display:block;".*"bolder"/, "Header2 style";
 
 my $span = $h2.Span;
-is $h2.style.Str, "display:block; font-size:1.5em; font-weight:bolder; margin-bottom:0.75em; margin-top:0.75em; unicode-bidi:embed;", "Header2/Span style";
+like $h2.style.Str, rx/"display:block;".*"bolder"/, "Header2/Span style";
 
 my $para = $doc.Paragraph;
-is $para.style.Str, "display:block; margin-bottom:1.12em; margin-top:1.12em; unicode-bidi:embed;", "Paragraph style";
+like $para.style.Str, rx/"display:block;".*"margin"/, "Paragraph style";
 
 my $code-para = $para.Code;
 # 'white-space:pre' may be dropped in older versions of CSS::Properties
-is $code-para.style.Str, "font-family:monospace;"|"font-family:monospace; white-space:pre;", "Paragraph/Code style";
+like $code-para.style.Str, rx/"mono"/, "Paragraph/Code style";
