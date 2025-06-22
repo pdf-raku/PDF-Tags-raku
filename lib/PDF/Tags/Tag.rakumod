@@ -52,6 +52,8 @@ method ActualText {
 
 method text { $.ActualText // $.kids».text.join }
 
+method ast { $.root.marks ?? callsame() !! Empty }
+
 method AT-POS(UInt $i) {
     fail "index out of range 0 .. $.elems: $i" unless 0 <= $i < $.elems;
     self.kids-raw[$i] //= self.build-kid($!value.kids[$i]);

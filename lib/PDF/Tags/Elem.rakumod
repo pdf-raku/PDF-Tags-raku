@@ -379,7 +379,11 @@ method style {
 
 method ast {
     my @content = %.attributes.sort;
-    @content.append: @.kids.map: *.ast;
+    @content.append: @.kids.map: {
+        my $ast = .ast;
+        .isa('PDF::Tags::Mark') ?? :Mark[$ast] !! $ast
+    }
+
     $.name => @content;
 }
 
