@@ -75,6 +75,8 @@ method set-attribute(Str() $key, $val) {
     callsame();
 }
 
+method ast { $.root.marks ?? :Mark[ callsame() ] !! Empty }
+
 =begin pod
 
 =head2 Synopsis
