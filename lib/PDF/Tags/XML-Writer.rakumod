@@ -144,66 +144,10 @@ multi sub inlined-elem(Str $name, %atts) {
 }
 
 sub find-href($node) {
-    use PDF::Annot::Link;
-    use PDF::Action::URI;
-    use PDF::Action::GoTo;
-    use PDF::Action::GoToR;
-    use PDF::Destination;
-
     my constant &object-refs = PDF::Tags::XPath.compile: 'descendant::object()';
     my Str $href;
     for $node.find(&object-refs) {
-        given .value {
-            when PDF::Annot::Link {
-                my $l = $_;
-                with $l<A> // $l<PA> {
-                    when PDF::Action::URI {
-                        $href = .URI;
-                        last;
-                    }
-                    when PDF::Action::GoTo {
-                        given .<D> {
-                            when Str {
-                                $href = '#' ~ $_;
-                                last;
-                            }
-                        }
-                    }
-                    when PDF::Action::GoToR {
-                        $href = 'file://' ~ (.UF // .F);
-                        given .<D> {
-                            when Str {
-                                $href ~= '#' ~ $_;
-                                last;
-                            }
-                        }
-                    }
-                    when PDF::Destination {
-                        # Todo: work out page number from page reference
-                    }
-                    default {
-                        warn "ignoring {.WHAT.raku}";
-                    }
-                }
-                else {
-                    with $l<Dest> {
-                        when Str {
-                            $href = '#' ~ $_;
-                            last;
-                        }
-                        when PDF::Destination {
-                            # Todo: work out page number from page reference
-                        }
-                        default {
-                            warn "ignoring {.WHAT.raku}";
-                        }
-                    }
-                }
-            }
-            default {
-                warn "ignoring {.WHAT.raku}";
-            }
-        }
+        $href ||= .value with .ast;
     }
     $href;
 }

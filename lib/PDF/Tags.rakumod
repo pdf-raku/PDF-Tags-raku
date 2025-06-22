@@ -17,7 +17,6 @@ has Hash $.role-map          is built;
 has NumberTree $.parent-tree is built;
 has      $.styler;
 has Lock $!lock handles<protect> .= new;
-method root { self }
 method marks { True }
 
 submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {

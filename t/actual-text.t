@@ -57,17 +57,18 @@ $page.graphics: -> $gfx {
         is $section.text, "This paragraph links to http://google.com.\nTop level para.\n";
     }
 
-    is $doc.xml, q{<Document>
-  <Sect>
-    <P>
-      This paragraph links to <Link href="http://google.com">http://google.com</Link>.
-    </P>
-    <P>
-      Top level para.
-    </P>
-  </Sect>
-</Document>
-}, 'xml';
+    is $doc.xml, q:to<END>, 'xml';
+    <Document>
+      <Sect>
+        <P>
+          This paragraph links to <Link href="http://google.com">http://google.com</Link>.
+        </P>
+        <P>
+          Top level para.
+        </P>
+      </Sect>
+    </Document>
+    END
 }
 
 # ensure consistant document ID generation

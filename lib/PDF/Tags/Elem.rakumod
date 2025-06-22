@@ -377,6 +377,12 @@ method style {
     }
 }
 
+method ast {
+    my @content = %.attributes.sort;
+    @content.append: @.kids.map: *.ast;
+    $.name => @content;
+}
+
 =begin pod
 
 =head2 Synopsis

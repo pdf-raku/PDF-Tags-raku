@@ -9,6 +9,7 @@ use PDF::StructElem;
 use PDF::Tags::Node::Parent;
 use PDF::Class::StructItem;
 
+
 submethod TWEAK {
     self.Pg = $_ with self.cos.Pg;
 }
@@ -23,6 +24,65 @@ method cos(--> PDF::OBJR) { callsame() }
 
 method name { '#ref' }
 method value(--> PDF::Class::StructItem) { $.cos.object }
+
+method ast {
+    use PDF::Annot::Link;
+    use PDF::Action::URI;
+    use PDF::Action::GoTo;
+    use PDF::Action::GoToR;
+    use PDF::Destination;
+    my Str $href;
+
+    given $.value {
+        when PDF::Annot::Link {
+            my $l = $_;
+            with $l<A> // $l<PA> {
+                when PDF::Action::URI {
+                    $href = .URI;
+                }
+                when PDF::Action::GoTo {
+                    given .<D> {
+                        when Str {
+                            $href = '#' ~ $_;
+                        }
+                    }
+                }
+                when PDF::Action::GoToR {
+                    $href = 'file://' ~ (.UF // .F);
+                    given .<D> {
+                        when Str {
+                            $href ~= '#' ~ $_;
+                        }
+                    }
+                }
+                when PDF::Destination {
+                    # Todo: work out page number from page reference
+                }
+                default {
+                    warn "ignoring {.WHAT.raku}";
+                }
+            }
+            else {
+                with $l<Dest> {
+                    when Str {
+                        $href = '#' ~ $_;
+                    }
+                    when PDF::Destination {
+                        # Todo: work out page number from page reference
+                    }
+                    default {
+                        warn "ignoring {.WHAT.raku}";
+                    }
+                }
+            }
+        }
+        default {
+            warn "ignoring {.WHAT.raku} ObjRef ast";
+        }
+    }
+
+    $href ?? :$href !! Empty;
+}
 
 =begin pod
 

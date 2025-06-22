@@ -23,6 +23,6 @@ has PDF::Tags::Node::Parent $.parent is rw;
 method name { '#text' }
 
 #| Text content
-method Str(--> Str) is also<gist text value ActualText> { $.cos() }
+method Str(--> Str) is also<gist text value ActualText ast> { $.cos() }
 
 

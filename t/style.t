@@ -34,5 +34,4 @@ my $para = $doc.Paragraph;
 like $para.style.Str, rx/"display:block;".*"margin"/, "Paragraph style";
 
 my $code-para = $para.Code;
-# 'white-space:pre' may be dropped in older versions of CSS::Properties
 like $code-para.style.Str, rx/"mono"/, "Paragraph/Code style";

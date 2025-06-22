@@ -186,6 +186,8 @@ method kids {
     Kids.new: :node(self);
 }
 
+method ast { self.name => self.Array.map: *.ast }
+
 constant ListAtts = set <ListNumbering>;
 constant PrintFieldAtts = set <Role checked Desc>;
 constant TableAtts = set <RowSpan ColSpan Headers Scope Summary>;

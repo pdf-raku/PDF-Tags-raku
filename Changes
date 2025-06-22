@@ -1,5 +1,6 @@
 {{$NEXT}}
-   - Fix some '>' & '<' characters in XML output
+   - Fixed vivification of role-maps
+   - Fixed actual-text escaping in XML output
 
 0.2.0  2025-06-04T12:53:05+12:00
    - Document mnemonics: /Code as CODE and /L and LIST. These have been
