@@ -118,6 +118,13 @@ method canvas-tags(|) {
     fail "PDF::Tags::Reader is required to read PDF tags";
 }
 
+method ast {
+    my @ast = self.Array.map: *.ast;
+    '#xml' => @ast.elems == 1
+        ?? @ast
+        !! :DocumentFragment(@ast);
+}
+
 =begin pod
 
 =head2 Synopsis
