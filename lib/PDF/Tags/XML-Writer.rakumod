@@ -102,6 +102,8 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     self!line($!css) if $!style;
+    self!line('<?pdf-role-map' ~ .role-map.&atts-str ~ ' ?>')
+        if .role-map;
 
     self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
@@ -171,7 +173,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         if $name eq 'Link' {
             %attributes<href> = $_ with $node.&find-href;
         }
-        atts-str(%attributes);
+        %attributes.&atts-str;
     } // '';
     my $*inline = inlined-elem($name, %attributes);
     $name = $_ with $role;
