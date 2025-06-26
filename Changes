@@ -1,6 +1,9 @@
 {{$NEXT}}
    - Fixed vivification of role-maps
    - Fixed actual-text escaping in XML output
+   - Fix XML :roles option to translate only valid XML names to tags.
+   - Also output a <?pdf-role-map role="<tag" ... ?> directive when
+     roles are being mapped.
 
 0.2.0  2025-06-04T12:53:05+12:00
    - Document mnemonics: /Code as CODE and /L and LIST. These have been

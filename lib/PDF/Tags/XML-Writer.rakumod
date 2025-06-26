@@ -31,6 +31,16 @@ has Bool $!got-nl = True;
 has Bool $!feed;
 has Bool $!snug = True;
 has Int  $!n = 0;
+has Str %!role-map;
+
+multi submethod TWEAK(PDF::Tags :$root) {
+    with $root {
+        $!root-tag //= 'DocumentFragment' if .elems != 1;
+        if $!roles && .role-map {
+            %!role-map = .role-map.grep: {.key ~~ /^<ident>$/};
+        }
+    }
+}
 
 method !chunk(Str $s is copy, UInt $depth = 0) {
     if $s {
@@ -94,7 +104,6 @@ method say(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
 
 multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     self!line('<?xml version="1.0" encoding="UTF-8"?>');
-    $!root-tag //= 'DocumentFragment' if .elems != 1;
     if $!dtd && $!valid {
         my $doctype = $!root-tag;
         $doctype //= .name with .kids.head;
@@ -102,9 +111,8 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     self!line($!css) if $!style;
-    self!line('<?pdf-role-map' ~ .role-map.&atts-str ~ ' ?>')
-        if .role-map;
-
+    self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ ' ?>')
+        if %!role-map;
     self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
 
@@ -161,6 +169,15 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
     my $name = $node.name;
     my $role = $node.role if $!roles;
+    if $role {
+        if %!role-map{$role} {
+            $name = $role
+        }
+        else {
+            $role = Nil;
+        }
+    }
+
     my $actual-text = self!actual-text($node);
     my %attributes;
     my $att = do if $!atts {
@@ -176,7 +193,6 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         %attributes.&atts-str;
     } // '';
     my $*inline = inlined-elem($name, %attributes);
-    $name = $_ with $role;
     return if $name eq 'Artifact' && !$!artifacts;
     my $omit-tag = $name ~~ $_ with $!omit;
 
