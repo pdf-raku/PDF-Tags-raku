@@ -13,6 +13,8 @@ use PDF::Tags::Text;
 use PDF::Tags::XPath;
 use PDF::Class::StructItem;
 use PDF::Content::Tag :Tags;
+use PDF::COS;
+use PDF::COS::Null;
 
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
@@ -77,11 +79,18 @@ sub xml-escape(Str:D $_) {
         /\>/ => '&gt;',
 }
 multi sub str-escape(@a) { @a.map(&str-escape).join: ' '; }
+multi sub str-escape(Any:U) { 'null' }
+multi sub str-escape(PDF::COS::Null) { 'null' }
 multi sub str-escape(Str $_) {
     .&xml-escape.trans: /\"/ => '&quote;';
 }
-multi sub str-escape(Pair $_) { str-escape(.value) }
-multi sub str-escape($_) is default { str-escape(.Str) }
+multi sub str-escape(Pair $_) { .value.&str-escape }
+multi sub str-escape(Bool $_) { .so ?? 'true' !! 'false' }
+multi sub str-escape(Numeric $_) { .Str.&str-escape }
+multi sub str-escape(PDF::COS $_ where .is-indirect) {
+    '%d %d R'.sprintf: .obj-num, .gen-num;
+}
+multi sub str-escape($_) { .Str.&str-escape }
 
 sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{str-escape(.value)}\"" }).join;

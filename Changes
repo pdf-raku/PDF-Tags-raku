@@ -1,4 +1,7 @@
 {{$NEXT}}
+   - Allow for references to null and indirect objects in XML
+     serializations. This is possible in attributes, which can
+     reference anything.
 
 0.2.1  2025-06-27T08:38:37+12:00
    - Fixed vivification of role-maps
@@ -8,7 +11,7 @@
      roles are being mapped.
 
 0.2.0  2025-06-04T12:53:05+12:00
-   - Document mnemonics: /Code as CODE and /L and LIST. These have been
+   - Document mnemonics: /Code as CODE and /L as LIST. These have been
      upper-cased in PDF::Content to avoid colliding with standard Raku
      data-types.
    - Improved robustness of XML serialization; warn rather than dying. This
