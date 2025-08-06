@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.2.2  2025-08-07T10:36:26+12:00
    - Allow for references to null and indirect objects in XML
      serializations. This is possible in attributes, which can
      reference anything.
