@@ -304,7 +304,7 @@ method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
         unless $omit-tag;
 
     if $!marks && $node.isa(PDF::Tags::Mark) && !($!omit ~~ 'Mark') {
-        my %atts = :MCID($node.mcid);
+        my %atts = :MCID($node.mcid) if $!atts || $!debug;
         if $!debug {
             %atts<Pg> = "{.obj-num} {.gen-num} R"
                 with $node.value.canvas;
