@@ -142,16 +142,12 @@ method Hash handles <keys pairs> {
     $!store //= do {
         my %h;
         %h{.name}.push: $_ for self.Array;
-        if self.can('attributes') {
-            %h{'@' ~ .key} = .value
-               for self.attributes.pairs;
-        }
+        %h{'@' ~ .key} = .value
+            for self.attributes.pairs;
         %h;
     }
 }
 method set-attribute(Str $key, $val) {
-    fail "attributes not applicable to objects of type {self.WHAT.raku}"
-        unless self.can('attributes');
     .{$key} = $val with $!store;
     $val;
 }

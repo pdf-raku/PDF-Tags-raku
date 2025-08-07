@@ -118,7 +118,7 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     self!line($!css) if $!style;
-    self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ ' ?>')
+    self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
     self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
