@@ -35,12 +35,10 @@ has Bool $!snug = True;
 has Int  $!n = 0;
 has Str %!role-map;
 
-multi submethod TWEAK(PDF::Tags :$root) {
-    with $root {
-        $!root-tag //= 'DocumentFragment' if .elems != 1;
-        if $!roles && .role-map {
-            %!role-map = .role-map.grep: {.key ~~ /^<ident>$/};
-        }
+multi submethod TWEAK(PDF::Tags:D :root($_)!) {
+    $!root-tag //= 'DocumentFragment' if .elems != 1;
+    if $!roles && .role-map {
+        %!role-map = .role-map.grep: {.key ~~ /^<ident>$/};
     }
 }
 
@@ -51,7 +49,7 @@ method !chunk(Str $s is copy, UInt $depth = 0) {
             take "\n" ~ ('  ' x $depth) unless $!snug--;
             $!feed = False;
         }
-        if $*inline && $s {
+        if $*inline {
             take $s
         }
         else {
