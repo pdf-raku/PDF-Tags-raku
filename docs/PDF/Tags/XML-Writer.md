@@ -37,5 +37,5 @@ The `xml` method can be called on individual elements in the tree to dump these 
     say .xml(:depth(2)) for $tags.find('Document//Sect');
     say '</Document>';
 
-Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str($node)`
+Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str($node)`.
 

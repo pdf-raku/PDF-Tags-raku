@@ -1,5 +1,11 @@
 {{$NEXT}}
-   - Support NoteType attribute in FENote tag. Seems to be a WTPDF
+
+0.2.3  2025-08-22T10:51:08+12:00
+   - Add :xsl option to XML-Writer. This will add a directive to
+     associate the XML document. Note that any :css option will
+     then work with the transformed document; usually HTML.
+   - Make XML MCID attribute output honor the :atts option.
+   - Support NoteType attribute in FENote tags. This is a WTPDF
      recommendation, but not yet official in PDF 2.0
 
 0.2.2  2025-08-07T10:36:26+12:00
