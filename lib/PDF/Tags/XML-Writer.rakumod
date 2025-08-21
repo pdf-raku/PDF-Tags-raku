@@ -19,7 +19,8 @@ use PDF::COS::Null;
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
 has Bool $.roles;
-has Str  $.css = '<?xml-stylesheet type="text/css" href="https://pdf-raku.github.io/css/tagged-pdf.css"?>';
+has Str  $.xsl;
+has Str  $.css;
 has Str  $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
 has Bool $.style = True;
 has Bool $.debug = False;
@@ -35,11 +36,17 @@ has Bool $!snug = True;
 has Int  $!n = 0;
 has Str %!role-map;
 
-multi submethod TWEAK(PDF::Tags:D :root($_)!) {
-    $!root-tag //= 'DocumentFragment' if .elems != 1;
-    if $!roles && .role-map {
-        %!role-map = .role-map.grep: {.key ~~ /^<ident>$/};
+submethod TWEAK(PDF::Tags :$root) {
+    with $root {
+        $!root-tag //= 'DocumentFragment' if .elems != 1;
+        if $!roles && .role-map {
+            %!role-map = .role-map.grep: {.key ~~ /^<ident>$/};
+        }
     }
+
+    # CSS is applied after XSL
+    $!css //= "http://pdf-raku.github.io/css/tagged-pdf.css"
+        unless $!xsl;
 }
 
 method !chunk(Str $s is copy, UInt $depth = 0) {
@@ -117,7 +124,10 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         $doctype //= 'Document';
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
-    self!line($!css) if $!style;
+    if $!style {
+        self!line: qq{<?xml-stylesheet type="text/xml" href="$_"?>} with $!xsl;
+        self!line: qq{<?xml-stylesheet type="text/css" href="$_"?>} with $!css;
+    }
     self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
     self!line('<' ~ $_ ~ '>', $depth++)
@@ -342,6 +352,6 @@ dump these as fragments:
    say .xml(:depth(2)) for $tags.find('Document//Sect');
    say '</Document>';
 
-Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str($node)`
+Calling `$node.xml(|c)`, is equivalent to: `PDF::Tags::XML-Writer.new(|c).Str($node)`.
 
 =end pod

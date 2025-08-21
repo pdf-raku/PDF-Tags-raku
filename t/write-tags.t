@@ -9,7 +9,7 @@ use PDF::Tags::Mark;
 use PDF::Tags::ObjRef;
 use PDF::Class;
 use PDF::Page;
-use PDF::Annot;
+use PDF::Annot::Link;
 use PDF::XObject::Image;
 use PDF::XObject::Form;
 
@@ -57,7 +57,7 @@ $page.graphics: -> $gfx {
         .say: "Eureka!", :position[40, 60];
     };
 
-    my PDF::Annot $annot .= COERCE: {
+    my PDF::Annot::Link $annot .= COERCE: {
         :Type(:name<Annot>),
         :Subtype(:name<Link>),
         :Rect[71, 717, 190, 734],
