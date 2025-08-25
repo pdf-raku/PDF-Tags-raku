@@ -170,13 +170,19 @@ multi sub inlined-elem(Str $name, %atts) {
     }
 }
 
+sub sanitize-id(Str:D $id) {
+    $id.subst(rx:i/<- [a..z 0..9 _ : . -]>/, '_', :g);
+}
+
 sub find-href($node) {
     my constant &object-refs = PDF::Tags::XPath.compile: 'descendant::object()';
     my Str $href;
     for $node.find(&object-refs) {
         $href ||= .value with .ast;
     }
-    $href;
+    ($href && $href.starts-with('#'))
+        ?? '#' ~ $href.substr(1).&sanitize-id
+        !! $href;
 }
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
@@ -216,7 +222,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
                 $name = 'Span';
                 $omit-tag = False;
             }
-            %attributes<id> //= $_;
+            %attributes<id> //= .&sanitize-id;
         }
 
         %attributes.&atts-str;
