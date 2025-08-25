@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+0.2.4  2025-08-26T08:06:49+12:00
+   - Add XML support for named destinations as hrefs and ids.
+
 0.2.3  2025-08-22T10:51:08+12:00
    - Add :xsl option to XML-Writer. This will add a directive to
      associate the XML document. Note that any :css option will
