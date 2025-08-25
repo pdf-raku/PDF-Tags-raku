@@ -31,6 +31,7 @@ has Hash $!attributes;
 has TagName $.name is built;
 has Str $.role is built;
 has List $!classes;
+has Str $.id;
 
 method classes { $!classes //= $.cos.class-map-keys }
 
@@ -82,6 +83,11 @@ method attributes {
 
 method build-kid($) {
     given callsame() {
+        if !$!id && .isa(PDF::Tags::Mark) {
+            if .value.dest-name -> $dest-name {
+                $!id = $dest-name;
+            }
+        }
         if ! $.root.marks && $_ ~~ PDF::Tags::Mark && !.attributes<Lang> {
             # dereference marked content tags. just get the aggregate text
             $.build-kid(.text);

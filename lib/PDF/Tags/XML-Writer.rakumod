@@ -197,6 +197,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 
     my $actual-text = self!actual-text($node);
     my %attributes;
+    my $omit-tag = $name ~~ $_ with $!omit;
     my $att = do if $!atts {
         %attributes = $node.attributes;
         if $role {
@@ -207,11 +208,21 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
         if $name eq 'Link' {
             %attributes<href> = $_ with $node.&find-href;
         }
+
+        with $node.id {
+            if $omit-tag {
+                # Omit the tag, but preserve the ID, to avoid broken internal links
+                %attributes = ();
+                $name = 'Span';
+                $omit-tag = False;
+            }
+            %attributes<id> //= $_;
+        }
+
         %attributes.&atts-str;
     } // '';
     my $*inline = inlined-elem($name, %attributes);
     return if $name eq 'Artifact' && !$!artifacts;
-    my $omit-tag = $name ~~ $_ with $!omit;
 
     if $depth >= $!max-depth {
         self!line("<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
