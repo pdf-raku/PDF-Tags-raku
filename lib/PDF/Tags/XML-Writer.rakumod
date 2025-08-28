@@ -91,7 +91,7 @@ multi sub str-escape(Str $_) {
 }
 multi sub str-escape(Pair $_) { .value.&str-escape }
 multi sub str-escape(Bool $_) { .so ?? 'true' !! 'false' }
-multi sub str-escape(Numeric $_) { .Str.&str-escape }
+multi sub str-escape(Numeric $_) { .Str }
 multi sub str-escape(PDF::COS $_ where .is-indirect) {
     '%d %d R'.sprintf: .obj-num, .gen-num;
 }
@@ -125,8 +125,8 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     if $!style {
-        self!line: qq{<?xml-stylesheet type="text/xml" href="$_"?>} with $!xsl;
-        self!line: qq{<?xml-stylesheet type="text/css" href="$_"?>} with $!css;
+        self!line: qq[<?xml-stylesheet type="text/xml" href="{.&str-escape}"?>] with $!xsl;
+        self!line: qq[<?xml-stylesheet type="text/css" href="{.&str-escape}"?>] with $!css;
     }
     self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
