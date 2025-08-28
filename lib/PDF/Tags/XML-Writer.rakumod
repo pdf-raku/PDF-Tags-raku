@@ -45,7 +45,7 @@ submethod TWEAK(PDF::Tags :$root) {
     }
 
     # CSS is applied after XSL
-    $!css //= "http://pdf-raku.github.io/css/tagged-pdf.css"
+    $!css //= "https://pdf-raku.github.io/css/tagged-pdf.css"
         unless $!xsl;
 }
 
