@@ -3,7 +3,7 @@ unit class PDF::Tags::XML-Writer;
 
 use PDF::Tags;
 use PDF::Tags::Elem;
-use PDF::Tags::Node;
+use PDF::Tags::Node :TagName;
 use PDF::Tags::ObjRef;
 use PDF::Tags::Node::Parent;
 use PDF::Tags::Node::Root;
@@ -19,6 +19,7 @@ use PDF::COS::Null;
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
 has Bool $.roles;
+has Bool $.classes;
 has Str  $.xsl;
 has Str  $.css;
 has Str  $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
@@ -40,7 +41,7 @@ submethod TWEAK(PDF::Tags :$root) {
     with $root {
         $!root-tag //= 'DocumentFragment' if .elems != 1;
         if $!roles && .role-map {
-            %!role-map = .role-map.grep: {.key ~~ /^<ident>$/};
+            %!role-map = .role-map.grep: {.key ~~ TagName};
         }
     }
 
@@ -210,6 +211,10 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
             %attributes<role>:delete;
         }
         %attributes<Lang> = $_ with $node.Lang;
+        if $!classes {
+            my @classes = $node.classes.List;
+            %attributes<class> = @classes.join(' ') if @classes;
+        }
 
         if $name eq 'Link' {
             %attributes<href> = $_ with $node.&find-href;
