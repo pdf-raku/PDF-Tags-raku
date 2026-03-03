@@ -48,10 +48,16 @@ method ast {
                     }
                 }
                 when PDF::Action::GoToR {
+                    my subset RemoteDest of PDF::Destination:D where .[0] ~~ UInt;
                     $href = 'file://' ~ (.UF // .F);
                     given .<D> {
                         when Str {
+                            # named destination
                             $href ~= '#' ~ $_;
+                        }
+                        when RemoteDest {
+                            # page number (starting from 0)
+                            $href ~= '#page=' ~ .[0] + 1;
                         }
                     }
                 }
