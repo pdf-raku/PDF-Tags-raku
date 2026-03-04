@@ -6,9 +6,9 @@ also is PDF::Tags::Node;
 
 use PDF::OBJR;
 use PDF::StructElem;
+use PDF::Destination;
 use PDF::Tags::Node::Parent;
 use PDF::Class::StructItem;
-
 
 submethod TWEAK {
     self.Pg = $_ with self.cos.Pg;
@@ -25,15 +25,28 @@ method cos(--> PDF::OBJR) { callsame() }
 method name { '#ref' }
 method value(--> PDF::Class::StructItem) { $.cos.object }
 
+multi sub frag(Str:D $_, |) { '#' ~ $_ }
+multi sub frag(PDF::Destination $_, :$remote) {
+    given .[0] {
+        when Str { '#' ~ $_ }
+        when UInt { $remote ?? '#page=' ~ ($_ + 1) !! '' }
+        when PDF::StructElem {
+            if .ID -> $id { '#' ~ $id } else { '' };
+        }
+        default { '' }
+    }
+}
+multi sub frag($, |) { '' }
+
 method ast {
     use PDF::Annot::Link;
     use PDF::Action::URI;
     use PDF::Action::GoTo;
     use PDF::Action::GoToR;
-    use PDF::Destination;
     my Str $href;
 
     given $.value {
+
         when PDF::Annot::Link {
             my $l = $_;
             with $l<A> // $l<PA> {
@@ -41,45 +54,20 @@ method ast {
                     $href = .URI;
                 }
                 when PDF::Action::GoTo {
-                    given .<D> {
-                        when Str {
-                            $href = '#' ~ $_;
-                        }
-                    }
+                    $href = frag(.<SD> // .<D>);
                 }
                 when PDF::Action::GoToR {
-                    my subset RemoteDest of PDF::Destination:D where .[0] ~~ UInt;
-                    $href = 'file://' ~ (.UF // .F);
-                    given .<D> {
-                        when Str {
-                            # named destination
-                            $href ~= '#' ~ $_;
-                        }
-                        when RemoteDest {
-                            # page number (starting from 0)
-                            $href ~= '#page=' ~ .[0] + 1;
-                        }
-                    }
+                    $href = 'file://' ~ (.UF // .F) ~ frag(.<SD> // .<D>, :remote);
                 }
                 when PDF::Destination {
-                    # Todo: work out page number from page reference
+                    $href = .&frag;
                 }
                 default {
                     warn "ignoring {.WHAT.raku}";
                 }
             }
             else {
-                with $l<Dest> {
-                    when Str {
-                        $href = '#' ~ $_;
-                    }
-                    when PDF::Destination {
-                        # Todo: work out page number from page reference
-                    }
-                    default {
-                        warn "ignoring {.WHAT.raku}";
-                    }
-                }
+                $href = .&frag with $l<Dest>;
             }
         }
         default {

@@ -107,7 +107,7 @@ Examples:
 
 =item `position()` - current position in parent list, numbered from `1`
 =item `first()` - true if this is the first item in its parent list
-=item `last()` - true if this is the first item in its parent list
+=item `last()` - true if this is the last item in its parent list
 
 =head3 Predicate Operators
 

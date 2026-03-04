@@ -1,7 +1,8 @@
 {{$NEXT}}
 
 0.2.5  2025-08-29T06:33:48+12:00
-   - Escape XML CSS and XSL stylesheets
+   - Escape XML CSS and XSL style-sheets
+   - Handle XML links for PDF 2.0 structural destinations
 
 0.2.4  2025-08-26T08:06:49+12:00
    - Add XML support for named destinations, as hrefs and ids.

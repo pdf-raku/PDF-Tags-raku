@@ -68,11 +68,13 @@ method attributes(:$class-names) {
         }
 
         if $class-names {
+            # show class names
             if @.classes.join(' ') -> $names {
                 %atts<class> = $names;
             }
         }
         else {
+            # expand class attributes
             unless %atts {
                 for @.classes {
                     with $.root.class-map{$_} -> PDF::Attributes $atts {

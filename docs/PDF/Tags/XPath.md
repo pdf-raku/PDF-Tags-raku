@@ -91,7 +91,7 @@ Examples:
 
   * `first()` - true if this is the first item in its parent list
 
-  * `last()` - true if this is the first item in its parent list
+  * `last()` - true if this is the last item in its parent list
 
 ### Predicate Operators
 
