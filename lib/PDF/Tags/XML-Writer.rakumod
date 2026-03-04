@@ -158,7 +158,7 @@ method !actual-text($node) {
     $actual-text;
 }
 
-multi sub inlined-elem(Str $name, %atts) {
+sub inlined-elem($name, %atts) {
     with %atts<Placement> {
         # From PDF 2.0 Table 387 Standard layout attributes common to all standard structure types,
         # regarding 'Placement':
@@ -206,7 +206,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my %attributes;
     my $omit-tag = $name ~~ $_ with $!omit;
     my $att = do if $!atts {
-        my %attributes = $node.attributes(:$!class-names);
+        %attributes = $node.attributes(:$!class-names);
         if $role {
             %attributes<role>:delete;
         }
@@ -228,8 +228,9 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
 
         %attributes.&atts-str;
     } // '';
-    my $*inline = inlined-elem($name, %attributes);
+
     return if $name eq 'Artifact' && !$!artifacts;
+    my $*inline = $name.&inlined-elem(%attributes);
 
     if $depth >= $!max-depth {
         self!line("<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
