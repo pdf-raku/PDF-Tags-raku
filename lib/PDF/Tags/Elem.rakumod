@@ -27,7 +27,7 @@ use PDF::XObject;
 
 method cos(--> PDF::StructElem) handles <ActualText Alt Lang> { callsame() }
 has PDF::Tags::Node::Parent $.parent is rw = self.root;
-has Hash $!attributes;
+has Hash @!attributes;
 has TagName $.name is built;
 has Str $.role is built;
 has List $!classes;
@@ -60,17 +60,24 @@ sub merge-atts(%atts, PDF::Attributes $a) {
     }
 }
 
-method attributes {
-    $!attributes //= do {
+method attributes(:$class-names) {
+    @!attributes[$class-names.so] //= do {
         my %atts;
         for $.cos.attribute-dicts -> PDF::Attributes $atts {
-            merge-atts(%atts, $atts);
+            %atts.&merge-atts($atts);
         }
 
-        unless %atts {
-            for @.classes {
-                with $.root.class-map{$_} -> PDF::Attributes $atts {
-                    merge-atts(%atts, $atts);
+        if $class-names {
+            if @.classes.join(' ') -> $names {
+                %atts<class> = $names;
+            }
+        }
+        else {
+            unless %atts {
+                for @.classes {
+                    with $.root.class-map{$_} -> PDF::Attributes $atts {
+                        %atts.&merge-atts($atts);
+                    }
                 }
             }
         }
@@ -332,7 +339,7 @@ method set-attributes(*%attributes) {
         $atts.set-attribute(.key, .value)
             for %atts-by-owner{$owner}.pairs;
     }
-    $!attributes = Nil; # regen on next access
+    @!attributes = (); # regen on next access
 }
 
 method !bbox($gfx, @rect) {

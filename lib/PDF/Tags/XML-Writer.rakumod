@@ -19,7 +19,7 @@ use PDF::COS::Null;
 has UInt $.max-depth = 16;
 has Bool $.atts = True;
 has Bool $.roles;
-has Bool $.classes;
+has Bool $.class-names;
 has Str  $.xsl;
 has Str  $.css;
 has Str  $.dtd = 'http://pdf-raku.github.io/dtd/tagged-pdf.dtd';
@@ -206,15 +206,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     my %attributes;
     my $omit-tag = $name ~~ $_ with $!omit;
     my $att = do if $!atts {
-        %attributes = $node.attributes;
+        my %attributes = $node.attributes(:$!class-names);
         if $role {
             %attributes<role>:delete;
         }
         %attributes<Lang> = $_ with $node.Lang;
-        if $!classes {
-            my @classes = $node.classes.List;
-            %attributes<class> = @classes.join(' ') if @classes;
-        }
 
         if $name eq 'Link' {
             %attributes<href> = $_ with $node.&find-href;

@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 3;
+plan 7;
 
 use PDF::Content::FontObj;
 use PDF::Content::Tag :Tags;
@@ -42,12 +42,16 @@ $page.graphics: -> $gfx {
     };
 
     is-deeply $para.attributes, %class-map<Normal>;
+    is-deeply $para.attributes(:class-names), %{ :class<Normal> };
+    is-deeply $para.attributes, %class-map<Normal>;
 }
 
 # ensure consistant document ID generation
 $pdf.id =  $*PROGRAM.basename.fmt('%-16.16s');
 
 is $tags.find('Document//*')>>.name.join(','), 'H1,P';
+is $tags.find('//P').head.xml.lines.head, '<P EndIndent="20" StartIndent="10" TextAlign="Start">', 'xml';
+is $tags.find('//P').head.xml(:class-names).lines.head, '<P class="Normal">', 'xml';
 
 lives-ok { $pdf.save-as: "t/class-maps.pdf", :!info }; 
 
