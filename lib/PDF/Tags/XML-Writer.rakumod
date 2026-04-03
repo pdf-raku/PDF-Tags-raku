@@ -37,6 +37,7 @@ has Bool $!snug = True;
 has Int  $!n = 0;
 has Str %!role-map;
 has Hash $!class-map;
+has Str:D %.info;
 
 submethod TWEAK(PDF::Tags :$root) {
     with $root {
@@ -133,6 +134,8 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!line: qq[<?xml-stylesheet type="text/xml" href="{.&str-escape}"?>] with $!xsl;
         self!line: qq[<?xml-stylesheet type="text/css" href="{.&str-escape}"?>] with $!css;
     }
+    self!line('<?pdf-info' ~ %!info.&atts-str ~ '?>')
+        if %!info;
     self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
     if $!class-names &&$!class-map {
