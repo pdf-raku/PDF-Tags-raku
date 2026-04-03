@@ -1,8 +1,12 @@
 {{$NEXT}}
+   - Handle XML links for PDF 2.0 structural destinations
+   - Add --class-names to serialization. This changes from the default
+     XML behaviour of in-lining class attributes to adding class="name..."
+     attributes to elements, and initial <?pdf-class "class-name" ... ?>
+     directives.
 
 0.2.5  2025-08-29T06:33:48+12:00
    - Escape XML CSS and XSL style-sheets
-   - Handle XML links for PDF 2.0 structural destinations
 
 0.2.4  2025-08-26T08:06:49+12:00
    - Add XML support for named destinations, as hrefs and ids.

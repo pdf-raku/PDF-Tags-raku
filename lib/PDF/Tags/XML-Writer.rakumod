@@ -36,12 +36,16 @@ has Bool $!feed;
 has Bool $!snug = True;
 has Int  $!n = 0;
 has Str %!role-map;
+has Hash $!class-map;
 
 submethod TWEAK(PDF::Tags :$root) {
     with $root {
         $!root-tag //= 'DocumentFragment' if .elems != 1;
         if $!roles && .role-map {
             %!role-map = .role-map.grep: {.key ~~ TagName};
+        }
+        if $!class-names && .class-map {
+            $!class-map := .class-map;
         }
     }
 
@@ -99,7 +103,7 @@ multi sub str-escape(PDF::COS $_ where .is-indirect) {
 multi sub str-escape($_) { .Str.&str-escape }
 
 sub atts-str(%atts) {
-    %atts.pairs.sort.map({ " {.key}=\"{str-escape(.value)}\"" }).join;
+    %atts.pairs.sort.map({ " {.key}=\"{.value.&str-escape}\"" }).join;
 }
 
 method Str(PDF::Tags::Node $item) {
@@ -131,6 +135,10 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     }
     self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
+    if $!class-names &&$!class-map {
+        self!line('<?pdf-class "' ~ .&str-escape() ~ '"' ~ $!class-map{$_}.Hash.&atts-str() ~ '?>')
+            for $!class-map.keys.sort;
+    }
     self!line('<' ~ $_ ~ '>', $depth++)
         with $!root-tag;
 
@@ -317,7 +325,7 @@ method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
         @text.join;
     }
     my $tag-atts = '';
-    if ($!atts) {
+    if $!atts {
         $tag-atts  = .&atts-str() with $node.attributes;
     }
     my $omit-tag = ! $!marks;
