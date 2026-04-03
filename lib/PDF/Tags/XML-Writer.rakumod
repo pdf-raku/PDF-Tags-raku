@@ -37,7 +37,7 @@ has Bool $!snug = True;
 has Int  $!n = 0;
 has Str %!role-map;
 has Hash $!class-map;
-has Str:D %.info;
+has Any:D %.info;
 
 submethod TWEAK(PDF::Tags :$root) {
     with $root {
@@ -94,6 +94,20 @@ multi sub str-escape(Any:U) { 'null' }
 multi sub str-escape(PDF::COS::Null) { 'null' }
 multi sub str-escape(Str $_) {
     .&xml-escape.trans: /\"/ => '&quote;';
+}
+multi sub str-escape(DateTime:D $dt) {
+    my :($tz-s, $tz) := do given $dt.timezone {
+        when * < 0 {'-', -$_ }
+        default    {'+', $_ }
+    }
+    sprintf('%s %s %02d %02d:%02d:%02d %04d%s%02d:%02d',
+	    <Mon Tue Wed Thu Fri Sat Sun>[$dt.day-of-week - 1],
+	    <Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec>[$dt.month - 1],
+	    $dt.day-of-month,
+	    $dt.hour, $dt.minute, $dt.second,
+	    $dt.year,
+            $tz-s, $tz div 3600, $tz div 60 mod 60);
+
 }
 multi sub str-escape(Pair $_) { .value.&str-escape }
 multi sub str-escape(Bool $_) { .so ?? 'true' !! 'false' }
