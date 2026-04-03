@@ -36,12 +36,11 @@ has Str $.id;
 method classes { $!classes //= $.cos.class-map-keys }
 
 method name is rw {
-    Proxy.new(
-        FETCH => { $!name },
-        STORE => -> $, $!name {
-            self.cos.tag = $!name;
-        }
-    );
+    sub FETCH($) { $!name }
+    sub STORE($, $!name) {
+        self.cos.tag = $!name;
+    }
+    Proxy.new: :&FETCH, :&STORE;
 }
 
 sub merge-atts(%atts, PDF::Attributes $a) {
@@ -322,7 +321,7 @@ method !setup-parents(PDF::XObject::Form $xobj) {
     }
 }
 
-method set-attribute(Str() $key, Any:D $val) {
+method set-attribute(Str() $key, $val) {
     my :($owner, $att) := att-owner($key);
     fail "unable to determine owner for attribute: $key"
         unless $owner;
@@ -330,6 +329,18 @@ method set-attribute(Str() $key, Any:D $val) {
     self.attributes{$key} = $val;
     callsame();
 }
+
+method attribute(Str:D $key) is rw {
+    sub FETCH($, $key) {
+        my %atts := self.attributes;
+        %atts.AT-KEY: $key;
+    }
+    sub STORE($, $key, $value) {
+        self.set-attribute($key, $value);
+    }
+    Proxy.new: :&FETCH, :&STORE;
+}
+
 method set-attributes(*%attributes) {
     my Hash %atts-by-owner;
     for %attributes {

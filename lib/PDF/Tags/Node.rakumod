@@ -13,19 +13,19 @@ use PDF::Tags::Node::Root;
 use Method::Also;
 
 my subset TagName of Str is export(:TagName)
-    where Str:U | /^<ident>$/;
+    where Str:U | /^<ident>[<[.-]>|<ident>]*$/;
 
 has PDF::Tags::Node::Root $.root is required handles<role-map artifacts>;
 has PDF::Page $.Pg; # current page scope
 has $.cos is required;
 method set-cos($!cos) { }
 method Pg is rw {
-    Proxy.new(
-        FETCH => {$!Pg},
-        STORE => -> $, $!Pg {
-            $!cos.Pg = $!Pg if $!cos ~~ PDF::OBJR|PDF::MCR|PDF::StructElem;
-        }
-    );
+    sub FETCH($) {$!Pg}
+    sub STORE($, $!Pg) {
+        $!cos.Pg = $!Pg if $!cos ~~ PDF::OBJR|PDF::MCR|PDF::StructElem;
+    }
+
+    Proxy.new: :&FETCH, :&STORE;
 }
 
 proto sub node-class($) is export(:node-class) {*}
