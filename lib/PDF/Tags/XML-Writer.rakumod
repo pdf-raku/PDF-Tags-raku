@@ -14,6 +14,7 @@ use PDF::Tags::XPath;
 use PDF::Class::StructItem;
 use PDF::Content::Tag :Tags;
 use PDF::COS;
+use PDF::COS::DateString;
 use PDF::COS::Null;
 
 has UInt $.max-depth = 16;
@@ -92,22 +93,14 @@ sub xml-escape(Str:D $_) {
 multi sub str-escape(@a) { @a.map(&str-escape).join: ' '; }
 multi sub str-escape(Any:U) { 'null' }
 multi sub str-escape(PDF::COS::Null) { 'null' }
+multi sub str-escape(PDF::COS::DateString $ds) {
+    my $timezone = $ds.timezone;
+    my $posix    = $ds.posix;
+    my DateTime $dt .= new: $posix, :$timezone;
+    $dt.gist;
+}
 multi sub str-escape(Str $_) {
     .&xml-escape.trans: /\"/ => '&quote;';
-}
-multi sub str-escape(DateTime:D $dt) {
-    my :($tz-s, $tz) := do given $dt.timezone {
-        when * < 0 {'-', -$_ }
-        default    {'+', $_ }
-    }
-    sprintf('%s %s %02d %02d:%02d:%02d %04d%s%02d:%02d',
-	    <Mon Tue Wed Thu Fri Sat Sun>[$dt.day-of-week - 1],
-	    <Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec>[$dt.month - 1],
-	    $dt.day-of-month,
-	    $dt.hour, $dt.minute, $dt.second,
-	    $dt.year,
-            $tz-s, $tz div 3600, $tz div 60 mod 60);
-
 }
 multi sub str-escape(Pair $_) { .value.&str-escape }
 multi sub str-escape(Bool $_) { .so ?? 'true' !! 'false' }
@@ -131,8 +124,8 @@ method print(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
         $fh.print($_);
     }
 }
-method say(IO::Handle $fh, PDF::Tags::Node $item, :$depth = 0) {
-    self.print($fh, $item, :$depth);
+method say(IO::Handle $fh, |c) {
+    self.print($fh, |c);
     $fh.say: '';
 }
 
@@ -152,7 +145,7 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         if %!info;
     self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
-    if $!class-names &&$!class-map {
+    if $!class-names && $!class-map {
         self!line('<?pdf-class "' ~ .&str-escape() ~ '"' ~ $!class-map{$_}.Hash.&atts-str() ~ '?>')
             for $!class-map.keys.sort;
     }
