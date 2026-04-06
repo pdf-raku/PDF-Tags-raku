@@ -32,8 +32,7 @@ has Bool $.valid = !$!marks && !$!roles;
 has Str  $.omit;
 has Str  $.root-tag;
 has Bool $.artifacts = False;
-has Bool $!got-nl = True;
-has Bool $!feed;
+has Bool $!line-feed = True;
 has Bool $!snug = True;
 has Int  $!n = 0;
 has Str %!role-map;
@@ -59,16 +58,18 @@ submethod TWEAK(PDF::Tags :$root) {
 method !chunk(Str $s is copy, UInt $depth = 0) {
     if $s {
         $!n++;
-        if $!feed || $!got-nl {
-            take "\n" ~ ('  ' x $depth) unless $!snug--;
-            $!feed = False;
+        if $!line-feed {
+            unless $!snug-- {
+                take "\n" ~ ('  ' x $depth);
+            }
+            $!line-feed = False;
         }
         if $*inline {
-            take $s
+            take $s;
         }
         else {
             # defer output of final new-line - indentation may change
-            $!got-nl = so($s ~~ s/\n$//);
+            $!line-feed = so($s ~~ s/\s*\n\s*$//);
             take $s.subst(/\n/, { "\n" ~ ( '  ' x $depth)}, :g);
         }
     }
@@ -81,7 +82,7 @@ method !no-output(&action --> Bool) {
     $!n == $n0;
 }
 
-method !line(|c) { $!feed = True; self!chunk(|c); $!feed = True; }
+method !line(|c) { $!line-feed = True; self!chunk(|c); $!line-feed = True; }
 method !frag(|c) { $*inline ?? self!chunk(|c) !! self!line(|c) }
 
 sub xml-escape(Str:D $_) {
@@ -141,22 +142,23 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self!line: qq[<?xml-stylesheet type="text/xml" href="{.&str-escape}"?>] with $!xsl;
         self!line: qq[<?xml-stylesheet type="text/css" href="{.&str-escape}"?>] with $!css;
     }
-    self!line('<?pdf-info' ~ %!info.&atts-str ~ '?>')
-        if %!info;
     self!line('<?pdf-role-map' ~ %!role-map.&atts-str ~ '?>')
         if %!role-map;
     if $!class-names && $!class-map {
         self!line('<?pdf-class "' ~ .&str-escape() ~ '"' ~ $!class-map{$_}.Hash.&atts-str() ~ '?>')
             for $!class-map.keys.sort;
     }
-    self!line('<' ~ $_ ~ '>', $depth++)
-        with $!root-tag;
-
-    if .elems {
-        self.stream-xml($_, :$depth) for .kids;
+    temp %!info;
+    with $!root-tag {
+        self!line('<' ~ $_ ~ %!info.&atts-str ~ '>', $depth++);
+        %!info = ();
     }
 
-    self!line('</' ~ $_ ~ '>', --$depth)
+    if .elems {
+        self.stream-xml($_, :$depth, :%!info) for .kids;
+    }
+
+    self!line('</' ~ $_ ~  %!info.&atts-str ~ '>', --$depth)
         with $!root-tag;
 }
 
@@ -204,7 +206,7 @@ sub find-href($node) {
         !! $href;
 }
 
-multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
+multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info) {
     if $!debug {
         self!chunk("<!-- struct elem {.obj-num} {.gen-num} R -->", $depth)
             given $node.cos;
@@ -221,10 +223,11 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0) {
     }
 
     my $actual-text = self!actual-text($node);
-    my %attributes;
     my $omit-tag = $name ~~ $_ with $!omit;
+    my %attributes;
     my $att = do if $!atts {
         %attributes = $node.attributes(:$!class-names);
+        %attributes ,= %info;
         if $role {
             %attributes<role>:delete;
         }
