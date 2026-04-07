@@ -48,6 +48,7 @@ submethod TWEAK(PDF::Tags :$root) {
         if $!class-names && .class-map {
             $!class-map := .class-map;
         }
+        %!info ,= .info;
     }
 
     # CSS is applied after XSL

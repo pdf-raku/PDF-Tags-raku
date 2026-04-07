@@ -17,6 +17,7 @@ has Hash $.role-map          is built;
 has NumberTree $.parent-tree is built;
 has      $.styler;
 has Lock $!lock handles<protect> .= new;
+has %.info;
 method marks { True }
 
 submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {
@@ -36,6 +37,10 @@ method read(|c) {
     }
     require ::(Reader);
     ::(Reader).read(|c);
+}
+
+method xml(|c) {
+    nextwith :%!info, |c
 }
 
 multi method set-role(Pair:D $_) { self.set-role: .key, .value }
