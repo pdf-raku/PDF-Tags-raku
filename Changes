@@ -1,9 +1,15 @@
 {{$NEXT}}
+
+0.2.6  2026-04-08T07:09:40+12:00
    - Handle XML links for PDF 2.0 structural destinations
    - Add --class-names to serialization. This changes from the default
      XML behaviour of in-lining class attributes to adding class="name..."
      attributes to elements, and initial <?pdf-class "class-name" ... ?>
      directives.
+   - Fully map the PDF information dictionary to Document attributes; add
+     %!info attribute to the document root object.
+   - Add Pg/Stm attribute to Mark tags. This contains an indirect object
+     reference.
 
 0.2.5  2025-08-29T06:33:48+12:00
    - Escape XML CSS and XSL style-sheets
