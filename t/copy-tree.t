@@ -35,9 +35,9 @@ $page.graphics: -> $gfx {
 
     is $mark.xml().trim, 'Header text';
     is $header.text, "Header text";
-    is-deeply $header.xml.lines, ('<H1>', '  Header text', '</H1>');
+    is $header.xml.trim, '<H1>Header text</H1>';
     my $copy = $header.copy-tree(:$Stm, :parent($doc));
-    is-deeply $copy.xml.lines, ('<H1>', '  Header text', '</H1>');
+    is $copy.xml.trim, '<H1>Header text</H1>';
 }
 
 done-testing;

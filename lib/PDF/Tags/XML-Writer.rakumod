@@ -32,12 +32,12 @@ has Bool $.valid = !$!marks && !$!roles;
 has Str  $.omit;
 has Str  $.root-tag;
 has Bool $.artifacts = False;
-has Bool $!line-feed = True;
-has Bool $!snug = True;
-has Int  $!n = 0;
+has Int  $!block-count = 0;
 has Str %!role-map;
 has Hash $!class-map;
 has Any:D %.info;
+has $!left-trim;
+has $!right-trim;
 
 submethod TWEAK(PDF::Tags :$root) {
     with $root {
@@ -56,35 +56,19 @@ submethod TWEAK(PDF::Tags :$root) {
         unless $!xsl;
 }
 
-method !chunk(Str $s is copy, UInt $depth = 0) {
-    if $s {
-        $!n++;
-        if $!line-feed {
-            unless $!snug-- {
-                take "\n" ~ ('  ' x $depth);
-            }
-            $!line-feed = False;
-        }
-        if $*inline {
-            take $s;
-        }
-        else {
-            # defer output of final new-line - indentation may change
-            $!line-feed = so($s ~~ s/\s*\n\s*$//);
-            take $s.subst(/\n/, { "\n" ~ ( '  ' x $depth)}, :g);
-        }
-    }
+sub pad($depth) {
+    "\n" ~ ( '  ' x $depth);
 }
 
-method !no-output(&action --> Bool) {
-    CATCH { default { warn $_ } }
-    my $n0 = $!n;
-    &action();
-    $!n == $n0;
+method !chunk(Str:D $s is copy) {
+    take $s;
 }
 
-method !line(|c) { $!line-feed = True; self!chunk(|c); $!line-feed = True; }
-method !frag(|c) { $*inline ?? self!chunk(|c) !! self!line(|c) }
+method !line($str, $indent=0) {
+    take $indent.&pad if $indent;
+    self!chunk($str);
+    take "\n";
+}
 
 sub xml-escape(Str:D $_) {
     .trans:
@@ -137,7 +121,7 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         my $doctype = $!root-tag;
         $doctype //= .name with .kids.head;
         $doctype //= 'Document';
-        self!frag: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
+        self!line: qq{<!DOCTYPE $doctype SYSTEM "$!dtd">};
     }
     if $!style {
         self!line: qq[<?xml-stylesheet type="text/xml" href="{.&str-escape}"?>] with $!xsl;
@@ -151,7 +135,8 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     }
     temp %!info;
     with $!root-tag {
-        self!line('<' ~ $_ ~ %!info.&atts-str ~ '>', $depth++);
+        self!line('<' ~ $_ ~ %!info.&atts-str ~ '>');
+        ++$depth;
         %!info = ();
     }
 
@@ -159,8 +144,16 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
         self.stream-xml($_, :$depth, :%!info) for .kids;
     }
 
-    self!line('</' ~ $_ ~  %!info.&atts-str ~ '>', --$depth)
-        with $!root-tag;
+    with $!root-tag {
+        self!line('</' ~ $_ ~ '>');
+        -- $depth;
+    }
+}
+
+method !trim($s is copy) {
+    $s ~~ s/^\n// if $!left-trim--;
+    $s ~~ s/\n$// if $!right-trim--;
+    $s
 }
 
 method !actual-text($node) {
@@ -188,7 +181,7 @@ sub inlined-elem($name, %atts) {
         $_ eq 'Inline'
     }
     else {
-        InlineElemTags($name).so;
+        $name eq 'Mark' || InlineElemTags($name).so;
     }
 }
 
@@ -223,7 +216,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info)
         }
     }
 
-    my $actual-text = self!actual-text($node);
+    my $actual-text = self!trim($_) with self!actual-text($node);
     my $omit-tag = $name ~~ $_ with $!omit;
     my %attributes;
     my $att = do if $!atts {
@@ -252,12 +245,18 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info)
     } // '';
 
     return if $name eq 'Artifact' && !$!artifacts;
-    my $*inline = $name.&inlined-elem(%attributes);
 
     if $depth >= $!max-depth {
         self!line("<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
     }
     else {
+        my $is-block = ! ($omit-tag || $name.&inlined-elem(%attributes));
+        my $block-id;
+        if $is-block {
+            $block-id = ++$!block-count;
+            take $depth.&pad if $depth;
+        }
+
         with $actual-text {
             if $!debug {
                 if $!marks {
@@ -268,32 +267,38 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info)
                 }
             }
             
-            given .&xml-escape {
+            given self!trim($_).&xml-escape {
                 my $frag = do {
                     when $omit-tag.so { $_ }
                     when .so { '<%s%s>%s</%s>'.sprintf($name, $att, $_, $name) }
                     default  { '<%s%s/>'.sprintf($name, $att); }
                 }
-                self!frag($frag, $depth);
+                self!chunk($frag);
             }
         }
         if $!marks || !$actual-text.defined {
             # descend
             my $elems = $node.elems;
             if $elems {
-                self!frag("<$name$att>", $depth++)
-                    unless $omit-tag;
-                temp $!snug = self!no-output: {
-                    for ^$elems {
-                        my $kid = $node.kids[$_];
-                        self.stream-xml($kid, :$depth);
-                    }
+                $depth++ if $is-block;
+
+                self!chunk("<$name$att>") unless $omit-tag;
+
+                for ^$elems {
+                    $!left-trim = $_ == 0 if $is-block;
+                    $!right-trim = $_ == $elems -1 if $is-block;
+                    my $kid = $node.kids[$_];
+                    self.stream-xml($kid, :$depth);
                 }
-                self!frag("</$name>", --$depth)
-                    unless $omit-tag;
+
+                $depth-- if $is-block;
+                take $depth.&pad
+                   if $is-block && $block-id != $!block-count;
+
+                self!chunk("</$name>") unless $omit-tag;
             }
             else {
-                self!chunk("<$name$att/>", $depth)
+                self!chunk("<$name$att/>")
                     unless $omit-tag;
             }
         }
@@ -312,28 +317,28 @@ multi method stream-xml(PDF::Tags::ObjRef $node, :$depth!) {
     }
 }
 
-multi method stream-xml(PDF::Tags::Mark $node, :$depth!) {
-    if self!tagged-content($node, :$depth) -> $text {
-        self!chunk($text, $depth);
+multi method stream-xml(PDF::Tags::Mark $node) {
+    if self!tagged-content($node) -> $text {
+        self!chunk: self!trim($text);
     }
 }
 
-multi method stream-xml(PDF::Tags::Text $node, :$depth!) {
+multi method stream-xml(PDF::Tags::Text $node) {
     if $node.Str -> $text {
-        self!chunk($text.&xml-escape, $depth);
+        self!chunk: self!trim($text).&xml-escape;
     }
 }
 
-method !tagged-content(PDF::Tags::Tag $node, :$depth!) {
+method !tagged-content(PDF::Tags::Tag $node) {
     my $name := $node.name;
     return '' if $name eq 'Artifact' && !$!artifacts;
-    my Str $text = .&xml-escape() with $node.actual-text;
+    my Str $text = self!trim($_).&xml-escape() with $node.actual-text;
     $text //= do {
         my @text = $node.kids.map: {
             when PDF::Tags::Tag {
-                self!tagged-content($_, :$depth);
+                self!tagged-content($_);
             }
-            when PDF::Tags::Text { .Str.&xml-escape }
+            when PDF::Tags::Text { self!trim(.Str).&xml-escape }
             default { die "unhandled tagged content: {.WHAT.raku}"; }
         }
         @text.join;

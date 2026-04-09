@@ -50,8 +50,8 @@ $page.graphics: -> $gfx {
 $pdf.id =  $*PROGRAM.basename.fmt('%-16.16s');
 
 is $tags.find('Document//*')>>.name.join(','), 'H1,P';
-is $tags.find('//P').head.xml.lines.head, '<P EndIndent="20" StartIndent="10" TextAlign="Start">', 'xml';
-is $tags.find('//P').head.xml(:class-names).lines.head, '<P class="Normal">', 'xml';
+is $tags.find('//P').head.xml.lines.head, '<P EndIndent="20" StartIndent="10" TextAlign="Start">Some body text¹²</P>', 'xml';
+is $tags.find('//P').head.xml(:class-names).lines.head, '<P class="Normal">Some body text¹²</P>', 'xml';
 
 lives-ok { $pdf.save-as: "t/class-maps.pdf", :!info }; 
 

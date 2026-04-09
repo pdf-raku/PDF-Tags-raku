@@ -60,12 +60,8 @@ $page.graphics: -> $gfx {
     is $doc.xml, q:to<END>, 'xml';
     <Document>
       <Sect>
-        <P>
-          This paragraph links to <Link href="http://google.com">http://google.com</Link>.
-        </P>
-        <P>
-          Top level para.
-        </P>
+        <P>This paragraph links to <Link href="http://google.com">http://google.com</Link>.</P>
+        <P>Top level para.</P>
       </Sect>
     </Document>
     END
