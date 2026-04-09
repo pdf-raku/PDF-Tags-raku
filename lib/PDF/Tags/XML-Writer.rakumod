@@ -64,7 +64,7 @@ method !chunk(Str:D $s is copy) {
     take $s;
 }
 
-method !line($str, $indent=0) {
+method !line($str='', $indent=0) {
     take $indent.&pad if $indent;
     self!chunk($str);
     take "\n";
@@ -135,7 +135,7 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     }
     temp %!info;
     with $!root-tag {
-        self!line('<' ~ $_ ~ %!info.&atts-str ~ '>');
+        self!chunk('<' ~ $_ ~ %!info.&atts-str ~ '>');
         ++$depth;
         %!info = ();
     }
@@ -145,7 +145,8 @@ multi method stream-xml(PDF::Tags::Node::Root $_, UInt :$depth is copy = 0) {
     }
 
     with $!root-tag {
-        self!line('</' ~ $_ ~ '>');
+        self!line;
+        self!chunk('</' ~ $_ ~ '>');
         -- $depth;
     }
 }
