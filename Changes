@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.2.7  2026-04-11T13:32:18+12:00
    - Restrict XML indentation to block elements only. No extra indentation or whitespace
      is added to text content or inline elements. This should ease automated text extraction,
      particulary where whitespace matters. E.g. within code blocks.
