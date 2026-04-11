@@ -203,7 +203,7 @@ sub find-href($node) {
 
 multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info) {
     if $!debug {
-        self!chunk("<!-- struct elem {.obj-num} {.gen-num} R -->", $depth)
+        self!chunk("<!-- struct elem {.obj-num} {.gen-num} R -->")
             given $node.cos;
     }
     my $name = $node.name;
@@ -308,7 +308,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info)
 
 multi method stream-xml(PDF::Tags::ObjRef $node, :$depth!) {
     if $!debug {
-        self!line("<!-- OBJR {.cos.Obj.obj-num} {.cos.Obj.gen-num} R -->", $depth)
+        self!chunk("<!-- OBJR {.cos.Obj.obj-num} {.cos.Obj.gen-num} R -->")
             given $node;
     }
     if $!fields {
