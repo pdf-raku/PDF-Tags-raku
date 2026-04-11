@@ -1,4 +1,7 @@
 {{$NEXT}}
+   - Restrict XML indentation to block elements only. No extra indentation or whitespace
+     is added to text content or inline elements. This should ease automated text extraction,
+     particulary where whitespace matters. E.g. within code blocks.
 
 0.2.6  2026-04-08T07:09:40+12:00
    - Handle XML links for PDF 2.0 structural destinations
