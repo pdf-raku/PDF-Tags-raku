@@ -18,6 +18,7 @@ use PDF::COS::DateString;
 use PDF::COS::Null;
 
 has UInt $.max-depth = 16;
+has Bool $!max-depth-exceeded;
 has Bool $.atts = True;
 has Bool $.roles;
 has Bool $.class-names;
@@ -248,6 +249,7 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info)
     return if $name eq 'Artifact' && !$!artifacts;
 
     if $depth >= $!max-depth {
+        $!max-depth-exceeded ||= do {warn "Maximum tag depth of $!max-depth has been exceeded; please increase this limit to preserve nested XML content."; True }
         self!line("<$name$att/> <!-- depth exceeded, see {$node.cos.obj-num} {$node.cos.gen-num} R -->", $depth);
     }
     else {
