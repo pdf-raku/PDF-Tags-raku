@@ -279,16 +279,22 @@ multi method stream-xml(PDF::Tags::Elem $node, UInt :$depth is copy = 0, :%info)
         }
         if $!marks || !$actual-text.defined {
             # descend
-            my $elems = $node.elems;
-            if $elems {
+            if $node.elems -> $elems {
                 $depth++ if $is-block;
 
                 self!chunk("<$name$att>") unless $omit-tag;
 
-                for ^$elems {
-                    $!left-trim = $_ == 0 if $is-block;
-                    $!right-trim = $_ == $elems -1 if $is-block;
-                    my $kid = $node.kids[$_];
+                for ^$elems -> $i {
+                    CATCH {
+                        default {
+                            my $msg = "error streaming child element <$name>[$i]: " ~ .message;
+                            warn $msg;
+                            self!chunk("<!-- $msg -->") if $!debug;
+                        }
+                    }
+                    $!left-trim = $i == 0 if $is-block;
+                    $!right-trim = $i == $elems -1 if $is-block;
+                    my $kid = $node.kids[$i];
                     self.stream-xml($kid, :$depth);
                 }
 
@@ -346,7 +352,7 @@ method !tagged-content(PDF::Tags::Tag $node) {
     }
     my $tag-atts = '';
     if $!atts {
-        $tag-atts  = .&atts-str() with $node.attributes;
+        $tag-atts = .&atts-str() with $node.attributes;
     }
     my $omit-tag = ! $!marks;
     $omit-tag ||= $name ~~ $_ with $!omit;
