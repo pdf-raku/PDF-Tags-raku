@@ -80,22 +80,22 @@ sub xml-escape(Str:D $_) {
 multi sub str-escape(@a) { @a.map(&str-escape).join: ' '; }
 multi sub str-escape(Any:U) { 'null' }
 multi sub str-escape(PDF::COS::Null) { 'null' }
-multi sub str-escape(PDF::COS::DateString $ds) {
+multi sub str-escape(PDF::COS::DateString:D $ds) {
     my $timezone = $ds.timezone;
     my $posix    = $ds.posix;
     my DateTime $dt .= new: $posix, :$timezone;
     $dt.gist;
 }
-multi sub str-escape(Str $_) {
+multi sub str-escape(Str:D $_) {
     .&xml-escape.trans: /\"/ => '&quote;';
 }
-multi sub str-escape(Pair $_) { .value.&str-escape }
-multi sub str-escape(Bool $_) { .so ?? 'true' !! 'false' }
-multi sub str-escape(Numeric $_) { .Str }
-multi sub str-escape(PDF::COS $_ where .is-indirect) {
+multi sub str-escape(Pair:D $_) { .value.&str-escape }
+multi sub str-escape(Bool:D $_) { .so ?? 'true' !! 'false' }
+multi sub str-escape(Numeric:D $_) { .Str }
+multi sub str-escape(PDF::COS:D $_ where .is-indirect) {
     '%d %d R'.sprintf: .obj-num, .gen-num;
 }
-multi sub str-escape($_) { .Str.&str-escape }
+multi sub str-escape(Any:D $_) { .Str.&str-escape }
 
 sub atts-str(%atts) {
     %atts.pairs.sort.map({ " {.key}=\"{.value.&str-escape}\"" }).join;

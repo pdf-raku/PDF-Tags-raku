@@ -299,7 +299,7 @@ multi sub find-parents(PDF::Tags::Elem $_, $xobj) {
         @parents.push: $_;
     }
     else {
-        @parents.append: find-parents($_, $xobj)
+        @parents.append: .&find-parents($xobj)
             for .kids;
     }
 
@@ -310,8 +310,7 @@ multi sub find-parents($, $) is default { [] }
 # xobject form  has marked content but no /StructParent(s) entries. Allow
 # this as shortcut. Automatically wrap with elements and create a ParentTree entry
 method !setup-parents(PDF::XObject::Form $xobj) {
-    my @parents = find-parents(self, $xobj);
-    if @parents {
+    if self.&find-parents($xobj) -> @parents {
         my UInt $idx := $.root.parent-tree.max-key + 1;
         $.root.parent-tree[$idx] = [ @parents».cos ];
         $xobj.StructParents = $idx;
