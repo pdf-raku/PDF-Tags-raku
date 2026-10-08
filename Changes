@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+0.2.9  2026-10-09T11:35:11+13:00
+   - Bump PDF for improved thread-safety. Fixes flapping tests in t/threaded.t
+   - Resolve ambiguous dispatch warn in latest Rakudo for XML str-escape()
+   - Warn when maximum XML nesting is exceeded
+
 0.2.8  2026-04-12T08:49:58+12:00
    - Fix XML :debug option 
 
