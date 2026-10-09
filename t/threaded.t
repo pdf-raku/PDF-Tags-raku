@@ -10,13 +10,8 @@ use PDF::Content::PageTree;
 use PDF::Content::Tag :StructureTags;
 use PDF::Tags;
 use PDF::Tags::Elem;
-use PDF::Tags::Mark;
-use PDF::Tags::ObjRef;
 use PDF::Class;
 use PDF::Page;
-use PDF::Annot;
-use PDF::XObject::Image;
-use PDF::XObject::Form;
 
 # up-font creation of PDF and font resources
 my PDF::Class $pdf .= new;
@@ -24,10 +19,11 @@ my PDF::Content::FontObj $font = $pdf.core-font: :family<Helvetica>;
 my PDF::Content::FontObj $hdr-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
 
 my PDF::Tags $tags .= create: :$pdf;
-my @page-frags = (1..30).map: { PDF::Content::PageTree.pages-fragment() }
-my @struct-frags = (1..30).map: { $tags.fragment(Division) };
+constant Chapters = 1..30;
+my @page-frags = Chapters.map: { PDF::Content::PageTree.pages-fragment() }
+my @struct-frags = Chapters.map: { $tags.fragment(Division) };
 
-(1..30).race(:batch(1)).map: -> $chap-num {
+Chapters.race(:batch(1)).map: -> $chap-num {
     # create a multi-page fragment for later assembly
     my PDF::Content::PageTree $pages = @page-frags[$chap-num-1];
     # also a chapter tag for later assembly

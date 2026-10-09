@@ -248,7 +248,7 @@ tagged internal link to a PDF.
 
 As a rule, all content doesn't have to form part of the structure tree, but should be tagged to meet accessibility guidelines.
 
-This sometimes requires tagging of incidental graphics. `PDF::Content` has a `tag()` method for this. The content is tagged, but does not appear in the structure tree.
+This sometimes requires tagging of incidental graphics. [PDF::Content](https://pdf-raku.github.io/PDF-Content-raku/) has a `tag()` method for this. The content is tagged, but does not appear in the structure tree.
 
 Some of the commonly used content tags are:
 
@@ -446,6 +446,86 @@ For example, it can be piped to `xmllint`, from the `libxml2` package, to check 
 
 $ pdf-tag-dump.raku /tmp/synopsis.pdf | xmllint --noout --valid -
 
+Concurrency
+---------
+
+The `fragment()` method creates nodes of type `DocumentFragment()` these can be constructed as stand-alone Tag sub-trees in parallel, then later assembled sequentially.
+Likewise, the [PDF::Content::PageTree](https://pdf-raku.github.io/PDF-Content-raku/PDF/Content/PageTree) `pages-fragment` method can be used to construct stand-alone Pages sub-trees:
+
+```raku
+# Concurrent construction of a PDF with 20 chapters
+constant Chapters = 1..20;
+
+use PDF::Content::FontObj;
+use PDF::Content::PageTree;
+use PDF::Content::Tag :StructureTags;
+use PDF::Tags;
+use PDF::Tags::Elem;
+use PDF::Class;
+use PDF::Page;
+
+# up-font creation of PDF and font resources
+my PDF::Class $pdf .= new;
+my PDF::Content::FontObj $font = $pdf.core-font: :family<Helvetica>;
+my PDF::Content::FontObj $hdr-font = $pdf.core-font: :family<Helvetica>, :weight<bold>;
+
+my PDF::Tags $tags .= create: :$pdf;
+my @page-frags = Chapters.map: { PDF::Content::PageTree.pages-fragment() }
+my @struct-frags = Chapters.map: { $tags.fragment(Division) };
+
+Chapters.race(:batch(1)).map: -> $chap-num {
+    # create a multi-page fragment for later assembly
+    my PDF::Content::PageTree $pages = @page-frags[$chap-num-1];
+    # also a chapter tag for later assembly
+    my PDF::Tags::Elem $div = @struct-frags[$chap-num-1];
+    my PDF::Page $page = $pages.add-page;
+    my PDF::Tags::Elem $para;
+
+    $page.graphics: -> $gfx {
+        $div.Header1: $gfx, {
+            .say("Chapter $chap-num",
+                 :font($hdr-font),
+                 :font-size(16),
+                 :position[50, 640]);
+        }
+        $div.Paragraph: $gfx, {
+            .say("This para contained on first page of chapter $chap-num.",
+                 :$font,
+                 :font-size(12),
+                 :position[50, 620]);
+        };
+
+        $para = $div.Paragraph: $gfx, {
+            .say("This para started on first page of chapter $chap-num...",
+                 :$font,
+                 :font-size(12),
+                 :position[50, 600]);
+ };
+    }
+
+    $page = $pages.add-page;
+    $page.graphics: -> $gfx {
+        $para.mark: $gfx, {
+        .say("...and finished on second page of chapter $chap-num",
+             :$font,
+             :font-size(12),
+             :position[50, 620]);
+        }
+    };
+    $page.finish;
+}
+
+# top-down creation of PDF struct tree
+my PDF::Tags::Elem $doc = $tags.Document;
+
+# final sequential assembly of structural and pages sub-trees.
+$pdf.Pages.add-pages($_) for @page-frags;
+$doc.add-kid(:node($_)) for @struct-frags;
+
+$pdf.save-as: "test.pdf";
+
+```
+
 See Also
 ------
 
@@ -467,5 +547,4 @@ Further Work
 
 A personal copy of the PDF accessibility standard [ISO 14289-1](https://pdfa.org/resource/iso-14289-pdfua/) is available from the [PDF Association Website](https://www.iso.org/).
 
-- Editing. Currently the API doesn't readily support editing tags into existing content. More work is also
-needed in the PDF::Content module to support content editing.
+- Editing. Currently the API doesn't readily support editing tags into existing content.
