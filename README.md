@@ -500,7 +500,7 @@ Chapters.race(:batch(1)).map: -> $chap-num {
                  :$font,
                  :font-size(12),
                  :position[50, 600]);
- };
+         }
     }
 
     $page = $pages.add-page;
