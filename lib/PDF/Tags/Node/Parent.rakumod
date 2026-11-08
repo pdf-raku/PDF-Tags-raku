@@ -193,12 +193,14 @@ constant LayoutAtts = set <BBox BackgroundColor BaselineShift BlockAlign BorderC
     TextDecorationColor TextDecorationThickness TextDecorationType
     TextIndent Width WritingMode>;
 constant FENoteAtts = set <NoteType>; # Current Well-Tagged PDF Recommendation (WTPDF V1.0.0)
+constant ArtifactAtts = set <Type Subtype>;
 constant %Owner = %(
     all(ListAtts.keys) => 'List',
     all(PrintFieldAtts.keys) => 'PrintField',
     all(TableAtts.keys) => 'Table',
     all(LayoutAtts.keys) => 'Layout',
     all(FENoteAtts.keys) => 'FENote',
+    all(ArtifactAtts.keys) => 'Artifact',
 );
 proto sub att-owner($) is export(:att-owner) {*}
 multi sub att-owner($_ where .contains(':')) {
