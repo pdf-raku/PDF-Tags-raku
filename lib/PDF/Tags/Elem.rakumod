@@ -49,8 +49,9 @@ sub merge-atts(%atts, PDF::Attributes $a) {
         # guess owner, if not given
         $owner //= att-owner($_).head
             given %a.keys.head;
-        if $owner ~~ 'Layout'|'List'|'PrintField'|'Table' {
-            # standard owners (Table 341) with mutually distinct attribute names
+        if $owner ~~ 'Layout'|'List'|'PrintField'|'Table'|'Artifact'
+        || $owner ~~/^['XML'|'HTML'|'OEB'|'RTF'|'CSS'|'RDFa'|'ARIA']'-'/ {
+            # standard structure owners with mutually distinct attribute names
             %atts{.key} = .value for %a;
         }
         else {
