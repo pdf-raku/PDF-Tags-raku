@@ -2,9 +2,6 @@ use v6;
 use Test;
 plan 1;
 
-# Singler threaded construction
-# Precursor to t/threads.t, which does similar, but in parallel
-
 use PDF::Content::FontObj;
 use PDF::Content::PageTree;
 use PDF::Content::Tag :StructureTags;
@@ -29,7 +26,7 @@ Chapters.race(:batch(1)).map: -> $chap-num {
     # also a chapter tag for later assembly
     my PDF::Tags::Elem $div = @struct-frags[$chap-num-1];
     my PDF::Page $page = $pages.add-page;
-    my $p2;
+    my PDF::Tags::Elem $para;
 
     $page.graphics: -> $gfx {
         $div.Header1: $gfx, {
@@ -45,7 +42,7 @@ Chapters.race(:batch(1)).map: -> $chap-num {
                  :position[50, 620]);
         };
 
-        $p2 = $div.Paragraph: $gfx, {
+        $para = $div.Paragraph: $gfx, {
             .say("This para started on first page of chapter $chap-num...",
                  :$font,
                  :font-size(12),
@@ -55,7 +52,7 @@ Chapters.race(:batch(1)).map: -> $chap-num {
 
     $page = $pages.add-page;
     $page.graphics: -> $gfx {
-        $p2.mark: $gfx, {
+        $para.mark: $gfx, {
         .say("...and finished on second page of chapter $chap-num",
              :$font,
              :font-size(12),

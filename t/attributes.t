@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 9;
+plan 11;
 
 use PDF::Content::FontObj;
 use PDF::Tags;
@@ -38,13 +38,16 @@ $page.graphics: -> $gfx {
     my $para = $doc.Paragraph: $gfx, {
         .say: 'Some body text', :position[50, 100], :font($body-font), :font-size(12);
     };
-    my  $p = $doc.Paragraph;
-    $p.mark: $gfx, :Lang<en>, {
+    $para = $doc.Paragraph;
+    $para.set-attribute('CSS-3:background-color', 'blue');
+    is-deeply $para.attributes, {"CSS-3:background-color" => "blue" };
+    $para.mark: $gfx, :Lang<en>, {
         .text: {
             .print: "content tagged english.", :position[50, 83];
         }
     }
-    my PDF::Tags::Mark:D $mark = $p.kids[0];
+    is $para.xml.chomp, '<P CSS-3:background-color="blue"><Span Lang="en">content tagged english.</Span></P>';
+    my PDF::Tags::Mark:D $mark = $para.kids[0];
     is $mark.attributes<Lang>, 'en';
     is $mark.xml.chomp, '<Span Lang="en">content tagged english.</Span>';
 }

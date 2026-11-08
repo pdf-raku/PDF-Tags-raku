@@ -107,7 +107,14 @@ endobj
 endobj
 
 11 0 obj
-<< /Type /StructElem /S /P /K [ 2 ] /P 8 0 R /Pg 3 0 R >>
+<<
+  /Type /StructElem
+  /S /P
+  /A << /O /CSS-3 /background-color (blue) >>
+  /K [ 2 ]
+  /P 8 0 R
+  /Pg 3 0 R
+>>
 endobj
 
 xref
@@ -127,5 +134,5 @@ xref
 trailer
 << /ID [ (attributes.t    ) (attributes.t    ) ] /Root 1 0 R /Size 12 >>
 startxref
-1503
+1559
 %%EOF
