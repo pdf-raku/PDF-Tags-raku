@@ -53,6 +53,9 @@ sub merge-atts(%atts, PDF::Attributes $a) {
             # standard structure owners with mutually distinct attribute names
             %atts{.key} = .value for %a;
         }
+        elsif $owner ~~ 'NSO' {
+            # todo PDF 2.0 namespace handling
+        }
         else {
             %atts{$owner ~ ':' ~ .key} = .value for %a;
         }
