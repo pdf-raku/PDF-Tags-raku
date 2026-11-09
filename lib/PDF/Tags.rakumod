@@ -28,15 +28,16 @@ submethod TWEAK(PDF::StructTreeRoot :$cos!, :%role-map) {
         given $cos.ParentTree //= { :Nums[] };
 }
 
-method read(|c) {
+method reader handles<read> {
     my constant Reader = 'PDF::Tags::Reader';
     CATCH {
         when X::CompUnit::UnsatisfiedDependency {
             fail "{Reader} needs to be installed to read tagged PDF files";
         }
     }
-    require ::(Reader);
-    ::(Reader).read(|c);
+    self.protect: {
+        require ::(Reader);
+    }
 }
 
 method xml(|c) {
