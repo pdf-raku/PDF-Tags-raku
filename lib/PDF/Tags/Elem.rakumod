@@ -352,7 +352,7 @@ method set-attributes(*%attributes) {
     for %atts-by-owner.keys.sort -> $owner {
         my $atts = $.cos.vivify-attributes(:$owner);
         $atts.set-attribute(.key, .value)
-            for %atts-by-owner{$owner}.pairs;
+            for %atts-by-owner{$owner}.pairs.sort;
     }
     @!attributes = (); # regen on next access
 }
